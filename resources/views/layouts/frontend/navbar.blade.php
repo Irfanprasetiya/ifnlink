@@ -1,17 +1,23 @@
 <nav class="bg-[#1d62fb] border-b border-blue-700 fixed w-full z-20 top-0 start-0">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="flex h-14 items-center justify-between ">
-            <div class="flex items-center space-x-4 max-md:flex-row-reverse ">
-                <span class="text-white font-extrabold text-3xl select-none cursor-default">Ifn<span
-                        class="text-base text-yellow-500">Link</span> </span>
-                <ul class="hidden md:w-auto md:flex space-x-3 text-blue-300 text-sm items-center">
+        <div class="flex h-14 items-center justify-between">
+            <div class="flex items-center gap-4">
+                <span
+                    class="text-white font-extrabold select-none cursor-default text-xl sm:text-2xl transition-all truncate max-w-[160px] sm:max-w-none">
+                    @auth
+                        {{ Auth::user()->tenant->nama_toko ?? 'Tanpa Toko' }}
+                    @endauth
+                </span>
+
+                <ul class="hidden md:flex items-center gap-1 text-sm">
                     {{-- Home --}}
                     <li>
                         <a href="{{ route('main') }}"
-                            class="flex items-center {{ request()->routeIs('main') ? 'text-white font-semibold' : 'hover:text-white' }}">
-                            <svg class="w-7 h-7 pb-1  mr-1 {{ request()->routeIs('main') ? 'text-white' : 'text-blue-300 group-hover:text-white' }}"
-                                fill="currentColor" viewBox="0 0 20 20">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            class="flex items-center gap-1.5 px-3 py-2 rounded-lg transition-colors
+                                {{ request()->routeIs('main') ? 'text-white font-semibold bg-white/10' : 'text-blue-200 hover:text-white hover:bg-white/10' }}">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                <path
                                     d="m4 12 8-8 8 8M6 10.5V19a1 1 0 0 0 1 1h3v-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3h3a1 1 0 0 0 1-1v-8.5" />
                             </svg>
                             Home
@@ -19,303 +25,251 @@
                     </li>
 
                     {{-- Transaksi --}}
-                    <li>
-                        <button id="transactionDropdownButton" data-dropdown-toggle="transactionDropdown" type="button"
-                            class="inline-flex items-center p-1 text-sm font-medium focus:outline-none
-                                       {{ request()->routeIs('transaksi-bank') || request()->routeIs('vouchers') ? 'text-white font-semibold' : 'text-blue-300 hover:text-white' }}">
-                            <svg class="w-6 h-6 mr-1 {{ request()->routeIs('transaksi-bank') || request()->routeIs('vouchers') ? 'text-white' : 'text-blue-300 group-hover:text-white' }}"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round" viewBox="0 0 24 24">
+                    <li class="relative" x-data="{ open: false }" x-on:click.outside="open = false">
+                        <button type="button" x-on:click="open = !open"
+                            class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors focus:outline-none
+                                {{ request()->routeIs('transaksi-bank') || request()->routeIs('vouchers') ? 'text-white font-semibold bg-white/10' : 'text-blue-200 hover:text-white hover:bg-white/10' }}">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                                 <path d="M21 12H3"></path>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M17 8H5m12 0a1 1 0 0 1 1 1v2.6M17 8l-4-4M5 8a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.6M5 8l4-4 4 4m6 4h-4a2 2 0 1 0 0 4h4a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1Z" />
                             </svg>
                             Transaksi
-                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" stroke-width="2"
-                                stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4 transition-transform" :class="open ? 'rotate-180' : ''" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                viewBox="0 0 24 24">
                                 <path d="M6 9l6 6 6-6"></path>
                             </svg>
                         </button>
-                        <!-- Dropdown menu -->
-                        <div id="transactionDropdown" class="hidden z-10 w-44 bg-white rounded shadow dark:bg-gray-700">
-                            <ul class="py-1 text-sm text-gray-700 dark:text-gray-200"
-                                aria-labelledby="transactionDropdownButton">
-                                <li>
-                                    <a href="{{ route('vouchers') }}"
-                                        class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600
-                                               {{ request()->routeIs('vouchers') ? 'text-gray-800 font-semibold' : '' }}">
-                                        Transaksi Konter
-                                        <span class="ml-1 text-xs text-gray-400">Beta</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="{{ route('transaksi-bank') }}"
-                                        class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600
-                                              {{ request()->routeIs('transaksi-bank') ? 'text-gray-800 font-semibold' : '' }}">
-                                        Transaksi Bank
-                                    </a>
-                                </li>
-                            </ul>
+
+                        <div x-show="open" x-cloak
+                            class="absolute left-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-1.5 z-30">
+                            {{-- <a href="{{ route('vouchers') }}"
+                                class="flex items-center justify-between px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors
+                                    {{ request()->routeIs('vouchers') ? 'text-blue-600 font-semibold' : '' }}">
+                                Transaksi Konter
+                                <span class="text-xs text-gray-400 bg-gray-100 rounded px-1.5 py-0.5">Beta</span>
+                            </a> --}}
+                            <a href="{{ route('transaksi-bank') }}"
+                                class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors
+                                    {{ request()->routeIs('transaksi-bank') ? 'text-blue-600 font-semibold' : '' }}">
+                                Transaksi Bank
+                            </a>
                         </div>
                     </li>
 
                     {{-- Laporan --}}
-                    <li>
-                        <button id="reportDropdownButton" data-dropdown-toggle="reportDropdown" type="button"
-                            class="inline-flex items-center p-1 text-sm font-medium focus:outline-none
-                                       {{ request()->routeIs('laporan-bank') || request()->routeIs('laporan-bank.rekap') || request()->routeIs('laporan_konter') ? 'text-white font-semibold' : 'text-blue-300 hover:text-white' }}">
-                            <svg class="w-6 h-6 mr-1 {{ request()->routeIs('laporan-bank') || request()->routeIs('laporan-bank.rekap') || request()->routeIs('laporan_konter') ? 'text-white' : 'text-blue-300 group-hover:text-white' }}"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    <li class="relative" x-data="{ open: false }" x-on:click.outside="open = false">
+                        <button type="button" x-on:click="open = !open"
+                            class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors focus:outline-none
+                                {{ request()->routeIs('laporan-bank') || request()->routeIs('laporan-bank.rekap') || request()->routeIs('laporan_konter') ? 'text-white font-semibold bg-white/10' : 'text-blue-200 hover:text-white hover:bg-white/10' }}">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                <path
                                     d="M6 4v10m0 0a2 2 0 1 0 0 4m0-4a2 2 0 1 1 0 4m0 0v2m6-16v2m0 0a2 2 0 1 0 0 4m0-4a2 2 0 1 1 0 4m0 0v10m6-16v10m0 0a2 2 0 1 0 0 4m0-4a2 2 0 1 1 0 4m0 0v2" />
                             </svg>
                             Laporan
-                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" stroke-width="2"
-                                stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4 transition-transform" :class="open ? 'rotate-180' : ''" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                viewBox="0 0 24 24">
                                 <path d="M6 9l6 6 6-6"></path>
                             </svg>
                         </button>
-                        <!-- Dropdown menu -->
-                        <div id="reportDropdown" class="hidden z-10 w-44 bg-white rounded shadow dark:bg-gray-700">
-                            <ul class="py-1 text-sm text-gray-700 dark:text-gray-200"
-                                aria-labelledby="reportDropdownButton">
-                                <li>
-                                    <a href="{{ route('laporan_konter') }}"
-                                        class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600
-                                              {{ request()->routeIs('laporan_konter') ? 'text-gray-800 font-semibold' : '' }}">
-                                        Laporan Konter
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="{{ route('laporan-bank') }}"
-                                        class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600
-                                              {{ request()->routeIs('laporan-bank') || request()->routeIs('laporan-bank.rekap') ? 'text-gray-800 font-semibold' : '' }}">
-                                        Laporan Bank
-                                    </a>
-                                </li>
-                            </ul>
+
+                        <div x-show="open" x-cloak
+                            class="absolute left-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-1.5 z-30">
+                            {{-- <a href="{{ route('laporan_konter') }}"
+                                class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors
+                                    {{ request()->routeIs('laporan_konter') ? 'text-blue-600 font-semibold' : '' }}">
+                                Laporan Konter
+                            </a> --}}
+                            <a href="{{ route('laporan-bank') }}"
+                                class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors
+                                    {{ request()->routeIs('laporan-bank') || request()->routeIs('laporan-bank.rekap') ? 'text-blue-600 font-semibold' : '' }}">
+                                Laporan Bank
+                            </a>
                         </div>
                     </li>
                 </ul>
             </div>
-            <div class="flex items-center">
-                <button id="userMenuButton" data-dropdown-toggle="userDropdown"
-                    class="flex items-center text-white text-sm font-medium hover:text-gray-200 focus:outline-none"
-                    type="button">
-                    <svg class="w-6 h-6 mr-1" fill="currentColor" viewBox="0 0 24 24">
-                        <path
-                            d="M12 12c2.21 0 4-1.79 4-4S14.21 4 12 4 8 5.79 8 8s1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                    </svg>
-                    {{ Auth::user()->name }}
-                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-                        <path d="M6 9l6 6 6-6"></path>
-                    </svg>
-                </button>
-                <!-- Dropdown menu -->
-                <!-- Authentication -->
+
+            <div class="relative" x-data="{ open: false }" x-on:click.outside="open = false">
+                <button type="button" x-on:click="open = !open"
+                    class="flex items-center gap-2 text-white text-sm font-medium hover:bg-white/10 rounded-lg px-2 py-1.5 transition-colors focus:outline-none">
+                    <span
+                        class="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center text-xs font-semibold shrink-0">
+                        @auth
+                            {{ strtoupper(substr(Auth::user()->name ?? '?', 0, 1)) }}
+                        @endauth
+                    </span>
+                <span class="hidden sm:inline max-w-[100px] truncate">@auth{{ Auth::user()->name }}</span> @endauth
+                <svg class="w-4 h-4 transition-transform" :class="open ? 'rotate-180' : ''" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    viewBox="0 0 24 24">
+                    <path d="M6 9l6 6 6-6"></path>
+                </svg>
+            </button>
+
+            <div x-show="open" x-cloak
+                class="absolute right-0 mt-2 w-32 bg-white rounded-xl shadow-lg border border-gray-100 py-1.5 z-30">
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-                    <div id="userDropdown" class="hidden z-25 w-40 bg-white rounded shadow dark:bg-gray-700">
-                        <ul class="py-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="userMenuButton">
-                            <li><a href="route('logout')"
-                                    onclick="event.preventDefault();
-                                                this.closest('form').submit();"
-                                    class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Logout</a>
-                            </li>
-                        </ul>
-                    </div>
-
+                    <button type="submit"
+                        class="w-full text-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                        Logout
+                    </button>
                 </form>
-
-            </div>
-        </div>
-    </div>
-</nav>
-
-<!-- Mobile Navigation Menu -->
-{{-- <div id="navbar-default" class="mt-14 md:hidden hidden bg-white shadow-lg fixed w-full z-20 top-0 start-0">
-    <ul class="text-blue-600 text-sm flex flex-col space-y-2 py-4 px-4">
-        <li>
-            <a href="{{ route('main') }}" class="flex py-2 items-center hover:bg-gray-300 w-full">
-                <svg class="w-5 h-5 mr-1 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path
-                        d="M10.707 1.293a1 1 0 00-1.414 0L3 7.586V18a1 1 0 001 1h4a1 1 0 001-1v-4h2v4a1 1 0 001 1h4a1 1 0 001-1V7.586l-6.293-6.293z" />
-                </svg>
-                Home
-            </a>
-        </li>
-        <li>
-            <button id="mobileTransactionDropdownButton" data-dropdown-toggle="transactionDropdown"
-                class="flex items-center text-blue-600 py-2 hover:bg-gray-300 w-full text-sm font-medium focus:outline-none"
-                type="button">
-                <svg class="w-5 h-5 mr-1 text-blue-600 group-hover:bg-gray-300" fill="none" stroke="currentColor"
-                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-                    <path d="M21 12H3"></path>
-                    <path d="M12 21l-9-9 9-9"></path>
-                </svg>
-                Trsnsaksi
-                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-                    <path d="M6 9l6 6 6-6"></path>
-                </svg>
-            </button>
-            <!-- Dropdown menu -->
-            <div id="mobileTransactionDropdown" class="hidden z-10 w-44 bg-white rounded shadow dark:bg-gray-700">
-                <ul class="py-1 text-sm text-gray-700 dark:text-gray-200"
-                    aria-labelledby="mobileTransactionDropdownButton">
-                    <li><a href="{{ route('vouchers') }}"
-                            class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Transaksi
-                            Konter</a></li>
-                    <li><a href="{{ route('transaksi-bank') }}"
-                            class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Transaksi
-                            Bank</a></li>
-                </ul>
-            </div>
-        </li>
-        <li>
-            <button id="mobileReportDropdownButton" data-dropdown-toggle="reportDropdown"
-                class="inline-flex items-center text-blue-600 py-2 hover:bg-gray-300 w-full text-sm font-medium focus:outline-none"
-                type="button">
-                <svg class="w-5 h-5 mr-1 text-blue-600 group-hover:bg-gray-300" fill="none" stroke="currentColor"
-                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-                    <path d="M9 17v-2a3 3 0 0 1 6 0v2"></path>
-                    <circle cx="12" cy="11" r="4"></circle>
-                </svg>
-                Laporan
-                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-                    <path d="M6 9l6 6 6-6"></path>
-                </svg>
-            </button>
-            <!-- Dropdown menu -->
-            <div id="mobileReportDropdown" class="hidden z-99 w-44 bg-white rounded shadow dark:bg-gray-700">
-                <ul class="py-1 text-sm text-gray-700 dark:text-gray-200"
-                    aria-labelledby="mobileReportDropdownButton">
-                    <li><a href="{{ route('laporan_konter') }}"
-                            class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Laporan
-                            Konter</a></li>
-                    <li><a href="{{ route('laporan-bank') }}"
-                            class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Laporan
-                            Bank</a></li>
-                </ul>
-            </div>
-        </li>
-
-        <li>
-            <a href="#" class="flex py-2 items-center hover:bg-gray-300 w-full">
-                <svg class="w-6 h-6 text-white max-md:text-gray-800 dark:text-white" aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
-                    viewBox="0 0 24 24">
-                    <path fill-rule="evenodd"
-                        d="M7.5 4.586A2 2 0 0 1 8.914 4h6.172a2 2 0 0 1 1.414.586L17.914 6H19a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h1.086L7.5 4.586ZM10 12a2 2 0 1 1 4 0 2 2 0 0 1-4 0Zm2-4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"
-                        clip-rule="evenodd" />
-                </svg>
-                Absensi
-            </a>
-        </li>
-
-        <!-- Authentication -->
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <div id="userDropdown" class="hidden z-25 w-40 bg-white rounded shadow dark:bg-gray-700">
-                <ul class="py-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="userMenuButton">
-                    <li><a href="route('logout')"
-                            onclick="event.preventDefault();
-                                                this.closest('form').submit();"
-                            class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Logout</a>
-                    </li>
-                </ul>
-            </div>
-
-        </form>
-    </ul>
-</div> --}}
-
-{{-- Mobile Nav Bottom --}}
-<div class="fixed md:hidden bottom-0 left-0 z-50 w-full h-16 border-t border-gray-200 bg-white" x-data="{ transaksiOpen: false, laporanOpen: false }">
-    <div class="grid h-full max-w-lg grid-cols-3 mx-auto font-medium">
-
-        <div class="mx-auto">
-            {{-- Home --}}
-            <a href="{{ route('main') }}"
-                class="relative inline-flex flex-col items-center justify-center px-5 group
-                      {{ request()->routeIs('main') ? 'text-blue-600' : 'text-gray-600' }}">
-                <svg class="w-6 h-6 mb-1
-                            {{ request()->routeIs('main') ? 'text-blue-600' : 'text-gray-600 group-hover:text-blue-600' }}"
-                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="m4 12 8-8 8 8M6 10.5V19a1 1 0 0 0 1 1h3v-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3h3a1 1 0 0 0 1-1v-8.5" />
-                </svg>
-                <span class="text-sm">Home</span>
-            </a>
-        </div>
-
-        {{-- Transaksi --}}
-        <div class="relative">
-            <button type="button" x-on:click="transaksiOpen = !transaksiOpen"
-                class="inline-flex flex-col items-center justify-center w-full px-5 group
-                           {{ request()->routeIs('transaksi-bank') || request()->routeIs('vouchers') ? 'text-blue-600' : 'text-gray-600' }}">
-                <svg class="w-6 h-6 mb-1
-                            {{ request()->routeIs('transaksi-bank') || request()->routeIs('vouchers') ? 'text-blue-600' : 'text-gray-600 group-hover:text-blue-600' }}"
-                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M17 8H5m12 0a1 1 0 0 1 1 1v2.6M17 8l-4-4M5 8a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.6M5 8l4-4 4 4m6 4h-4a2 2 0 1 0 0 4h4a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1Z" />
-                </svg>
-                <span class="text-sm">Transaksi</span>
-            </button>
-
-            {{-- Dropdown ke atas --}}
-            <div x-show="transaksiOpen" x-on:click.outside="transaksiOpen = false"
-                class="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 w-40 bg-white border rounded shadow-lg">
-                <a href="{{ route('transaksi-bank') }}"
-                    class="block px-4 py-2 text-sm hover:bg-gray-100
-                          {{ request()->routeIs('transaksi-bank') ? 'text-blue-600' : '' }}">
-                    Transaksi BriLink
-                </a>
-                <a href="{{ route('vouchers') }}"
-                    class="block px-4 py-2 text-sm hover:bg-gray-100
-                          {{ request()->routeIs('vouchers') ? 'text-blue-600' : '' }}">
-                    Transaksi Konter
-                </a>
-            </div>
-        </div>
-
-        {{-- Laporan --}}
-        <div class="relative">
-            <button type="button" x-on:click="laporanOpen = !laporanOpen"
-                class="inline-flex flex-col items-center justify-center w-full px-5 group 
-            {{ request()->routeIs('laporan-bank') ||
-            request()->routeIs('laporan-bank.rekap') ||
-            request()->routeIs('laporan_konter')
-                ? 'text-blue-600'
-                : 'text-gray-600' }}">
-                <svg class="w-6 h-6 mb-1
-                            {{ request()->routeIs('laporan-bank') || request()->routeIs('laporan-bank.rekap') || request()->routeIs('laporan_konter') ? 'text-blue-600' : 'text-gray-600 group-hover:text-blue-600' }}"
-                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M6 4v10m0 0a2 2 0 1 0 0 4m0-4a2 2 0 1 1 0 4m0 0v2m6-16v2m0 0a2 2 0 1 0 0 4m0-4a2 2 0 1 1 0 4m0 0v10m6-16v10m0 0a2 2 0 1 0 0 4m0-4a2 2 0 1 1 0 4m0 0v2" />
-                </svg>
-                <span class="text-sm">Laporan</span>
-            </button>
-
-            {{-- Dropdown ke atas --}}
-            <div x-show="laporanOpen" x-on:click.outside="laporanOpen = false"
-                class="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 w-40 bg-white border rounded shadow-lg">
-                <a href="{{ route('laporan-bank') }}"
-                    class="block px-4 py-2 text-sm hover:bg-gray-100
-                          {{ request()->routeIs('laporan-bank') ? 'text-blue-600' : '' }}">
-                    Laporan BriLink
-                </a>
-                <a href="{{ route('laporan_konter') }}"
-                    class="block px-4 py-2 text-sm hover:bg-gray-100 
-                          {{ request()->routeIs('laporan_konter') ? 'text-blue-600' : '' }}">
-                    Laporan Konter
-                </a>
             </div>
         </div>
     </div>
 </div>
+</nav>
 
-{{-- end --}}
+{{-- Mobile Nav Bottom (Clean Light Dock - Menyatu dengan Tema Web) --}}
+<div class="fixed md:hidden bottom-0 inset-x-0 z-50 pointer-events-none" x-data="{ transaksiOpen: false, laporanOpen: false }">
+
+<div
+    class="bg-white/95 backdrop-blur-xl border-t border-slate-200/80 shadow-[0_-10px_30px_rgba(0,0,0,0.06)] flex items-center justify-around h-16 w-full px-4 relative pointer-events-auto pb-safe">
+
+    {{-- 1. Menu Home --}}
+    @php $isHome = request()->routeIs('main'); @endphp
+    <a href="{{ route('main') }}"
+        class="relative flex flex-col items-center justify-center w-full h-full transition-all duration-300 {{ $isHome ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600' }}">
+
+        <div
+            class="flex flex-col items-center gap-1 transition-transform duration-300 {{ $isHome ? '-translate-y-1' : '' }}">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" viewBox="0 0 24 24">
+                <path
+                    d="m4 12 8-8 8 8M6 10.5V19a1 1 0 0 0 1 1h3v-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3h3a1 1 0 0 0 1-1v-8.5" />
+            </svg>
+            <span class="text-[10px] {{ $isHome ? 'font-bold' : 'font-medium' }}">Beranda</span>
+        </div>
+
+        @if ($isHome)
+            <span
+                class="absolute bottom-1.5 w-1.5 h-1.5 bg-blue-600 rounded-full shadow-[0_0_6px_rgba(37,99,235,0.6)]"></span>
+        @endif
+    </a>
+
+    {{-- 2. Menu Transaksi --}}
+    @php $isTransaksi = request()->routeIs('transaksi-bank') || request()->routeIs('vouchers'); @endphp
+    <div class="relative flex items-center justify-center w-full h-full">
+        <button type="button" x-on:click="transaksiOpen = !transaksiOpen; laporanOpen = false"
+            class="relative flex flex-col items-center justify-center w-full h-full transition-all duration-300 outline-none {{ $isTransaksi ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600' }}">
+
+            <div
+                class="flex flex-col items-center gap-1 transition-transform duration-300 {{ $isTransaksi ? '-translate-y-1' : '' }}">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <path
+                        d="M17 8H5m12 0a1 1 0 0 1 1 1v2.6M17 8l-4-4M5 8a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.6M5 8l4-4 4 4m6 4h-4a2 2 0 1 0 0 4h4a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1Z" />
+                </svg>
+                <span class="text-[10px] {{ $isTransaksi ? 'font-bold' : 'font-medium' }}">Transaksi</span>
+            </div>
+
+            @if ($isTransaksi)
+                <span
+                    class="absolute bottom-1.5 w-1.5 h-1.5 bg-blue-600 rounded-full shadow-[0_0_6px_rgba(37,99,235,0.6)]"></span>
+            @endif
+        </button>
+
+        <!-- Dropup Transaksi (Light Theme) -->
+        <div x-show="transaksiOpen" x-cloak x-on:click.outside="transaksiOpen = false"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 translate-y-3 scale-95"
+            x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+            x-transition:leave-end="opacity-0 translate-y-3 scale-95"
+            class="absolute bottom-[calc(100%+12px)] left-1/2 -translate-x-1/2 w-52 bg-white backdrop-blur-xl border border-slate-200 rounded-[1.5rem] shadow-2xl p-2 overflow-hidden">
+
+            @php $isTxBank = request()->routeIs('transaksi-bank'); @endphp
+            <a href="{{ route('transaksi-bank') }}"
+                class="flex items-center gap-3 px-4 py-3.5 text-sm rounded-xl transition-colors duration-200 {{ $isTxBank ? 'bg-blue-50 text-blue-700 font-bold' : 'text-slate-700 hover:bg-slate-50' }}">
+                <div class="p-1.5 rounded-lg {{ $isTxBank ? 'bg-blue-200/50' : 'bg-slate-100 text-slate-500' }}">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                            d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                    </svg>
+                </div>
+                Transaksi Bank
+            </a>
+
+            {{-- @php $isTxKonter = request()->routeIs('vouchers'); @endphp
+            <a href="{{ route('vouchers') }}"
+                class="flex items-center gap-3 px-4 py-3.5 text-sm rounded-xl transition-colors duration-200 mt-1 {{ $isTxKonter ? 'bg-blue-50 text-blue-700 font-bold' : 'text-slate-700 hover:bg-slate-50' }}">
+                <div
+                    class="p-1.5 rounded-lg {{ $isTxKonter ? 'bg-blue-200/50' : 'bg-slate-100 text-slate-500' }}">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                            d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                Transaksi Konter
+            </a> --}}
+        </div>
+    </div>
+
+    {{-- 3. Menu Laporan --}}
+    @php $isLaporan = request()->routeIs('laporan-bank') || request()->routeIs('laporan-bank.rekap') || request()->routeIs('laporan_konter'); @endphp
+    <div class="relative flex items-center justify-center w-full h-full">
+        <button type="button" x-on:click="laporanOpen = !laporanOpen; transaksiOpen = false"
+            class="relative flex flex-col items-center justify-center w-full h-full transition-all duration-300 outline-none {{ $isLaporan ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600' }}">
+
+            <div
+                class="flex flex-col items-center gap-1 transition-transform duration-300 {{ $isLaporan ? '-translate-y-1' : '' }}">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <path
+                        d="M6 4v10m0 0a2 2 0 1 0 0 4m0-4a2 2 0 1 1 0 4m0 0v2m6-16v2m0 0a2 2 0 1 0 0 4m0-4a2 2 0 1 1 0 4m0 0v10m6-16v10m0 0a2 2 0 1 0 0 4m0-4a2 2 0 1 1 0 4m0 0v2" />
+                </svg>
+                <span class="text-[10px] {{ $isLaporan ? 'font-bold' : 'font-medium' }}">Laporan</span>
+            </div>
+
+            @if ($isLaporan)
+                <span
+                    class="absolute bottom-1.5 w-1.5 h-1.5 bg-blue-600 rounded-full shadow-[0_0_6px_rgba(37,99,235,0.6)]"></span>
+            @endif
+        </button>
+
+        <!-- Dropup Laporan (Light Theme) -->
+        <div x-show="laporanOpen" x-cloak x-on:click.outside="laporanOpen = false"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 translate-y-3 scale-95"
+            x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+            x-transition:leave-end="opacity-0 translate-y-3 scale-95"
+            class="absolute bottom-[calc(100%+12px)] left-1/2 -translate-x-1/2 w-52 bg-white backdrop-blur-xl border border-slate-200 rounded-[1.5rem] shadow-2xl p-2 overflow-hidden">
+
+            @php $isLapBank = request()->routeIs('laporan-bank') || request()->routeIs('laporan-bank.rekap'); @endphp
+            <a href="{{ route('laporan-bank') }}"
+                class="flex items-center gap-3 px-4 py-3.5 text-sm rounded-xl transition-colors duration-200 {{ $isLapBank ? 'bg-blue-50 text-blue-700 font-bold' : 'text-slate-700 hover:bg-slate-50' }}">
+                <div class="p-1.5 rounded-lg {{ $isLapBank ? 'bg-blue-200/50' : 'bg-slate-100 text-slate-500' }}">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                            d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                </div>
+                Laporan Bank
+            </a>
+
+            {{-- @php $isLapKonter = request()->routeIs('laporan_konter'); @endphp
+            <a href="{{ route('laporan_konter') }}"
+                class="flex items-center gap-3 px-4 py-3.5 text-sm rounded-xl transition-colors duration-200 mt-1 {{ $isLapKonter ? 'bg-blue-50 text-blue-700 font-bold' : 'text-slate-700 hover:bg-slate-50' }}">
+                <div
+                    class="p-1.5 rounded-lg {{ $isLapKonter ? 'bg-blue-200/50' : 'bg-slate-100 text-slate-500' }}">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                </div>
+                Laporan Konter
+            </a> --}}
+        </div>
+    </div>
+
+</div>
+</div>

@@ -8,10 +8,14 @@
     $segments = Request::segments();
 @endphp
 
-<nav class="mt-4 max-sm:mt-0 bg-gray-100 rounded p-2 text-gray-600 select-none cursor-default text-sm"
+<nav class="mt-4 sm:mt-2 bg-gray-100 rounded p-3 text-gray-600 select-none cursor-default 
+            text-sm md:text-base lg:text-lg"
     aria-label="breadcrumb">
-    <ol class="list-reset flex">
-        <li><a href="{{ route('main') }}" class="text-blue-600 hover:underline">Home</a></li>
+    <ol class="flex flex-wrap items-center gap-2">
+        <!-- Home -->
+        <li>
+            <a href="{{ route('main') }}" class="text-blue-600 hover:underline">Home</a>
+        </li>
 
         @foreach ($segments as $index => $segment)
             @php
@@ -36,7 +40,7 @@
                             break;
                         case 'jenis_transaksi':
                             $model = JenisTransaksi::find($segment);
-                            $label = $model?->nama_jenis_transaksi ?? "ID $segment";
+                            $label = $model?->nama_transaksi ?? "ID $segment";
                             break;
                         default:
                             $label = "ID $segment";
@@ -44,20 +48,17 @@
                 }
             @endphp
 
-            @if (!is_numeric($segment))
-                {{-- tampilkan breadcrumb --}}
+            <!-- Separator -->
+            <li class="text-gray-400">/</li>
 
-                <li class="mx-2">/</li>
-                <li>
-                    @if ($isLast)
-                        <span class="text-gray-500">{{ $label }}</span>
-                    @else
-                        <a href="{{ $url }}" class="text-blue-600 hover:underline">{{ $label }}</a>
-                    @endif
-                </li>
-            @endif
-
-
+            <!-- Segment -->
+            <li>
+                @if ($isLast)
+                    <span class="text-gray-500">{{ $label }}</span>
+                @else
+                    <a href="{{ $url }}" class="text-blue-600 hover:underline">{{ $label }}</a>
+                @endif
+            </li>
         @endforeach
     </ol>
 </nav>

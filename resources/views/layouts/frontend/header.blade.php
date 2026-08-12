@@ -1,19 +1,22 @@
-    <!-- Header Box -->
-    <section class="bg-white rounded-lg shadow-md p-5 mt-20 mb-8">
-        <div class="flex justify-start items-center flex-wrap mb-3">
-            <div class="flex items-center space-x-1">
-                <div class="w-20 h-20 rounded overflow-hidden flex-shrink-0">
-                    <img src="{{ asset('assets/images/irfan.png') }}"
-                        alt="Logo merah kuning IC dengan tulisan pilihan kita bersama di bawahnya"
-                        class="object-contain w-full h-full"
-                        onerror="this.onerror=null;this.src='https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/1f5b150c-5e0d-4d47-be9f-199775963a42.png';" />
-                </div>
-                <h2 class="text-lg font-semibold select-none cursor-default">Cabang
+<!-- Header Box -->
+<section class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 md:p-7 mt-20 mb-8">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+        <div>
+            <p class="text-sm md:text-base text-gray-500 mb-1">Selamat datang kembali</p>
+            <h2 class="text-xl md:text-2xl lg:text-3xl font-semibold text-gray-800 select-none cursor-default">
+                @auth
                     {{ Auth::user()->cabang->nama_cabang }}
-                </h2>
-            </div>
+                @endauth
+            </h2>
         </div>
 
-        <!-- breadcrumb -->
-        <x-breadcrumb />
-    </section>
+        <div
+            class="flex items-center gap-2 text-sm md:text-base text-gray-500 bg-gray-50 rounded-lg px-3 py-2 md:px-4 md:py-2.5 w-fit">
+            <span class="material-symbols-outlined text-base md:text-lg">calendar_today</span>
+            {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}
+        </div>
+    </div>
+
+    <!-- breadcrumb -->
+    <x-breadcrumb />
+</section>

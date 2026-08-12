@@ -61,7 +61,7 @@
                 @if (!request()->hasAny(['tanggal', 'cabang_id']))
                     <tr>
                         <td colspan="5" class="text-center py-6 text-gray-500 font-semibold">
-                            📌 Silakan pilih cabang dan tanggal untuk menampilkan data
+                            📌 Masih Tahap Perbaikan
                         </td>
                     </tr>
                 @elseif($data->count() == 0)

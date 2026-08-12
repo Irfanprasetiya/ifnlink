@@ -5,3 +5,10 @@
 @import "flowbite/src/themes/default";
 @plugin "flowbite/plugin";
 @source "../../node_modules/flowbite";
+[x-cloak] {
+    display: none !important;
+}
+
+.safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+}

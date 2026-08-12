@@ -74,15 +74,4 @@
                 </table>
             </div>
         </section> --}}
-    <section class="bg-white rounded-lg shadow-md p-6 mb-10 flex-grow">
-        <h2 class="text-center text-lg font-semibold select-none cursor-default mb-4">
-            Proses pengerjaan
-        </h2>
-        <div class="flex justify-center">
-            <img src="{{ asset('assets/images/work.svg') }}" alt="Web Maintenance" class="w-64 h-auto mx-auto">
-        </div>
-        <p class="text-center text-gray-600 mt-4 text-sm">
-            Tahapan pengerjaan sedang berlangsung, mohon menunggu hasil akhir.
-        </p>
-    </section>
 @endsection
