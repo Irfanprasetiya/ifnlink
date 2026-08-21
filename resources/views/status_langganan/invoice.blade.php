@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Invoice #INV-{{ str_pad($pembayaran->id, 5, '0', STR_PAD_LEFT) }}</title>
+    <title>Invoice #{{ $pembayaran->order_id ?? 'INV-' . str_pad($pembayaran->id, 5, '0', STR_PAD_LEFT) }}</title>
     <style>
         /* Menggunakan Font Inter (SaaS Standard) */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -226,13 +226,13 @@
                     <p class="m-0 text-muted" style="font-size: 12px;">Email: support@omzetly.id | WA: 0838-6609-6623
                     </p>
                     <p class="m-0 text-muted" style="margin-top: 4px; font-size: 12px;">
-                        <strong>Penerima Pembayaran:</strong> Supriyadi (Bagian Keuangan)
+                        <strong>Penerima:</strong> Supriyadi (Admin Omzetly.id)
                     </p>
                 </td>
                 <td style="width: 50%;" class="text-right">
                     <h2 class="invoice-title">INVOICE</h2>
                     <p class="m-0 font-extrabold text-primary" style="font-size: 15px; margin-bottom: 4px;">
-                        #INV-{{ str_pad($pembayaran->id, 5, '0', STR_PAD_LEFT) }}</p>
+                        #{{ $pembayaran->order_id ?? 'INV-' . str_pad($pembayaran->id, 5, '0', STR_PAD_LEFT) }}</p>
                     <p class="m-0 text-dark" style="font-size: 12px; margin-bottom: 12px; font-weight: 500;">Tanggal:
                         {{ $pembayaran->created_at->format('d F Y') }}</p>
 
@@ -261,7 +261,7 @@
                 <div class="info-box">
                     <div class="section-label">Ditagihkan Kepada:</div>
                     <p class="m-0 font-bold text-dark" style="font-size: 16px;">{{ $tenant->nama_toko }}</p>
-                    <p class="m-0 font-semibold" style="margin-top: 4px;">Attn: {{ $tenant->nama_pemilik }}</p>
+                    <p class="m-0 font-semibold" style="margin-top: 4px;">Nama: {{ $tenant->nama_pemilik }}</p>
                     <p class="m-0 text-muted" style="margin-top: 4px;">Email: {{ $tenant->email ?? '-' }}</p>
                     <p class="m-0 text-muted">No. HP: {{ $tenant->no_hp ?? '-' }}</p>
                 </div>

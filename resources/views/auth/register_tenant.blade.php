@@ -3,7 +3,17 @@
 @section('title', 'Daftar Agen | Omzetly.id')
 
 @section('container')
-    <section class="flex items-center justify-center min-h-screen px-6 py-10" x-data="{
+    {{-- Background Ornaments --}}
+    <div class="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+        <div
+            class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-blue-400/20 dark:bg-blue-900/20 blur-[100px]">
+        </div>
+        <div
+            class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-400/20 dark:bg-indigo-900/20 blur-[100px]">
+        </div>
+    </div>
+
+    <section class="flex items-center justify-center min-h-screen px-4 sm:px-6 py-10 relative z-10" x-data="{
         step: 1,
         plan_id: '',
         plan_harga: 0,
@@ -37,31 +47,57 @@
             this.plan_nama = nama;
         }
     }">
-        <div class="w-full max-w-lg bg-white/80 backdrop-blur-md rounded-2xl shadow-lg dark:bg-gray-800/80 p-8">
-            <div class="flex flex-col items-center mb-6">
-                <img class="h-24 mb-3" src="{{ asset('assets/images/omzetly.png') }}" alt="logo">
-                <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Daftar Agen</h1>
-                <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">Mulai kelola bisnis Toko Anda</p>
+        <div
+            class="w-full max-w-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl shadow-2xl p-6 sm:p-8 border border-white/50 dark:border-gray-700/50 animate-in fade-in zoom-in-95 duration-500">
+
+            {{-- Header Logo --}}
+            <div class="flex flex-col items-center mb-6 sm:mb-8 text-center">
+                <div class="relative group cursor-pointer mb-3">
+                    <div
+                        class="absolute inset-0 bg-blue-100 dark:bg-blue-900/50 rounded-full blur-xl opacity-50 group-hover:opacity-100 transition-opacity duration-300">
+                    </div>
+                    <img class="h-20 sm:h-24 relative z-10 drop-shadow-lg transition-transform duration-300 group-hover:scale-105"
+                        src="{{ asset('assets/images/logo/favicon.png') }}" alt="logo">
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">Daftar Agen
+                </h1>
+                <p class="text-gray-500 dark:text-gray-400 text-sm sm:text-base mt-1 font-medium">Mulai kelola bisnis Toko
+                    Anda hari ini.</p>
             </div>
 
             {{-- Progress indicator --}}
-            <div class="flex items-center gap-2 mb-6">
-                <div class="flex-1 h-1.5 rounded-full" :class="step >= 1 ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-600'">
-                </div>
-                <div class="flex-1 h-1.5 rounded-full" :class="step >= 2 ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-600'">
-                </div>
+            <div class="flex items-center gap-2.5 mb-6 sm:mb-8">
+                <div class="flex-1 h-2 rounded-full transition-colors duration-300"
+                    :class="step >= 1 ? 'bg-blue-600 shadow-sm shadow-blue-500/30' : 'bg-gray-200 dark:bg-gray-700'"></div>
+                <div class="flex-1 h-2 rounded-full transition-colors duration-300"
+                    :class="step >= 2 ? 'bg-blue-600 shadow-sm shadow-blue-500/30' : 'bg-gray-200 dark:bg-gray-700'"></div>
             </div>
 
-            @if (session('error'))
-                <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-700 dark:text-red-400">
-                    {{ session('error') }}
-                </div>
-            @endif
-            @if (session('info'))
-                <div class="p-4 mb-4 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-gray-700 dark:text-blue-400">
-                    {{ session('info') }}
-                </div>
-            @endif
+            {{-- Alerts --}}
+            <div class="space-y-3 mb-6">
+                @if (session('error'))
+                    <div
+                        class="bg-rose-50 dark:bg-rose-900/30 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-400 px-4 py-3 rounded-2xl flex items-center gap-3 shadow-sm text-[11px] sm:text-sm font-medium">
+                        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>{{ session('error') }}</span>
+                    </div>
+                @endif
+                @if (session('info'))
+                    <div
+                        class="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-400 px-4 py-3 rounded-2xl flex items-center gap-3 shadow-sm text-[11px] sm:text-sm font-medium">
+                        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>{{ session('info') }}</span>
+                    </div>
+                @endif
+            </div>
 
             @php
                 $pendingTenantId = session('pending_tenant_id');
@@ -69,15 +105,18 @@
             @endphp
 
             @if ($pendingTenant && $pendingTenant->status_langganan === 'pending')
-                <div class="mb-6 bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg">
-                    <p class="text-sm font-medium mb-2">
-                        Pendaftaran untuk <strong>{{ $pendingTenant->nama_toko }}</strong> sudah berhasil.
-                        Silakan selesaikan pembayaran untuk mengaktifkan akun.
-                    </p>
-                    <a href="{{ route('checkout', ['plan' => $pendingTenant->plan_id]) }}"
-                        class="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">
-                        Lanjutkan Pembayaran
-                    </a>
+                <div
+                    class="mb-6 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-300 px-5 py-4 rounded-2xl shadow-sm relative overflow-hidden">
+                    <div class="relative z-10">
+                        <p class="text-sm font-medium mb-3 leading-relaxed">
+                            Pendaftaran untuk <strong>{{ $pendingTenant->nama_toko }}</strong> sudah berhasil. Silakan
+                            selesaikan pembayaran untuk mengaktifkan akun.
+                        </p>
+                        <a href="{{ route('checkout', ['plan' => $pendingTenant->plan_id]) }}"
+                            class="inline-flex items-center justify-center w-full sm:w-auto bg-blue-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-blue-700 transition active:scale-95 shadow-sm">
+                            💳 Lanjutkan Pembayaran
+                        </a>
+                    </div>
                 </div>
             @endif
 
@@ -86,68 +125,77 @@
                 <input type="hidden" name="plan_id" x-model="plan_id">
 
                 {{-- STEP 1 --}}
-                <div x-show="step === 1" id="step1" class="space-y-5">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div x-show="step === 1" id="step1" class="space-y-4 sm:space-y-5">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
                         <div>
                             <label for="nama_toko"
-                                class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Nama Toko</label>
-                            <input type="text" name="nama_toko" id="nama_toko" value="{{ old('nama_toko') }}"
-                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition"
-                                placeholder="Contoh: Toko Berkah" @input="hasErrors = false" required>
-                            <x-input-error :messages="$errors->get('nama_toko')" class="mt-1" />
+                                class="block mb-1.5 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">Nama
+                                Toko</label>
+                            <input type="text" name="nama_toko" id="nama_toko" value="{{ old('nama_toko') }}" required
+                                @input="hasErrors = false"
+                                class="w-full px-4 py-3.5 sm:py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 text-gray-900 dark:text-white text-base sm:text-sm focus:bg-white dark:focus:bg-gray-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 outline-none transition-all"
+                                placeholder="Contoh: Toko Berkah">
+                            <x-input-error :messages="$errors->get('nama_toko')" class="mt-1.5 text-[10px] sm:text-xs text-rose-500" />
                         </div>
                         <div>
                             <label for="nama_pemilik"
-                                class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Nama Pemilik</label>
+                                class="block mb-1.5 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">Nama
+                                Pemilik</label>
                             <input type="text" name="nama_pemilik" id="nama_pemilik" value="{{ old('nama_pemilik') }}"
-                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition"
-                                placeholder="Nama lengkap pemilik" @input="hasErrors = false" required>
-                            <x-input-error :messages="$errors->get('nama_pemilik')" class="mt-1" />
+                                required @input="hasErrors = false"
+                                class="w-full px-4 py-3.5 sm:py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 text-gray-900 dark:text-white text-base sm:text-sm focus:bg-white dark:focus:bg-gray-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 outline-none transition-all"
+                                placeholder="Nama lengkap pemilik">
+                            <x-input-error :messages="$errors->get('nama_pemilik')" class="mt-1.5 text-[10px] sm:text-xs text-rose-500" />
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
                         <div>
                             <label for="no_hp"
-                                class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">No.
+                                class="block mb-1.5 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">No.
                                 Handphone</label>
-                            <input type="text" name="no_hp" id="no_hp" value="{{ old('no_hp') }}"
-                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition"
-                                placeholder="08123xxx" @input="hasErrors = false" required>
-                            <x-input-error :messages="$errors->get('no_hp')" class="mt-1" />
+                            <input type="text" inputmode="numeric" name="no_hp" id="no_hp"
+                                value="{{ old('no_hp') }}" required @input="hasErrors = false"
+                                class="w-full px-4 py-3.5 sm:py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 text-gray-900 dark:text-white text-base sm:text-sm focus:bg-white dark:focus:bg-gray-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 outline-none transition-all"
+                                placeholder="08123xxxx">
+                            <x-input-error :messages="$errors->get('no_hp')" class="mt-1.5 text-[10px] sm:text-xs text-rose-500" />
                         </div>
                         <div>
                             <label for="email"
-                                class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Email Bisnis</label>
-                            <input type="email" name="email" id="email" value="{{ old('email') }}"
-                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition"
-                                placeholder="toko@email.com" @input="hasErrors = false" required>
-                            <x-input-error :messages="$errors->get('email')" class="mt-1" />
+                                class="block mb-1.5 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">Email
+                                Bisnis</label>
+                            <input type="email" name="email" id="email" value="{{ old('email') }}" required
+                                @input="hasErrors = false"
+                                class="w-full px-4 py-3.5 sm:py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 text-gray-900 dark:text-white text-base sm:text-sm focus:bg-white dark:focus:bg-gray-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 outline-none transition-all"
+                                placeholder="toko@email.com">
+                            <x-input-error :messages="$errors->get('email')" class="mt-1.5 text-[10px] sm:text-xs text-rose-500" />
                         </div>
                     </div>
 
-                    <hr class="border-gray-200 dark:border-gray-700">
+                    <hr class="border-gray-100 dark:border-gray-700/50 my-2">
 
                     <div>
                         <label for="username"
-                            class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Username</label>
-                        <input type="text" name="username" id="username" value="{{ old('username') }}"
+                            class="block mb-1.5 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">Username
+                            Login</label>
+                        <input type="text" name="username" id="username" value="{{ old('username') }}" required
                             @input="hasErrors = false"
-                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition"
-                            placeholder="Buat username unik" required>
-                        <x-input-error :messages="$errors->get('username')" class="mt-1" />
+                            class="w-full px-4 py-3.5 sm:py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 text-gray-900 dark:text-white text-base sm:text-sm focus:bg-white dark:focus:bg-gray-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 outline-none transition-all"
+                            placeholder="Buat username unik">
+                        <x-input-error :messages="$errors->get('username')" class="mt-1.5 text-[10px] sm:text-xs text-rose-500" />
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
                         <div>
                             <label for="password"
-                                class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
+                                class="block mb-1.5 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">Password</label>
                             <div class="relative" x-data="{ show: false }">
                                 <input :type="show ? 'text' : 'password'" name="password" id="password" minlength="6"
-                                    class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition pr-10"
-                                    placeholder="••••••••" required @input="passwordMatch = null; hasErrors = false">
+                                    required @input="passwordMatch = null; hasErrors = false"
+                                    class="w-full px-4 py-3.5 sm:py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 text-gray-900 dark:text-white text-base sm:text-sm focus:bg-white dark:focus:bg-gray-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 outline-none transition-all pr-12"
+                                    placeholder="••••••••">
                                 <button type="button" @click="show = !show"
-                                    class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
+                                    class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-blue-600 transition-colors">
                                     <svg x-show="!show" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
                                         stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -164,21 +212,20 @@
                                     </svg>
                                 </button>
                             </div>
-                            <x-input-error :messages="$errors->get('password')" class="mt-1" />
+                            <x-input-error :messages="$errors->get('password')" class="mt-1.5 text-[10px] sm:text-xs text-rose-500" />
                         </div>
-
                         <div>
                             <label for="password_confirmation"
-                                class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Konfirmasi
+                                class="block mb-1.5 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">Konfirmasi
                                 Password</label>
                             <div class="relative" x-data="{ show: false }">
                                 <input :type="show ? 'text' : 'password'" name="password_confirmation"
-                                    id="password_confirmation" minlength="6"
-                                    class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition pr-10"
-                                    placeholder="••••••••" required
-                                    @input="passwordMatch = ($el.value === document.getElementById('password').value); hasErrors = false">
+                                    id="password_confirmation" minlength="6" required
+                                    @input="passwordMatch = ($el.value === document.getElementById('password').value); hasErrors = false"
+                                    class="w-full px-4 py-3.5 sm:py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 text-gray-900 dark:text-white text-base sm:text-sm focus:bg-white dark:focus:bg-gray-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 outline-none transition-all pr-12"
+                                    placeholder="••••••••">
                                 <button type="button" @click="show = !show"
-                                    class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
+                                    class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-blue-600 transition-colors">
                                     <svg x-show="!show" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
                                         stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -195,122 +242,150 @@
                                     </svg>
                                 </button>
                             </div>
-                            <p x-show="passwordMatch === true" class="text-xs text-green-600 mt-1">Password sesuai</p>
-                            <p x-show="passwordMatch === false" class="text-xs text-red-600 mt-1">Password tidak sesuai
-                            </p>
-                            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-1" />
+                            <p x-show="passwordMatch === true"
+                                class="text-[10px] sm:text-xs text-emerald-600 mt-1.5 font-medium">✅ Password sesuai</p>
+                            <p x-show="passwordMatch === false"
+                                class="text-[10px] sm:text-xs text-rose-600 mt-1.5 font-medium">❌ Password tidak sesuai</p>
+                            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-1.5 text-[10px] sm:text-xs text-rose-500" />
                         </div>
                     </div>
 
-                    <button type="button" @click="nextStep()"
-                        class="w-full py-3 mt-2 text-white font-semibold bg-blue-600 hover:bg-blue-700 rounded-lg shadow-md transition focus:ring-4 focus:ring-blue-300 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-                        :disabled="hasErrors">
-                        Lanjut Pilih Paket
-                    </button>
-                    <p x-show="hasErrors" class="text-xs text-red-600 text-center mt-1">
-                        Silakan perbaiki error di atas sebelum melanjutkan.
-                    </p>
+                    <div class="pt-4">
+                        <button type="button" @click="nextStep()" :disabled="hasErrors"
+                            class="w-full py-3.5 mt-2 text-white font-bold bg-blue-600 hover:bg-blue-700 rounded-xl shadow-md shadow-blue-500/20 transition-all active:scale-95 outline-none disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                            Lanjut Pilih Paket
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                            </svg>
+                        </button>
+                        <p x-show="hasErrors" class="text-[11px] sm:text-xs text-rose-600 text-center mt-2 font-medium">
+                            ⚠️ Silakan perbaiki error di atas sebelum melanjutkan.
+                        </p>
+                    </div>
                 </div>
 
                 {{-- STEP 2 --}}
                 <div x-show="step === 2" x-cloak class="space-y-5">
-                    <div>
-                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">Pilih Paket</h2>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Bisa upgrade kapan saja setelah daftar</p>
+                    <div class="text-center sm:text-left mb-2">
+                        <h2 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-1">Pilih Paket Bisnis</h2>
+                        <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Anda dapat melakukan *upgrade* kapan
+                            saja setelah mendaftar.</p>
                     </div>
 
                     <div class="space-y-3">
                         @forelse($plans as $plan)
-                            <label class="block border rounded-xl p-4 cursor-pointer transition hover:border-blue-400"
+                            <label
+                                class="block border rounded-2xl p-4 sm:p-5 cursor-pointer transition-all duration-200 hover:border-blue-400 shadow-sm"
                                 :class="plan_id === '{{ $plan->id }}' ?
-                                    'border-blue-600 ring-1 ring-blue-600 bg-blue-50 dark:bg-blue-900/20' :
-                                    'border-gray-300 dark:border-gray-600'">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center gap-3">
+                                    'border-blue-600 ring-2 ring-blue-600/20 bg-blue-50/50 dark:bg-blue-900/20' :
+                                    'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'">
+                                <div class="flex items-center justify-between gap-3">
+                                    <div class="flex items-center gap-3 sm:gap-4">
                                         <input type="radio" name="plan_radio" value="{{ $plan->id }}"
                                             x-model="plan_id"
                                             @change="selectPlan('{{ $plan->id }}', {{ (int) $plan->harga }}, '{{ $plan->nama_paket }}')"
-                                            class="w-4 h-4 text-blue-600">
+                                            class="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 focus:ring-blue-500 border-gray-300">
                                         <div>
-                                            <p class="font-semibold text-gray-900 dark:text-white">
+                                            <p
+                                                class="font-bold text-gray-900 dark:text-white text-sm sm:text-base flex items-center flex-wrap gap-2">
                                                 {{ $plan->nama_paket }}
                                                 @if ($plan->harga == 0)
                                                     <span
-                                                        class="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full ml-2">Gratis</span>
+                                                        class="text-[10px] bg-emerald-100 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-md uppercase tracking-wider">Gratis</span>
                                                 @elseif($plan->harga == $plans->where('harga', '>', 0)->max('harga'))
                                                     <span
-                                                        class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full ml-2">Populer</span>
+                                                        class="text-[10px] bg-blue-100 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-md uppercase tracking-wider">Populer</span>
                                                 @endif
                                             </p>
                                             @if ($plan->max_user)
-                                                <p class="text-xs text-gray-400 mt-1">👥 Maks. {{ $plan->max_user }} User
-                                                </p>
+                                                <p class="text-[11px] sm:text-xs text-gray-500 mt-1 font-medium">👥
+                                                    Maksimal {{ $plan->max_user }} Akses User</p>
                                             @endif
                                         </div>
                                     </div>
-                                    <div class="text-right">
+                                    <div class="text-right shrink-0">
                                         @if ($plan->harga == 0)
-                                            <p class="font-semibold text-green-600 dark:text-green-400 text-lg">Gratis</p>
+                                            <p
+                                                class="font-extrabold text-emerald-600 dark:text-emerald-400 text-base sm:text-lg">
+                                                Gratis</p>
                                         @else
-                                            <p class="font-semibold text-gray-900 dark:text-white text-lg">Rp
+                                            <p class="font-extrabold text-gray-900 dark:text-white text-base sm:text-lg">Rp
                                                 {{ number_format($plan->harga, 0, ',', '.') }}</p>
-                                            <p class="text-xs text-gray-500 dark:text-gray-400">/bulan</p>
+                                            <p class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 font-medium">
+                                                / bulan</p>
                                         @endif
                                     </div>
                                 </div>
                             </label>
                         @empty
-                            <div class="text-center py-8">
-                                <p class="text-gray-500 dark:text-gray-400">⚠️ Belum ada paket tersedia.</p>
+                            <div
+                                class="text-center py-8 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700">
+                                <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">⚠️ Belum ada paket tersedia
+                                    saat ini.</p>
                             </div>
                         @endforelse
                     </div>
 
-                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4" x-show="plan_id">
-                        <p class="text-sm text-gray-600 dark:text-gray-300">Paket dipilih: <span class="font-semibold"
-                                x-text="plan_nama"></span></p>
-                        <p class="text-sm text-gray-600 dark:text-gray-300">
-                            Harga: <span class="font-semibold">
-                                <span x-show="plan_harga == 0" class="text-green-600">Gratis</span>
-                                <span x-show="plan_harga > 0"
-                                    x-text="'Rp ' + new Intl.NumberFormat('id-ID').format(plan_harga) + '/bulan'"></span>
+                    <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 border border-gray-100 dark:border-gray-600 shadow-inner"
+                        x-show="plan_id" x-transition>
+                        <div class="flex justify-between items-center text-xs sm:text-sm">
+                            <span class="text-gray-600 dark:text-gray-300">Paket yang dipilih:</span>
+                            <span class="font-bold text-gray-900 dark:text-white" x-text="plan_nama"></span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs sm:text-sm mt-1.5">
+                            <span class="text-gray-600 dark:text-gray-300">Total Pembayaran:</span>
+                            <span class="font-bold">
+                                <span x-show="plan_harga == 0" class="text-emerald-600">Gratis 14 Hari</span>
+                                <span x-show="plan_harga > 0" class="text-blue-600"
+                                    x-text="'Rp ' + new Intl.NumberFormat('id-ID').format(plan_harga) + ' / bln'"></span>
                             </span>
-                        </p>
+                        </div>
                     </div>
 
-                    <div class="flex gap-3">
+                    <div class="flex gap-3 pt-2">
                         <button type="button" @click="step = 1"
-                            class="flex-1 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 font-semibold rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                            class="w-1/3 py-3.5 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 font-bold text-sm rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition active:scale-95">
                             ← Kembali
                         </button>
                         <button type="submit" id="btnSubmitRegister" :disabled="!plan_id"
-                            class="flex-1 py-3 text-white font-semibold bg-blue-600 hover:bg-blue-700 rounded-lg shadow-md transition focus:ring-4 focus:ring-blue-300 outline-none disabled:opacity-50 disabled:cursor-not-allowed">
-                            <span x-show="plan_harga == 0">Daftar Sekarang (Gratis)</span>
-                            <span x-show="plan_harga > 0">Lanjut ke Pembayaran</span>
+                            class="w-2/3 py-3.5 text-white font-bold text-sm bg-blue-600 hover:bg-blue-700 rounded-xl shadow-md shadow-blue-500/20 transition-all active:scale-95 outline-none disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center">
+                            <span x-show="plan_harga == 0">Daftar Sekarang</span>
+                            <span x-show="plan_harga > 0">Lanjut Pembayaran</span>
                         </button>
                     </div>
                 </div>
             </form>
 
-            <div class="mt-6 text-center text-sm">
-                <span class="text-gray-500 dark:text-gray-400">Sudah punya akun?</span>
-                <a href="{{ route('login') }}" class="text-blue-600 hover:underline font-semibold ml-1">Masuk di sini</a>
+            <div class="mt-8 text-center border-t border-gray-100 dark:border-gray-700/50 pt-6">
+                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 font-medium">
+                    Sudah punya akun?
+                    <a href="{{ route('login') }}"
+                        class="font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:underline transition-colors ml-1">
+                        Masuk di sini
+                    </a>
+                </p>
             </div>
+
             <div class="mt-4 flex justify-center items-center">
                 <a href="/"
-                    class="flex items-center text-sm font-medium text-blue-600 hover:text-blue-700 transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
+                    class="inline-flex items-center text-xs sm:text-sm font-semibold text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors bg-gray-50 dark:bg-gray-800 px-4 py-2 rounded-lg border border-gray-100 dark:border-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                             d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
                     Kembali ke Beranda
                 </a>
             </div>
-            <p class="text-center text-xs text-gray-400 mt-8">© {{ date('Y') }} Omzetly.id. All rights reserved.</p>
+
+            <p class="text-center text-[10px] sm:text-[11px] text-gray-400 mt-8 tracking-wide font-medium">
+                © {{ date('Y') }} Omzetly.id. ALL RIGHTS RESERVED.
+            </p>
         </div>
     </section>
 
+    {{-- Script Loading UTUH TIDAK DIUBAH --}}
     <script>
         document.getElementById('registerForm').addEventListener('submit', function(e) {
             const btn = document.getElementById('btnSubmitRegister');

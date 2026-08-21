@@ -41,8 +41,8 @@
         {{-- Logo & Header --}}
         <div class="text-center mb-6">
             <div
-                class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-blue-50 border border-blue-100 mb-4 shadow-sm">
-                <img src="{{ asset('assets/images/omzetly.png') }}" alt="Omzetly" class="h-12 w-12 object-contain">
+                class="inline-flex items-center justify-center w-24 h-24 rounded-2xl bg-blue-50 border border-blue-100 mb-4 shadow-sm">
+                <img class="object-contain" src="{{ asset('assets/images/logo/favicon.png') }}" alt="logo">
             </div>
             <h1 class="text-2xl font-bold tracking-tight text-slate-900">Selesaikan Pembayaran</h1>
             <p class="text-xs text-slate-500 mt-1">Lanjutkan transaksi untuk mengaktifkan langganan Anda.</p>
@@ -103,35 +103,54 @@
             const button = document.getElementById('pay-button');
             button.disabled = true;
             button.innerHTML = `
-                <svg class="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                </svg>
-                Memproses Pembayaran...
-            `;
+            <svg class="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
+            Memproses Pembayaran...
+        `;
 
             snap.pay('{{ $snapToken }}', {
                 onSuccess: function(result) {
-                    window.location.href = "{{ route('payment.finish') }}";
+                    // ✅ Kirim data lengkap ke finish
+                    let params = new URLSearchParams({
+                        order_id: result.order_id || '{{ $orderId }}',
+                        transaction_id: result.transaction_id || result.order_id ||
+                            '{{ $orderId }}',
+                        transaction_status: result.transaction_status || 'settlement',
+                        payment_type: result.payment_type || '',
+                    });
+
+                    window.location.href = "{{ route('payment.finish') }}?" + params.toString();
                 },
                 onPending: function(result) {
                     alert('Pembayaran Anda sedang diproses. Kami akan mengupdate status secara otomatis.');
-                    window.location.href = "{{ route('status.langganan') ?? '/' }}";
+
+                    // ✅ Kirim data pending
+                    let params = new URLSearchParams({
+                        order_id: result.order_id || '{{ $orderId }}',
+                        transaction_id: result.transaction_id || result.order_id ||
+                            '{{ $orderId }}',
+                        transaction_status: 'pending',
+                        payment_type: result.payment_type || '',
+                    });
+
+                    window.location.href = "{{ route('payment.finish') }}?" + params.toString();
                 },
                 onError: function(result) {
                     alert('Pembayaran gagal: ' + (result.status_message || 'Silakan coba lagi.'));
                     button.disabled = false;
                     button.innerHTML = `
-                        <span>Bayar Sekarang</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7-7 7"/></svg>
-                    `;
+                    <span>Bayar Sekarang</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7-7 7"/></svg>
+                `;
                 },
                 onClose: function() {
                     button.disabled = false;
                     button.innerHTML = `
-                        <span>Bayar Sekarang</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7-7 7"/></svg>
-                    `;
+                    <span>Bayar Sekarang</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7-7 7"/></svg>
+                `;
                 }
             });
         }

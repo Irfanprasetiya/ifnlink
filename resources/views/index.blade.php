@@ -7,18 +7,19 @@
     <title>Omzetly.id — Manajemen Transaksi Agen Digital Berbasis Cloud</title>
     <meta name="description"
         content="Platform cloud untuk owner agen digital: catat transaksi, hitung laba otomatis, dan pantau performa cabang dari mana saja." />
-    <link rel="icon" href="{{ asset('assets/images/omzetly.png') }}" type="image/png">
+    {{-- <link rel="icon" href="{{ asset('assets/images/') }}" type="image/svg+xml"> --}}
+    <link rel="manifest" href="{{ asset('assets/images/favicon.png') }}" />
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
         rel="stylesheet" />
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['Poppins', 'ui-sans-serif', 'system-ui']
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui']
                     },
                     colors: {
                         ink: '#0f172a',
@@ -43,7 +44,7 @@
     <style>
         html,
         body {
-            font-family: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+            font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
             background-color: #ffffff;
             color: #0f172a;
         }
@@ -74,13 +75,23 @@
                 opacity: 0;
             }
         }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
     </style>
 </head>
 
-<body class="antialiased selection:bg-blue-600 selection:text-white">
+<body class="bg-white text-slate-900 antialiased selection:bg-blue-600 selection:text-white">
     <!-- NAV -->
     <header id="nav" class="fixed inset-x-0 top-0 z-50 transition-all duration-300">
-        <div class="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div
+            class="mx-auto mt-3 flex h-20 max-w-7xl items-center justify-between rounded-2xl border border-transparent px-4 sm:mt-4 sm:px-6 lg:px-8">
             <a href="#beranda" class="flex items-center gap-2.5 group">
                 <div
                     class="h-10 w-10 md:h-12 md:w-12 rounded-xl overflow-hidden shadow-md transition group-hover:scale-105 flex items-center justify-center bg-white">
@@ -92,7 +103,7 @@
             </a>
 
             <!-- Menu Desktop: text-sm diubah menjadi text-base (16px) -->
-            <nav class="hidden md:flex items-center gap-6 lg:gap-8 text-base font-semibold text-slate-600">
+            <nav class="hidden items-center gap-6 text-sm font-medium text-slate-600 md:flex lg:gap-8">
                 <a href="#beranda" class="hover:text-brand transition">Beranda</a>
                 <a href="#fitur" class="hover:text-brand transition">Fitur Utama</a>
                 <a href="#tampilan" class="hover:text-brand transition">Tampilan</a>
@@ -100,19 +111,19 @@
                 <a href="#harga" class="hover:text-brand transition">Harga</a>
             </nav>
 
-            <div class="hidden md:flex items-center gap-3">
+            <div class="hidden items-center gap-3 md:flex">
                 <!-- Tombol Desktop: text-sm diubah menjadi text-base -->
                 <a href="{{ route('login') }}"
-                    class="px-4 py-2 text-base font-semibold text-slate-700 hover:text-brand transition">Masuk</a>
+                    class="rounded-xl px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 hover:text-brand">Masuk</a>
                 <a href="{{ route('agen.register') }}"
-                    class="rounded-xl bg-slate-900 px-5 py-2.5 text-base font-semibold text-white shadow-md hover:bg-slate-800 transition">
+                    class="rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-soft transition hover:-translate-y-0.5 hover:bg-slate-800">
                     Coba Gratis
                 </a>
             </div>
 
             <!-- Mobile Menu Toggle -->
             <button id="menuBtn"
-                class="md:hidden p-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 focus:outline-none">
+                class="rounded-2xl border border-slate-200 bg-white p-2.5 text-slate-700 shadow-soft focus:outline-none md:hidden">
                 <svg id="icon-menu" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16">
                     </path>
@@ -126,20 +137,28 @@
 
         <!-- Mobile Nav Menu -->
         <div id="mobileMenu"
-            class="hidden md:hidden absolute inset-x-0 top-20 glass border-b border-slate-200 shadow-2xl">
+            class="absolute inset-x-4 top-24 hidden rounded-2xl border border-slate-200 bg-white/95 shadow-[0_30px_80px_-30px_rgba(15,23,42,0.28)] backdrop-blur-xl md:hidden sm:inset-x-6">
             <!-- Menu Mobile: text-base diubah menjadi text-lg (18px) -->
-            <div class="px-6 py-6 flex flex-col gap-2 text-lg font-semibold">
-                <a href="#beranda" class="py-2.5 text-slate-700 border-b border-slate-100">Beranda</a>
-                <a href="#fitur" class="py-2.5 text-slate-700 border-b border-slate-100">Fitur Utama</a>
-                <a href="#tampilan" class="py-2.5 text-slate-700 border-b border-slate-100">Tampilan Aplikasi</a>
-                <a href="#testimoni" class="py-2.5 text-slate-700 border-b border-slate-100">Testimoni</a>
-                <a href="#harga" class="py-2.5 text-slate-700">Harga</a>
+            <div class="flex flex-col gap-2 px-5 py-5 text-base font-semibold">
+                <a href="#beranda"
+                    class="rounded-xl border border-transparent px-4 py-3 text-slate-700 transition hover:border-slate-200 hover:bg-slate-50">Beranda</a>
+                <a href="#fitur"
+                    class="rounded-xl border border-transparent px-4 py-3 text-slate-700 transition hover:border-slate-200 hover:bg-slate-50">Fitur
+                    Utama</a>
+                <a href="#tampilan"
+                    class="rounded-xl border border-transparent px-4 py-3 text-slate-700 transition hover:border-slate-200 hover:bg-slate-50">Tampilan
+                    Aplikasi</a>
+                <a href="#testimoni"
+                    class="rounded-xl border border-transparent px-4 py-3 text-slate-700 transition hover:border-slate-200 hover:bg-slate-50">Testimoni</a>
+                <a href="#harga"
+                    class="rounded-xl border border-transparent px-4 py-3 text-slate-700 transition hover:border-slate-200 hover:bg-slate-50">Harga</a>
 
-                <div class="mt-4 flex flex-col gap-3">
+                <div class="mt-4 flex flex-col gap-3 border-t border-slate-100 pt-4">
                     <a href="{{ route('login') }}"
-                        class="text-center py-3 rounded-xl bg-blue-50 text-brand font-bold">Masuk Akun</a>
+                        class="rounded-2xl bg-blue-50 px-4 py-3 text-center text-sm font-bold text-brand">Masuk Akun</a>
                     <a href="{{ route('agen.register') }}"
-                        class="text-center rounded-xl bg-slate-900 py-3 text-white shadow-md font-bold">Coba Gratis
+                        class="rounded-2xl bg-slate-900 py-3 text-center text-sm font-bold text-white shadow-soft">Coba
+                        Gratis
                         Sekarang</a>
                 </div>
             </div>
@@ -148,54 +167,56 @@
 
     <!-- HERO (ASIMETRIS LAYOUT) -->
     <section id="beranda"
-        class="relative overflow-hidden pt-32 pb-16 md:pt-40 md:pb-24 lg:pt-48 lg:pb-32 bg-slate-50/50">
+        class="relative overflow-hidden bg-[radial-gradient(circle_at_top_left,_rgba(96,165,250,0.16),_transparent_34%),linear-gradient(to_bottom,_rgba(248,250,252,0.95),_#ffffff)] pt-32 pb-20 md:pt-40 md:pb-28 lg:pt-48 lg:pb-36">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="grid lg:grid-cols-12 gap-12 items-center">
+            <div class="grid items-center gap-14 lg:grid-cols-12 lg:gap-16">
 
                 <!-- KIRI: Teks & CTA -->
-                <div class="lg:col-span-7 text-left">
+                <div class="lg:col-span-7">
                     <div
-                        class="inline-flex items-center gap-2 rounded-full bg-blue-50 border border-blue-200/60 px-4 py-1.5 text-xs font-bold text-blue-700 mb-6 shadow-sm">
+                        class="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-200/70 bg-white px-4 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-blue-700 shadow-soft">
                         <span class="h-2 w-2 rounded-full bg-blue-600 animate-pulse"></span>
                         Sistem Cloud Manajemen Agen No. 1
                     </div>
 
                     <h1
-                        class="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.15] md:leading-[1.12] min-h-[90px] md:min-h-[120px] lg:min-h-[140px]">
+                        class="min-h-[104px] max-w-3xl text-4xl font-extrabold tracking-tight text-slate-950 leading-tight md:min-h-[128px] md:text-5xl lg:min-h-[150px] lg:text-6xl">
                         Pusat Kendali <br />
                         {{-- Elemen untuk teks dinamis & kursor --}}
                         <span class="text-gradient" id="typed-text"></span><span
                             class="text-blue-600 animate-[blink_1s_step-end_infinite]">|</span>
                     </h1>
 
-                    <p class="mt-6 text-base md:text-lg text-slate-600 leading-relaxed max-w-xl">
+                    <p class="mt-6 max-w-2xl text-base leading-8 text-slate-600 md:text-lg">
                         Tinggalkan catatan manual. Pantau mutasi bank, hitung laba bersih otomatis, dan kelola banyak
                         cabang agen dalam satu platform cloud yang aman.
                     </p>
 
-                    <div class="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+                    <div class="mt-10 flex flex-col items-stretch gap-4 sm:flex-row sm:items-center">
                         <a href="#harga"
-                            class="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-primary px-8 py-4 text-sm md:text-base font-bold text-white shadow-lg shadow-blue-500/25 hover:opacity-95 transition-all">
+                            class="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-primary px-8 py-4 text-sm font-bold text-white shadow-[0_24px_60px_-24px_rgba(37,99,235,0.7)] transition-all hover:-translate-y-0.5 hover:opacity-95 md:text-base">
                             Mulai Gratis 14 Hari →
                         </a>
                         <a href="#fitur"
-                            class="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-300 bg-white px-8 py-4 text-sm md:text-base font-bold text-slate-700 hover:bg-slate-100 transition-all">
+                            class="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-300 bg-white px-8 py-4 text-sm font-bold text-slate-700 shadow-soft transition-all hover:-translate-y-0.5 hover:bg-slate-50 md:text-base">
                             Eksplor Fitur
                         </a>
                     </div>
 
-                    <p class="mt-6 text-[11px] md:text-xs text-slate-500 font-medium">
+                    <p class="mt-6 text-xs font-medium leading-relaxed text-slate-500 md:text-sm">
                         ✨ Tanpa kartu kredit &nbsp;·&nbsp; 🚀 Aktif dalam 2 menit &nbsp;·&nbsp; 🔒 Data terisolasi aman
                     </p>
                 </div>
 
                 <!-- KANAN: Floating Card Dashboard Minimalist -->
-                <div class="lg:col-span-5 hidden sm:block">
+                <div class="hidden sm:block lg:col-span-5">
                     <div class="relative">
-                        <div class="absolute -inset-4 rounded-3xl bg-blue-600/10 blur-2xl"></div>
+                        <div class="absolute -inset-5 rounded-[2rem] bg-blue-600/12 blur-3xl"></div>
                         <div
-                            class="relative rounded-3xl border border-slate-200/80 bg-white p-6 md:p-8 shadow-elegant">
-                            <div class="flex items-center justify-between pb-6 border-b border-slate-100">
+                            class="relative overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-elegant md:p-8">
+                            <div class="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-blue-50/70 to-transparent">
+                            </div>
+                            <div class="relative flex items-center justify-between border-b border-slate-100 pb-6">
                                 <div class="flex items-center gap-3">
                                     <div
                                         class="w-10 h-10 rounded-xl bg-blue-600 text-white font-bold grid place-items-center">
@@ -211,17 +232,17 @@
                                     Utama</span>
                             </div>
 
-                            <div class="mt-6 space-y-4">
-                                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                            <div class="relative mt-6 space-y-4">
+                                <div class="rounded-2xl border border-slate-100 bg-slate-50 p-5 shadow-soft">
                                     <span class="text-xs text-slate-500 font-medium">Saldo Rekening BRI Pusat</span>
                                     <div class="text-2xl font-extrabold text-slate-900 mt-1">Rp 45.280.000</div>
                                 </div>
                                 <div class="grid grid-cols-2 gap-4">
-                                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                                    <div class="rounded-2xl border border-slate-100 bg-slate-50 p-4 shadow-soft">
                                         <span class="text-xs text-slate-500 font-medium">Transaksi Hari Ini</span>
                                         <div class="text-lg font-bold text-slate-900 mt-1">142 Tx</div>
                                     </div>
-                                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                                    <div class="rounded-2xl border border-slate-100 bg-slate-50 p-4 shadow-soft">
                                         <span class="text-xs text-slate-500 font-medium">Estimasi Laba</span>
                                         <div class="text-lg font-bold text-emerald-600 mt-1">+Rp 850rb</div>
                                     </div>
@@ -229,7 +250,7 @@
                             </div>
 
                             <div
-                                class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 font-medium">
+                                class="mt-6 flex items-center justify-between border-t border-slate-100 pt-4 text-xs font-medium text-slate-500">
                                 <span>Perbarui terakhir: Barusan</span>
                                 <span class="text-blue-600 font-bold">Sistem Stabil</span>
                             </div>
@@ -242,25 +263,26 @@
     </section>
 
     <!-- STATS (MINIMALIST BAR) -->
-    <section class="bg-slate-900 text-white py-12">
+    <section class="bg-slate-950 py-14 text-white">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-4 text-center">
-                <div>
+            <div
+                class="grid grid-cols-2 gap-8 rounded-[2rem] border border-white/10 bg-white/5 px-6 py-8 text-center backdrop-blur-sm md:grid-cols-4 md:gap-4 md:px-10">
+                <div class="space-y-2">
                     <div class="text-2xl md:text-3xl font-extrabold text-blue-400">1.200+</div>
                     <div class="text-[10px] md:text-xs text-slate-400 uppercase tracking-widest mt-1.5 font-semibold">
                         Agen Aktif</div>
                 </div>
-                <div>
+                <div class="space-y-2">
                     <div class="text-2xl md:text-3xl font-extrabold text-blue-400">Rp 48M+</div>
                     <div class="text-[10px] md:text-xs text-slate-400 uppercase tracking-widest mt-1.5 font-semibold">
                         Volume Transaksi</div>
                 </div>
-                <div>
+                <div class="space-y-2">
                     <div class="text-2xl md:text-3xl font-extrabold text-blue-400">99.9%</div>
                     <div class="text-[10px] md:text-xs text-slate-400 uppercase tracking-widest mt-1.5 font-semibold">
                         Server Uptime</div>
                 </div>
-                <div>
+                <div class="space-y-2">
                     <div class="text-2xl md:text-3xl font-extrabold text-blue-400">4.9/5</div>
                     <div class="text-[10px] md:text-xs text-slate-400 uppercase tracking-widest mt-1.5 font-semibold">
                         Rating Pengguna</div>
@@ -270,15 +292,15 @@
     </section>
 
     <!-- SHOWCASE APLIKASI (SCREENSHOTS DENGAN TAB INTERAKTIF) -->
-    <section id="tampilan" class="py-20 md:py-32 bg-slate-50 overflow-hidden border-b border-slate-200">
+    <section id="tampilan" class="overflow-hidden border-b border-slate-200 bg-slate-50 py-24 md:py-32">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
             <span
-                class="text-xs font-bold uppercase tracking-widest text-blue-600 bg-blue-100 px-3 py-1.5 rounded-full border border-blue-200">Antarmuka
+                class="rounded-full border border-blue-200 bg-white px-4 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-blue-600 shadow-soft">Antarmuka
                 Sistem</span>
-            <h2 class="mt-6 text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900">
+            <h2 class="mt-6 text-3xl font-extrabold tracking-tight text-slate-900 md:text-4xl lg:text-5xl">
                 Desain Bersih. Mudah Dipahami.
             </h2>
-            <p class="mt-4 text-base md:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
+            <p class="mx-auto mt-5 max-w-2xl text-base leading-8 text-slate-600 md:text-lg">
                 Tampilan antarmuka yang modern dan intuitif. Dirancang khusus agar owner dan operator agen Anda bisa
                 langsung
                 paham penggunaannya dalam hitungan menit.
@@ -286,97 +308,109 @@
 
             <!-- Navigasi Tab Showcase -->
             <div
-                class="mt-12 flex items-center justify-start md:justify-center gap-3 overflow-x-auto pb-4 no-scrollbar snap-x">
+                class="no-scrollbar mt-12 flex items-center justify-start gap-3 overflow-x-auto pb-4 md:justify-center">
                 <button onclick="switchTab('admin')" id="btn-admin"
-                    class="tab-btn shrink-0 snap-center px-5 py-2.5 rounded-full text-sm font-bold transition-all bg-slate-900 text-white shadow-md">
+                    class="tab-btn shrink-0 rounded-full border border-transparent bg-slate-900 px-5 py-3 text-sm font-bold text-white shadow-soft transition-all">
                     Pusat Kendali (Admin)
                 </button>
                 <button onclick="switchTab('user')" id="btn-user"
-                    class="tab-btn shrink-0 snap-center px-5 py-2.5 rounded-full text-sm font-bold transition-all bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 hover:text-slate-600">
+                    class="tab-btn shrink-0 rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-600 shadow-soft transition-all hover:bg-slate-100 hover:text-slate-600">
                     Dashboard Kasir (User)
                 </button>
                 <button onclick="switchTab('laba')" id="btn-laba"
-                    class="tab-btn shrink-0 snap-center px-5 py-2.5 rounded-full text-sm font-bold transition-all bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 hover:text-slate-600">
+                    class="tab-btn shrink-0 rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-600 shadow-soft transition-all hover:bg-slate-100 hover:text-slate-600">
                     Laporan Laba Rugi
                 </button>
                 <button onclick="switchTab('transaksi')" id="btn-transaksi"
-                    class="tab-btn shrink-0 snap-center px-5 py-2.5 rounded-full text-sm font-bold transition-all bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 hover:text-slate-600">
+                    class="tab-btn shrink-0 rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-600 shadow-soft transition-all hover:bg-slate-100 hover:text-slate-600">
                     Input Transaksi
                 </button>
             </div>
 
             <!-- Kontainer Gambar -->
-            <div class="mt-8 relative mx-auto max-w-5xl">
+            <div class="relative mx-auto mt-10 max-w-6xl">
                 <!-- Efek shadow/glow di belakang gambar -->
                 <div
-                    class="absolute -inset-1 md:-inset-4 rounded-3xl bg-gradient-to-r from-blue-500 to-indigo-500 opacity-20 blur-2xl">
+                    class="absolute -inset-1 rounded-[2rem] bg-gradient-to-r from-blue-500/20 to-indigo-500/20 blur-3xl md:-inset-3">
                 </div>
 
                 <!-- 1. Screenshot Dashboard Admin -->
                 <!-- TODO: Ganti src dengan path file "Screenshot 2026-08-06 005032.png" -->
-                <img id="img-admin" src="{{ asset('assets/images/dashAdmin.png') }}"
-                    alt="Tampilan Dashboard Admin Omzetly"
-                    class="tab-img relative rounded-2xl border border-slate-200 shadow-2xl object-cover w-full transition-opacity duration-500 block">
+                <div
+                    class="tab-panel relative block overflow-hidden rounded-[1.75rem] border border-slate-200/60 bg-white p-2 shadow-[0_24px_60px_-28px_rgba(15,23,42,0.22)] md:p-2.5">
+                    <img id="img-admin" src="{{ asset('assets/images/dashAdmin.png') }}"
+                        alt="Tampilan Dashboard Admin Omzetly"
+                        class="tab-img aspect-[16/10] w-full rounded-[1.35rem] bg-slate-50 object-contain object-top shadow-soft transition-opacity duration-500">
+                </div>
 
                 <!-- 2. Screenshot Dashboard User -->
                 <!-- TODO: Ganti src dengan screenshot dashboard saat login sebagai operator cabang -->
-                <img id="img-user" src="{{ asset('assets/images/dashUser.png') }}"
-                    alt="Tampilan Dashboard User Omzetly"
-                    class="tab-img relative rounded-2xl border border-slate-200 shadow-2xl object-cover w-full transition-opacity duration-500 hidden">
+                <div
+                    class="tab-panel relative hidden overflow-hidden rounded-[1.75rem] border border-slate-200/60 bg-white p-2 shadow-[0_24px_60px_-28px_rgba(15,23,42,0.22)] md:p-2.5">
+                    <img id="img-user" src="{{ asset('assets/images/dashUser.png') }}"
+                        alt="Tampilan Dashboard User Omzetly"
+                        class="tab-img aspect-[16/10] w-full rounded-[1.35rem] bg-slate-50 object-contain object-top shadow-soft transition-opacity duration-500">
+                </div>
 
                 <!-- 3. Screenshot Laba Rugi -->
                 <!-- TODO: Ganti src dengan screenshot tabel laporan laba rugi yang sudah kita perbaiki desainnya -->
-                <img id="img-laba" src="{{ asset('assets/images/labaRugi.png') }}"
-                    alt="Tampilan Laporan Laba Rugi Omzetly"
-                    class="tab-img relative rounded-2xl border border-slate-200 shadow-2xl object-cover w-full transition-opacity duration-500 hidden">
+                <div
+                    class="tab-panel relative hidden overflow-hidden rounded-[1.75rem] border border-slate-200/60 bg-white p-2 shadow-[0_24px_60px_-28px_rgba(15,23,42,0.22)] md:p-2.5">
+                    <img id="img-laba" src="{{ asset('assets/images/labaRugi.png') }}"
+                        alt="Tampilan Laporan Laba Rugi Omzetly"
+                        class="tab-img aspect-[16/10] w-full rounded-[1.35rem] bg-slate-50 object-contain object-top shadow-soft transition-opacity duration-500">
+                </div>
 
                 <!-- 4. Screenshot Input Transaksi -->
                 <!-- TODO: Ganti src dengan form tempat operator memasukkan nominal transaksi/tarik tunai -->
-                <img id="img-transaksi" src="{{ asset('assets/images/trxser.png') }}"
-                    alt="Tampilan Input Transaksi Omzetly"
-                    class="tab-img relative rounded-2xl border border-slate-200 shadow-2xl object-cover w-full transition-opacity duration-500 hidden">
+                <div
+                    class="tab-panel relative hidden overflow-hidden rounded-[1.75rem] border border-slate-200/60 bg-white p-2 shadow-[0_24px_60px_-28px_rgba(15,23,42,0.22)] md:p-2.5">
+                    <img id="img-transaksi" src="{{ asset('assets/images/trxser.png') }}"
+                        alt="Tampilan Input Transaksi Omzetly"
+                        class="tab-img aspect-[16/10] w-full rounded-[1.35rem] bg-slate-50 object-contain object-top shadow-soft transition-opacity duration-500">
+                </div>
             </div>
         </div>
     </section>
 
     <!-- FEATURES (BENTO GRID LAYOUT) -->
-    <section id="fitur" class="py-20 md:py-32 bg-slate-50/50">
+    <section id="fitur" class="bg-slate-50/60 py-24 md:py-32">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="max-w-2xl mx-auto mb-12 md:mb-16 text-center">
+            <div class="mx-auto mb-14 max-w-2xl text-center md:mb-16">
                 <span
-                    class="inline-block text-xs font-bold uppercase tracking-widest text-blue-600 bg-blue-50 px-3 py-1 rounded-full">Arsitektur
+                    class="inline-block rounded-full border border-blue-200 bg-white px-4 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-blue-600 shadow-soft">Arsitektur
                     Modern</span>
-                <h2 class="mt-5 text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900">
+                <h2 class="mt-6 text-3xl font-extrabold tracking-tight text-slate-900 md:text-4xl lg:text-5xl">
                     Dirancang Untuk Kecepatan Operasional.
                 </h2>
-                <p class="mt-4 text-base md:text-lg text-slate-600 leading-relaxed mx-auto max-w-xl">
+                <p class="mx-auto mt-5 max-w-xl text-base leading-8 text-slate-600 md:text-lg">
                     Fitur dirancang secara spesifik berdasarkan alur kerja nyata di lapangan agen BRILink & retail,
                     bukan teori semata.
                 </p>
             </div>
 
             <!-- Bento Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
 
                 <!-- Box Besar 1 (Span 2) -->
                 <div
-                    class="md:col-span-2 rounded-3xl border border-slate-200 bg-white p-8 md:p-10 flex flex-col justify-between relative overflow-hidden shadow-sm hover:shadow-md transition">
+                    class="relative flex flex-col justify-between overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white p-8 shadow-soft transition hover:-translate-y-1 hover:shadow-[0_28px_70px_-35px_rgba(15,23,42,0.3)] md:col-span-2 md:p-10">
                     <div
                         class="absolute right-0 top-0 w-64 h-64 bg-blue-50 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20">
                     </div>
                     <div class="relative z-10">
                         <span
-                            class="text-[11px] md:text-xs font-bold text-blue-600 bg-blue-50 border border-blue-100 px-3 py-1.5 rounded-md">Multi-Tenancy
+                            class="rounded-xl border border-blue-100 bg-blue-50 px-3 py-1.5 text-[11px] font-bold text-blue-600 md:text-xs">Multi-Tenancy
                             & Cabang</span>
-                        <h3 class="text-2xl md:text-3xl font-bold text-slate-900 mt-5 leading-tight">Kelola Banyak
+                        <h3 class="mt-5 text-2xl font-bold leading-tight text-slate-900 md:text-3xl">Kelola Banyak
                             Cabang Dalam Satu Akun Utama
                         </h3>
-                        <p class="mt-3 text-base text-slate-600 max-w-lg leading-relaxed">Setiap cabang memiliki data
+                        <p class="mt-4 max-w-lg text-base leading-8 text-slate-600">Setiap cabang memiliki data
                             terisolasi. Owner dapat
                             memantau kas masuk dan keluar secara terpisah maupun gabungan secara instan.</p>
                     </div>
                     <div
-                        class="mt-8 pt-6 border-t border-slate-100 flex items-center gap-6 text-sm font-semibold text-slate-700 relative z-10">
+                        class="relative z-10 mt-8 flex flex-wrap items-center gap-5 border-t border-slate-100 pt-6 text-sm font-semibold text-slate-700">
                         <span class="flex items-center gap-1.5"><span class="text-blue-600">✓</span> Cabang Tak
                             Terbatas</span>
                         <span class="flex items-center gap-1.5"><span class="text-blue-600">✓</span> Kontrol Akses
@@ -386,45 +420,45 @@
 
                 <!-- Box Kecil 2 -->
                 <div
-                    class="rounded-3xl border border-slate-200 bg-white p-8 flex flex-col justify-between shadow-sm hover:shadow-md transition">
+                    class="flex flex-col justify-between rounded-[2rem] border border-slate-200/80 bg-white p-8 shadow-soft transition hover:-translate-y-1 hover:shadow-[0_28px_70px_-35px_rgba(15,23,42,0.3)]">
                     <div>
                         <div
                             class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-6 font-bold text-2xl">
                             ⚡</div>
-                        <h3 class="text-xl md:text-2xl font-bold text-slate-900">Laba Bersih Otomatis</h3>
-                        <p class="mt-3 text-base text-slate-600 leading-relaxed">Sistem otomatis memotong modal admin
+                        <h3 class="text-xl font-bold text-slate-900 md:text-2xl">Laba Bersih Otomatis</h3>
+                        <p class="mt-4 text-base leading-8 text-slate-600">Sistem otomatis memotong modal admin
                             bank dan mencatat keuntungan bersih tanpa kalkulator.</p>
                     </div>
                 </div>
 
                 <!-- Box Kecil 3 -->
                 <div
-                    class="rounded-3xl border border-slate-200 bg-white p-8 flex flex-col justify-between shadow-sm hover:shadow-md transition">
+                    class="flex flex-col justify-between rounded-[2rem] border border-slate-200/80 bg-white p-8 shadow-soft transition hover:-translate-y-1 hover:shadow-[0_28px_70px_-35px_rgba(15,23,42,0.3)]">
                     <div>
                         <div
                             class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mb-6 font-bold text-2xl">
                             📊</div>
-                        <h3 class="text-xl md:text-2xl font-bold text-slate-900">Mutasi & Saldo Bank</h3>
-                        <p class="mt-3 text-base text-slate-600 leading-relaxed">Pantau kecocokan saldo awal dan akhir
+                        <h3 class="text-xl font-bold text-slate-900 md:text-2xl">Mutasi & Saldo Bank</h3>
+                        <p class="mt-4 text-base leading-8 text-slate-600">Pantau kecocokan saldo awal dan akhir
                             hari di setiap rekening bank dengan laporan akurat.</p>
                     </div>
                 </div>
 
                 <!-- Box Besar 4 (Span 2) -->
                 <div
-                    class="md:col-span-2 rounded-3xl border border-slate-800 bg-gradient-to-br from-slate-900 to-blue-950 p-8 md:p-10 text-white flex flex-col justify-between shadow-lg">
+                    class="flex flex-col justify-between rounded-[2rem] border border-slate-800 bg-gradient-to-br from-slate-900 to-blue-950 p-8 text-white shadow-[0_28px_70px_-35px_rgba(15,23,42,0.55)] md:col-span-2 md:p-10">
                     <div>
                         <span
-                            class="text-[11px] md:text-xs font-bold text-blue-300 bg-blue-900/50 border border-blue-800 px-3 py-1.5 rounded-md">Cloud
+                            class="rounded-xl border border-blue-800 bg-blue-900/50 px-3 py-1.5 text-[11px] font-bold text-blue-300 md:text-xs">Cloud
                             Infrastructure</span>
-                        <h3 class="text-2xl md:text-3xl font-bold mt-5 leading-tight">Akses Dari Mana Saja, Tanpa
+                        <h3 class="mt-5 text-2xl font-bold leading-tight md:text-3xl">Akses Dari Mana Saja, Tanpa
                             Instalasi Rumit</h3>
-                        <p class="mt-3 text-base text-slate-300 max-w-lg leading-relaxed">Berjalan sepenuhnya di
+                        <p class="mt-4 max-w-lg text-base leading-8 text-slate-300">Berjalan sepenuhnya di
                             browser cloud. Aman dari risiko kehilangan data meskipun perangkat (HP/Komputer) Anda rusak
                             atau hilang.</p>
                     </div>
                     <div
-                        class="mt-8 pt-6 border-t border-slate-700/50 flex flex-wrap items-center gap-6 text-sm text-slate-300 font-medium">
+                        class="mt-8 flex flex-wrap items-center gap-6 border-t border-slate-700/50 pt-6 text-sm font-medium text-slate-300">
                         <span class="flex items-center gap-2">🛡️ Enkripsi Keamanan</span>
                         <span class="flex items-center gap-2">☁️ Auto Backup Harian</span>
                     </div>
@@ -435,23 +469,23 @@
     </section>
 
     <!-- TESTIMONI ("Apa Kata Mereka") -->
-    <section id="testimoni" class="py-20 md:py-32 border-y border-slate-200/60 bg-white">
+    <section id="testimoni" class="border-y border-slate-200/60 bg-white py-24 md:py-32">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16 md:mb-20">
+            <div class="mb-16 text-center md:mb-20">
                 <span
-                    class="text-xs font-bold uppercase tracking-widest text-blue-600 bg-blue-50 px-3 py-1 rounded-full">Testimoni</span>
-                <h2 class="mt-5 text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900">
+                    class="rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-blue-600">Testimoni</span>
+                <h2 class="mt-6 text-3xl font-extrabold tracking-tight text-slate-900 md:text-4xl lg:text-5xl">
                     Apa Kata Mereka?
                 </h2>
-                <p class="mt-4 text-base md:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
+                <p class="mx-auto mt-5 max-w-2xl text-base leading-8 text-slate-600 md:text-lg">
                     Ribuan pemilik agen dan bisnis ritel digital telah beralih ke Omzetly untuk menyederhanakan
                     pembukuan mereka.
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-3 lg:gap-8">
                 <!-- Kartu Testimoni 1 -->
-                <div class="bg-slate-50/50 rounded-3xl p-8 border border-slate-200">
+                <div class="rounded-[2rem] border border-slate-200/80 bg-slate-50/70 p-8 shadow-soft">
                     <div class="flex text-amber-400 mb-5 text-lg gap-0.5">
                         <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
                     </div>
@@ -472,7 +506,7 @@
                 </div>
 
                 <!-- Kartu Testimoni 2 -->
-                <div class="bg-slate-50/50 rounded-3xl p-8 border border-slate-200">
+                <div class="rounded-[2rem] border border-slate-200/80 bg-slate-50/70 p-8 shadow-soft">
                     <div class="flex text-amber-400 mb-5 text-lg gap-0.5">
                         <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
                     </div>
@@ -493,7 +527,7 @@
                 </div>
 
                 <!-- Kartu Testimoni 3 -->
-                <div class="bg-slate-50/50 rounded-3xl p-8 border border-slate-200">
+                <div class="rounded-[2rem] border border-slate-200/80 bg-slate-50/70 p-8 shadow-soft">
                     <div class="flex text-amber-400 mb-5 text-lg gap-0.5">
                         <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
                     </div>
@@ -516,17 +550,17 @@
     </section>
 
     <!-- SOLUSI -->
-    <section id="tentang" class="py-20 md:py-32 bg-slate-50/50">
+    <section id="tentang" class="bg-slate-50/60 py-24 md:py-32">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            <div class="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
                 <div>
                     <span
-                        class="text-xs font-bold uppercase tracking-widest text-blue-600 bg-blue-50 px-3 py-1 rounded-full">Transformasi
+                        class="rounded-full border border-blue-200 bg-white px-4 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-blue-600 shadow-soft">Transformasi
                         Digital</span>
-                    <h2 class="mt-5 text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">
+                    <h2 class="mt-6 text-3xl font-extrabold tracking-tight leading-tight text-slate-900 md:text-4xl">
                         Waktunya Beralih Dari Buku Tulis Ke Sistem Cloud.
                     </h2>
-                    <p class="mt-4 text-base md:text-lg text-slate-600 leading-relaxed">
+                    <p class="mt-5 text-base leading-8 text-slate-600 md:text-lg">
                         Banyak owner agen rugi waktu karena harus mencocokkan catatan kertas operator di malam hari.
                         Dengan Omzetly, seluruh mutasi terekam detik itu juga secara transparan.
                     </p>
@@ -545,26 +579,27 @@
                         </div>
                     </div>
                 </div>
-                <div class="bg-white rounded-3xl p-6 md:p-8 border border-slate-200 shadow-xl relative">
+                <div
+                    class="relative rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-[0_28px_70px_-35px_rgba(15,23,42,0.28)] md:p-8">
                     <div
-                        class="absolute inset-0 bg-gradient-to-tr from-blue-50 to-transparent opacity-50 rounded-3xl pointer-events-none">
+                        class="pointer-events-none absolute inset-0 rounded-[2rem] bg-gradient-to-tr from-blue-50 to-transparent opacity-50">
                     </div>
-                    <div class="text-sm font-bold text-slate-900 mb-5 pb-3 border-b border-slate-100 relative z-10">
+                    <div class="relative z-10 mb-5 border-b border-slate-100 pb-3 text-sm font-bold text-slate-900">
                         Aktivitas Sistem
                         Real-Time</div>
-                    <div class="space-y-4 relative z-10">
+                    <div class="relative z-10 space-y-4">
                         <div
-                            class="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 border border-slate-100 text-xs md:text-sm shadow-sm">
+                            class="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 p-4 text-xs shadow-soft md:text-sm">
                             <span class="font-bold text-slate-700">Cabang Utama — Transfer BRI</span>
                             <span class="text-emerald-600 font-extrabold">+Rp 2.500.000</span>
                         </div>
                         <div
-                            class="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 border border-slate-100 text-xs md:text-sm shadow-sm">
+                            class="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 p-4 text-xs shadow-soft md:text-sm">
                             <span class="font-bold text-slate-700">Cabang II — Tarik Tunai Mandiri</span>
                             <span class="text-blue-600 font-extrabold">+Rp 1.000.000</span>
                         </div>
                         <div
-                            class="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 border border-slate-100 text-xs md:text-sm shadow-sm">
+                            class="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 p-4 text-xs shadow-soft md:text-sm">
                             <span class="font-bold text-slate-700">Cabang Utama — Setor Tunai BCA</span>
                             <span class="text-emerald-600 font-extrabold">+Rp 5.000.000</span>
                         </div>
@@ -575,27 +610,27 @@
     </section>
 
     <!-- PRICING -->
-    <section id="harga" class="py-20 md:py-32 border-t border-slate-200/60 bg-white">
+    <section id="harga" class="border-t border-slate-200/60 bg-white py-24 md:py-32">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto max-w-2xl text-center mb-16 md:mb-20">
+            <div class="mx-auto mb-16 max-w-2xl text-center md:mb-20">
                 <span
-                    class="text-xs font-bold uppercase tracking-widest text-blue-600 bg-blue-50 px-3 py-1 rounded-full">Paket
+                    class="rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-blue-600">Paket
                     Langganan</span>
-                <h2 class="mt-5 text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900">
+                <h2 class="mt-6 text-3xl font-extrabold tracking-tight text-slate-900 md:text-4xl lg:text-5xl">
                     Investasi Transparan
                 </h2>
-                <p class="mt-4 text-base md:text-lg text-slate-600 leading-relaxed">Pilih kapasitas yang sesuai dengan
+                <p class="mt-5 text-base leading-8 text-slate-600 md:text-lg">Pilih kapasitas yang sesuai dengan
                     skala bisnis agen Anda hari ini tanpa biaya tersembunyi.</p>
             </div>
 
-            <div class="flex flex-col md:flex-row justify-center items-stretch gap-8 mx-auto max-w-5xl">
+            <div class="mx-auto flex max-w-5xl flex-col items-stretch justify-center gap-8 md:flex-row">
                 @forelse($plans as $plan)
                     @if ($plan->harga == $plans->max('harga') && $plan->harga > 0)
                         <!-- Paket Populer -->
                         <div
-                            class="w-full md:w-1/2 flex flex-col rounded-3xl bg-slate-900 p-8 md:p-10 text-white shadow-2xl relative transform md:-translate-y-4">
+                            class="relative flex w-full flex-col rounded-[2rem] bg-slate-900 p-8 text-white shadow-[0_32px_90px_-35px_rgba(15,23,42,0.7)] md:w-1/2 md:-translate-y-4 md:p-10">
                             <span
-                                class="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-primary px-5 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider shadow-md">Paling
+                                class="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-primary px-5 py-2 text-[11px] font-bold uppercase tracking-[0.18em] shadow-soft">Paling
                                 Diminati</span>
                             <div class="text-xl font-bold text-blue-400 mt-2">{{ $plan->nama_paket }}</div>
                             <div class="mt-4 flex items-baseline gap-1.5">
@@ -603,10 +638,10 @@
                                     {{ number_format($plan->harga, 0, ',', '.') }}</span>
                                 <span class="text-sm font-medium text-slate-400">/ bln</span>
                             </div>
-                            <p class="mt-4 text-base text-slate-300 leading-relaxed">
+                            <p class="mt-4 text-base leading-8 text-slate-300">
                                 {{ $plan->deskripsi ?? 'Untuk agen dengan kebutuhan sistem multi-cabang lengkap.' }}
                             </p>
-                            <ul class="mt-8 space-y-4 text-base text-slate-200 flex-1">
+                            <ul class="mt-8 flex-1 space-y-4 text-base text-slate-200">
                                 @if (is_array($plan->fitur))
                                     @foreach ($plan->fitur as $fitur)
                                         <li class="flex items-start gap-3">
@@ -616,14 +651,14 @@
                                 @endif
                             </ul>
                             <a href="{{ route('agen.register') }}"
-                                class="mt-10 block w-full rounded-2xl bg-blue-600 py-4 text-center text-base font-bold text-white hover:bg-blue-500 transition shadow-lg shadow-blue-500/25">
+                                class="mt-10 block w-full rounded-2xl bg-blue-600 py-4 text-center text-base font-bold text-white shadow-[0_24px_60px_-24px_rgba(59,130,246,0.7)] transition hover:-translate-y-0.5 hover:bg-blue-500">
                                 Pilih Paket Ini
                             </a>
                         </div>
                     @else
                         <!-- Paket Standar / Gratis -->
                         <div
-                            class="w-full md:w-1/2 flex flex-col rounded-3xl border border-slate-200 bg-white p-8 md:p-10 shadow-xl shadow-slate-200/50 hover:border-slate-300 transition-colors duration-300">
+                            class="flex w-full flex-col rounded-[2rem] border border-slate-200/80 bg-white p-8 shadow-[0_28px_70px_-35px_rgba(15,23,42,0.22)] transition duration-300 hover:-translate-y-1 hover:border-slate-300 md:w-1/2 md:p-10">
                             <div class="text-xl font-bold text-slate-900">{{ $plan->nama_paket }}</div>
                             <div class="mt-4 flex items-baseline gap-1.5">
                                 <span class="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900">
@@ -633,10 +668,10 @@
                                     <span class="text-sm font-medium text-slate-500">/ bln</span>
                                 @endif
                             </div>
-                            <p class="mt-4 text-base text-slate-600 leading-relaxed">
+                            <p class="mt-4 text-base leading-8 text-slate-600">
                                 {{ $plan->deskripsi ?? 'Cocok untuk mulai mengelola operasional dasar.' }}
                             </p>
-                            <ul class="mt-8 space-y-4 text-base text-slate-700 flex-1 font-medium">
+                            <ul class="mt-8 flex-1 space-y-4 text-base font-medium text-slate-700">
                                 @if (is_array($plan->fitur))
                                     @foreach ($plan->fitur as $fitur)
                                         <li class="flex items-start gap-3">
@@ -646,7 +681,7 @@
                                 @endif
                             </ul>
                             <a href="{{ route('agen.register') }}"
-                                class="mt-10 block w-full rounded-2xl bg-slate-900 py-4 text-center text-base font-bold text-white shadow-md hover:bg-slate-800 transition">
+                                class="mt-10 block w-full rounded-2xl bg-slate-900 py-4 text-center text-base font-bold text-white shadow-soft transition hover:-translate-y-0.5 hover:bg-slate-800">
                                 Mulai Sekarang
                             </a>
                         </div>
@@ -659,14 +694,14 @@
     </section>
 
     <!-- FAQ -->
-    <section id="faq" class="py-20 md:py-32 bg-slate-50/50 border-t border-slate-200/60">
+    <section id="faq" class="border-t border-slate-200/60 bg-slate-50/60 py-24 md:py-32">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12 md:mb-16">
+            <div class="mb-12 text-center md:mb-16">
                 <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">Pertanyaan Umum</h2>
             </div>
             <div class="space-y-4 md:space-y-6">
                 <details
-                    class="group rounded-2xl border border-slate-200 bg-white p-6 md:p-8 shadow-sm open:border-blue-300 transition-colors"
+                    class="group rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-soft transition-colors open:border-blue-300 md:p-8"
                     open>
                     <summary
                         class="flex cursor-pointer items-center justify-between font-bold text-slate-800 text-base md:text-lg">
@@ -679,7 +714,7 @@
                         batasi sesuai kebutuhan.</p>
                 </details>
                 <details
-                    class="group rounded-2xl border border-slate-200 bg-white p-6 md:p-8 shadow-sm open:border-blue-300 transition-colors">
+                    class="group rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-soft transition-colors open:border-blue-300 md:p-8">
                     <summary
                         class="flex cursor-pointer items-center justify-between font-bold text-slate-800 text-base md:text-lg">
                         Bisakah diakses menggunakan handphone?
@@ -695,13 +730,14 @@
     </section>
 
     <!-- FOOTER -->
-    <footer class="border-t border-slate-200 bg-slate-900 text-white py-16 md:py-20">
+    <footer class="border-t border-slate-200 bg-slate-950 py-16 text-white md:py-20">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-12 lg:gap-16 pb-12 border-b border-slate-800">
+            <div
+                class="grid grid-cols-1 gap-12 rounded-[2rem] border border-white/10 bg-white/5 p-8 pb-10 md:grid-cols-12 lg:gap-16 lg:p-10">
 
                 <!-- Sisi Kiri: Brand & Live Status Badge -->
                 <div class="md:col-span-5 lg:col-span-6 flex flex-col justify-between">
-                    <div>
+                    <div class="space-y-6">
                         <div class="flex items-center gap-2.5">
                             <div
                                 class="h-10 w-10 md:h-12 md:w-12 rounded-xl overflow-hidden shadow-md bg-white flex items-center justify-center">
@@ -711,7 +747,7 @@
                             <span class="font-extrabold text-white text-xl md:text-2xl tracking-tight">Omzetly<span
                                     class="text-blue-500">.id</span></span>
                         </div>
-                        <p class="mt-6 text-sm md:text-base text-slate-400 max-w-sm leading-relaxed">
+                        <p class="max-w-sm text-sm leading-7 text-slate-400 md:text-base">
                             Platform cloud mutakhir untuk pencatatan transaksi, manajemen kas multi-cabang, dan
                             kalkulasi laba otomatis bagi agen digital.
                         </p>
@@ -719,7 +755,7 @@
 
                     <!-- Indikator Server Live -->
                     <div
-                        class="mt-8 md:mt-10 inline-flex items-center gap-3 rounded-full bg-slate-800/80 border border-slate-700/60 px-5 py-2.5 text-xs md:text-sm font-medium text-slate-300 w-fit backdrop-blur-sm">
+                        class="mt-8 inline-flex w-fit items-center gap-3 rounded-full border border-slate-700/60 bg-slate-800/80 px-5 py-2.5 text-xs font-medium text-slate-300 backdrop-blur-sm md:mt-10 md:text-sm">
                         <span class="relative flex h-3 w-3">
                             <span
                                 class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -766,7 +802,7 @@
 
             <!-- Bagian Bawah: Copyright -->
             <div
-                class="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs md:text-sm text-slate-400 font-medium">
+                class="mt-8 flex flex-col items-center justify-between gap-4 text-xs font-medium text-slate-400 md:text-sm sm:flex-row">
                 <p>&copy; 2026 Omzetly.id. Seluruh hak cipta dilindungi undang-undang.</p>
                 <p class="flex items-center gap-1.5">
                     Dibuat dengan presisi untuk <span class="text-white font-semibold">Agen Indonesia</span> 🇮🇩
@@ -777,10 +813,10 @@
 
     <script>
         function switchTab(tabId) {
-            // Sembunyikan semua gambar
-            document.querySelectorAll('.tab-img').forEach(img => {
-                img.classList.add('hidden');
-                img.classList.remove('block');
+            // Sembunyikan semua panel gambar
+            document.querySelectorAll('.tab-panel').forEach(panel => {
+                panel.classList.add('hidden');
+                panel.classList.remove('block');
             });
 
             // Reset semua tombol ke gaya tidak aktif
@@ -791,8 +827,9 @@
 
             // Tampilkan gambar yang dipilih
             const selectedImg = document.getElementById('img-' + tabId);
-            selectedImg.classList.remove('hidden');
-            selectedImg.classList.add('block');
+            const selectedPanel = selectedImg.closest('.tab-panel');
+            selectedPanel.classList.remove('hidden');
+            selectedPanel.classList.add('block');
 
             // Ubah gaya tombol yang aktif
             const selectedBtn = document.getElementById('btn-' + tabId);
@@ -852,8 +889,9 @@
         // Navbar glass effect
         const nav = document.getElementById('nav');
         window.addEventListener('scroll', () => {
-            if (window.scrollY > 20) nav.classList.add('glass', 'border-b', 'border-slate-200', 'shadow-sm');
-            else nav.classList.remove('glass', 'border-b', 'border-slate-200', 'shadow-sm');
+            if (window.scrollY > 20) nav.firstElementChild.classList.add('glass', 'border-slate-200',
+                'shadow-soft');
+            else nav.firstElementChild.classList.remove('glass', 'border-slate-200', 'shadow-soft');
         });
 
         // Mobile Menu toggle

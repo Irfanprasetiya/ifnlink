@@ -76,8 +76,7 @@
                                 class="appearance-none block w-full pl-4 pr-10 py-2.5 text-sm border border-slate-300 rounded-lg bg-slate-50 text-slate-900 focus:ring-blue-500 focus:border-blue-500 transition-colors cursor-pointer font-medium outline-none">
                                 <option value="" disabled selected>-- Pilih cabang dan akun dari daftar --</option>
                                 @foreach ($cabangs as $cabang)
-                                    <optgroup label="🏢 {{ $cabang->nama_cabang }}"
-                                        class="font-bold text-slate-900 bg-white">
+                                    <optgroup label="{{ $cabang->nama_cabang }}" class="font-bold text-slate-900 bg-white">
                                         @foreach ($cabang->akuns as $akun)
                                             <option value="{{ $cabang->id }}|{{ $akun->id }}"
                                                 data-status="{{ $akun->status_saldo_awal }}"
@@ -90,10 +89,11 @@
                                 @endforeach
                             </select>
                             <div
-                                class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3.5 text-slate-400">
+                                <svg class="w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-200" fill="none"
+                                    stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M19 9l-7 7-7-7" />
+                                        d="M19 9l-7 7-7-7"></path>
                                 </svg>
                             </div>
                         </div>

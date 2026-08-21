@@ -36,8 +36,8 @@
         {{-- Logo & Header --}}
         <div class="text-center mb-8">
             <div
-                class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-50 border border-blue-100 mb-4 shadow-sm">
-                <img src="{{ asset('assets/images/omzetly.png') }}" alt="Omzetly" class="object-contain">
+                class="inline-flex items-center justify-center w-24 h-24 rounded-2xl bg-blue-50 border border-blue-100 mb-4 shadow-sm">
+                <img class="object-contain" src="{{ asset('assets/images/logo/favicon.png') }}" alt="logo">
             </div>
             <h1 class="text-2xl font-bold tracking-tight text-slate-900">Konfirmasi Checkout</h1>
             <p class="text-xs text-slate-500 mt-1">Selesaikan langganan untuk mengaktifkan fitur penuh.</p>
@@ -167,7 +167,16 @@
             function continuePayment() {
                 window.snap.pay('{{ $existingToken }}', {
                     onSuccess: function(result) {
-                        window.location.href = '{{ route('payment.finish') }}?order_id=' + result.order_id;
+                        // ✅ Kirim data lengkap
+                        let params = new URLSearchParams({
+                            order_id: result.order_id || '{{ $orderId }}',
+                            transaction_id: result.transaction_id || result.order_id ||
+                                '{{ $orderId }}',
+                            transaction_status: result.transaction_status || 'settlement',
+                            payment_type: result.payment_type || '',
+                        });
+
+                        window.location.href = '{{ route('payment.finish') }}?' + params.toString();
                     },
                     onPending: function(result) {
                         alert('Pembayaran pending, silakan selesaikan.');

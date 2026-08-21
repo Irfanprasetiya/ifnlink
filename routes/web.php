@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Developer\PembayaranController;
 use Illuminate\Support\Facades\Route;
 
 // ==================== Controllers: Public & Auth ====================
@@ -16,6 +17,7 @@ use App\Http\Controllers\Developer\PlanController as DeveloperPlanController;
 
 // ==================== Controllers: Admin & Super Admin ====================
 use App\Http\Controllers\AkunPengeluaranController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\BankController;
 use App\Http\Controllers\BankSaldoController;
 use App\Http\Controllers\BarangMasukController;
@@ -60,7 +62,9 @@ use App\Http\Controllers\SaldoGudangController;
 Route::get('/', [LandingController::class, 'index'])->name('landing.index');
 Route::get('/pricing', [LandingController::class, 'pricing'])->name('landing.pricing');
 
-Route::get('/register-agen', [TenantController::class, 'showRegister'])->name('agen.register');
+Route::get('/register-agen', [TenantController::class, 'showRegister'])
+    ->name('agen.register')
+    ->middleware('guest'); // ✅ Hanya untuk yang belum login
 Route::post('/register-agen', [TenantController::class, 'storeRegister'])->name('agen.store');
 
 Route::get('/checkout/{plan}', [PaymentController::class, 'checkout'])->name('checkout');
@@ -115,6 +119,12 @@ Route::middleware(['auth', 'role:developer'])->prefix('developer')->name('develo
         Route::delete('/{id}/force', [PelangganController::class, 'forceDelete'])->name('force-delete');
     });
 
+    // Riwayat Pembayaran
+    Route::get('/pembayaran', [PembayaranController::class, 'index'])->name('pembayaran.index');
+    // ✅ Export PDF - Harus sebelum route {id}
+    Route::get('/pembayaran/export/pdf', [PembayaranController::class, 'exportPdf'])->name('pembayaran.export.pdf');
+    Route::get('/pembayaran/{id}', [PembayaranController::class, 'show'])->name('pembayaran.show');
+
     Route::get('/backup', [BackupController::class, 'index'])->name('backup.index');
     Route::get('/backup/download', [BackupController::class, 'download'])->name('backup.download');
     Route::post('/backup/restore', [BackupController::class, 'restore'])->name('backup.restore');
@@ -147,6 +157,9 @@ Route::middleware(['auth', 'check.pending', 'check.tenant.active', 'role:super_a
 
     // Status Langganan & Upgrade
     Route::get('/status-langganan', [LanggananController::class, 'index'])->name('status.langganan');
+    Route::get('/status-langganan/cek-status', [LanggananController::class, 'cekStatus'])
+        ->name('status.langganan.cek')
+        ->middleware('auth');
     Route::get('/status-langganan/perpanjang', [LanggananController::class, 'perpanjang'])->name('status.perpanjang');
     Route::post('/status-langganan/upload-bukti', [LanggananController::class, 'uploadBukti'])->name('status.upload-bukti');
     Route::get('/status-langganan/invoice/{id}', [LanggananController::class, 'downloadInvoice'])->name('status.invoice');
@@ -172,6 +185,7 @@ Route::middleware(['auth', 'check.pending', 'check.tenant.active', 'role:super_a
     Route::post('/users/register', [UserRegisterController::class, 'store'])->name('users.register');
     Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
     Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+    Route::post('/users/{userId}/reset-password', [UserController::class, 'resetPassword'])->name('users.reset-password');
 
     // Manajemen Cabang
     Route::get('/cabang', [CabangController::class, 'index'])->name('data_master.cabang.index');

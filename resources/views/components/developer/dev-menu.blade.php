@@ -3,6 +3,8 @@
 <x-sidebar-menu label="Kelola Pelanggan" route="developer.pelanggan.index" active="developer.pelanggan.*"
     icon="users" />
 <x-sidebar-menu label="Log Aktivitas" route="developer.log.index" active="developer.log.*" icon="log" />
+<x-sidebar-menu label="Riwayat Pembayaran" route="developer.pembayaran.index" active="developer.pembayaran.*"
+    icon="payment" />
 <x-sidebar-menu label="Backup & Restore" route="developer.backup.index" active="developer.backup.*" icon="backup" />
 <x-sidebar-menu label="Maintenance Mode" route="developer.maintenance.index" active="developer.maintenance.*"
     icon="maintenance" />

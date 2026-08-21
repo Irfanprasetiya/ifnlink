@@ -5,7 +5,6 @@
     <meta charset="utf-8">
     <title>Laporan Rekap - {{ $tanggal }}</title>
     <style>
-        /* Reset & Global */
         * {
             margin: 0;
             padding: 0;
@@ -21,7 +20,6 @@
             padding: 30px 25px;
         }
 
-        /* Brand Header */
         .brand-header {
             width: 100%;
             border-bottom: 3px solid #2563eb;
@@ -47,7 +45,6 @@
             margin-top: 2px;
         }
 
-        /* Header Table */
         .header-table {
             width: 100%;
             border-bottom: 1.5px solid #e2e8f0;
@@ -94,7 +91,6 @@
             font-weight: 700;
         }
 
-        /* KPI Cards (Ringkasan) */
         .kpi-table {
             width: 100%;
             border-collapse: collapse;
@@ -129,7 +125,6 @@
             margin-top: 4px;
         }
 
-        /* Section Title */
         .section-title {
             font-size: 12pt;
             font-weight: 800;
@@ -139,7 +134,6 @@
             border-left: 4px solid #2563eb;
         }
 
-        /* Data Table */
         .data-table {
             width: 100%;
             border-collapse: collapse;
@@ -178,7 +172,6 @@
             background-color: #f8fafc;
         }
 
-        /* Utilities */
         .text-right {
             text-align: right !important;
         }
@@ -211,6 +204,10 @@
             color: #dc2626;
         }
 
+        .amber {
+            color: #d97706;
+        }
+
         .indigo {
             color: #4f46e5;
         }
@@ -223,7 +220,6 @@
             color: #dc2626;
         }
 
-        /* Brand Footer */
         .brand-footer {
             position: fixed;
             bottom: -15px;
@@ -242,7 +238,6 @@
             font-weight: 700;
         }
 
-        /* Print Styles */
         @media print {
             body {
                 padding: 20px 15px;
@@ -274,6 +269,7 @@
 <body>
 
     @php
+        $profit = ($totalOmzet ?? 0) - ($totalPengeluaran ?? 0);
         $totalNonKas = ($totalTransfer ?? 0) + ($totalTarikTunai ?? 0) + ($totalNumpang ?? 0);
         $rataOmzet = $totalNonKas > 0 ? ($totalOmzet ?? 0) / $totalNonKas : 0;
     @endphp
@@ -290,8 +286,7 @@
             <td class="w-60">
                 <h1 class="doc-title">Laporan Rekapitulasi</h1>
                 <p class="doc-subtitle">
-                    <strong>{{ $tenant->nama_toko ?? 'Nama Toko / Agen' }}</strong><br>
-                    {{-- {{ $tenant->alamat ?? 'Alamat toko belum diatur' }} --}}
+                    <strong>{{ $tenant->nama_toko ?? 'Nama Toko / Agen' }}</strong>
                 </p>
             </td>
             <td class="w-40 meta-info">
@@ -305,38 +300,84 @@
         </tr>
     </table>
 
-    <!-- RINGKASAN KEUANGAN (4 KPI BOXES) -->
+    <!-- ✅ 5 KPI CARDS -->
     <table class="kpi-table" cellspacing="0" cellpadding="0">
         <tr>
-            {{-- Omzet --}}
-            <td class="kpi-card" style="width: 23%;">
-                <div class="kpi-label">Total Profit</div>
+            {{-- Laba Kotor --}}
+            <td class="kpi-card" style="width: 18%;">
+                <div class="kpi-label">Laba Kotor</div>
                 <div class="kpi-value blue">Rp {{ number_format($totalOmzet ?? 0, 0, ',', '.') }}</div>
-                <div class="kpi-sub">Total pendapatan admin</div>
+                <div class="kpi-sub">Omzet transaksi operasional</div>
             </td>
-            <td style="width: 2.6%;"></td>
+            <td style="width: 2%;"></td>
 
-            {{-- Total Transaksi Non-Kas --}}
-            <td class="kpi-card" style="width: 23%;">
-                <div class="kpi-label">Volume Trx</div>
-                <div class="kpi-value indigo">{{ number_format($totalNonKas ?? 0) }}</div>
-                <div class="kpi-sub">TF + Tarik + Numpang</div>
+            {{-- Biaya Operasional --}}
+            <td class="kpi-card" style="width: 18%;">
+                <div class="kpi-label">Biaya Operasional</div>
+                <div class="kpi-value red">Rp {{ number_format($totalPengeluaran ?? 0, 0, ',', '.') }}</div>
+                <div class="kpi-sub">Listrik, PDAM, Internet, dll</div>
             </td>
-            <td style="width: 2.6%;"></td>
+            <td style="width: 2%;"></td>
+
+            {{-- Profit --}}
+            <td class="kpi-card" style="width: 18%;">
+                <div class="kpi-label">Profit</div>
+                <div class="kpi-value {{ $profit >= 0 ? 'green' : 'red' }}">
+                    {{ $profit >= 0 ? '' : '-' }}Rp {{ number_format(abs($profit), 0, ',', '.') }}
+                </div>
+                <div class="kpi-sub">Laba Kotor - Biaya Operasional</div>
+            </td>
+            <td style="width: 2%;"></td>
+
+            {{-- Rata Profit/Trx --}}
+            <td class="kpi-card" style="width: 18%;">
+                <div class="kpi-label">Rata Profit/Trx</div>
+                <div class="kpi-value indigo">Rp {{ number_format($rataOmzet ?? 0, 0, ',', '.') }}</div>
+                <div class="kpi-sub">Omzet / Total Transaksi</div>
+            </td>
+            <td style="width: 2%;"></td>
 
             {{-- Saldo Kas --}}
-            <td class="kpi-card" style="width: 23%;">
+            <td class="kpi-card" style="width: 18%;">
                 <div class="kpi-label">Saldo Kas</div>
                 <div class="kpi-value purple">Rp {{ number_format($totalSaldoKas ?? 0, 0, ',', '.') }}</div>
                 <div class="kpi-sub">Total akhir uang fisik</div>
             </td>
+        </tr>
+    </table>
+
+    <!-- ✅ OPER SALDO CARDS -->
+    <table class="kpi-table" cellspacing="0" cellpadding="0">
+        <tr>
+            {{-- Oper Kas Masuk --}}
+            <td class="kpi-card" style="width: 23%;">
+                <div class="kpi-label">Oper Kas Masuk</div>
+                <div class="kpi-value green">Rp {{ number_format($totalOperKasMasuk ?? 0, 0, ',', '.') }}</div>
+                <div class="kpi-sub">Terima dari cabang lain</div>
+            </td>
             <td style="width: 2.6%;"></td>
 
-            {{-- Rata-rata Profit --}}
+            {{-- Oper Kas Keluar --}}
             <td class="kpi-card" style="width: 23%;">
-                <div class="kpi-label">Rata Profit/Trx</div>
-                <div class="kpi-value green">Rp {{ number_format($rataOmzet ?? 0, 0, ',', '.') }}</div>
-                <div class="kpi-sub">Profit / Trx Non-Kas</div>
+                <div class="kpi-label">Oper Kas Keluar</div>
+                <div class="kpi-value amber">Rp {{ number_format($totalOperKasKeluar ?? 0, 0, ',', '.') }}</div>
+                <div class="kpi-sub">Kirim ke cabang lain</div>
+            </td>
+            <td style="width: 2.6%;"></td>
+
+            {{-- Oper Bank Masuk --}}
+            <td class="kpi-card" style="width: 23%;">
+                <div class="kpi-label">Oper Bank Masuk</div>
+                <div class="kpi-value blue">Rp {{ number_format($totalOperBankMasuk ?? 0, 0, ',', '.') }}</div>
+                <div class="kpi-sub">Terima dari cabang lain</div>
+            </td>
+            <td style="width: 2.6%;"></td>
+
+            {{-- Oper Bank Keluar --}}
+            <td class="kpi-card" style="width: 23%;">
+                <div class="kpi-label">Oper Bank Keluar</div>
+                <div class="kpi-value indigo">Rp {{ number_format($totalOperBankKeluar ?? 0, 0, ',', '.') }}</div>
+                <div class="kpi-sub">Kirim ke cabang lain</div>
             </td>
         </tr>
     </table>
@@ -385,16 +426,13 @@
                     <td class="text-center">{{ $b['total_trx'] }}</td>
                     <td class="text-right">Rp {{ number_format($b['debit'], 0, ',', '.') }}</td>
                     <td class="text-right">Rp {{ number_format($b['kredit'], 0, ',', '.') }}</td>
-                    <td class="text-right">
-                        <strong class="{{ $b['saldo'] >= 0 ? 'blue' : 'text-negative' }}">
-                            Rp {{ number_format($b['saldo'], 0, ',', '.') }}
-                        </strong>
+                    <td class="text-right font-bold {{ $b['saldo'] >= 0 ? 'blue' : 'text-negative' }}">
+                        Rp {{ number_format($b['saldo'], 0, ',', '.') }}
                     </td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="5" class="text-center" style="color: #94a3b8; font-style: italic;">Tidak ada data
-                        bank</td>
+                    <td colspan="5" class="text-center" style="color: #94a3b8;">Tidak ada data bank</td>
                 </tr>
             @endforelse
         </tbody>
@@ -405,9 +443,11 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>Nama Cabang / Toko</th>
-                <th class="text-center">Jml Transaksi</th>
-                <th class="text-right">Total Profit</th>
+                <th>Nama Cabang</th>
+                <th class="text-center">Trx</th>
+                <th class="text-right">Omzet</th>
+                <th class="text-right">Biaya</th>
+                <th class="text-right">Profit</th>
                 <th class="text-right">Saldo Kas</th>
             </tr>
         </thead>
@@ -416,13 +456,17 @@
                 <tr>
                     <td class="font-bold">{{ $c['nama'] }}</td>
                     <td class="text-center">{{ $c['total_trx'] }}</td>
-                    <td class="text-right font-bold blue">Rp {{ number_format($c['omzet'], 0, ',', '.') }}</td>
+                    <td class="text-right blue">Rp {{ number_format($c['omzet'], 0, ',', '.') }}</td>
+                    <td class="text-right red">Rp {{ number_format($c['pengeluaran'], 0, ',', '.') }}</td>
+                    <td class="text-right font-bold {{ ($c['profit'] ?? 0) >= 0 ? 'green' : 'text-negative' }}">
+                        {{ ($c['profit'] ?? 0) >= 0 ? '' : '-' }}Rp
+                        {{ number_format(abs($c['profit'] ?? 0), 0, ',', '.') }}
+                    </td>
                     <td class="text-right font-bold purple">Rp {{ number_format($c['saldo_kas'], 0, ',', '.') }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="4" class="text-center" style="color: #94a3b8; font-style: italic;">Tidak ada data
-                        cabang</td>
+                    <td colspan="6" class="text-center" style="color: #94a3b8;">Tidak ada data cabang</td>
                 </tr>
             @endforelse
         </tbody>
@@ -435,22 +479,28 @@
             <tr>
                 <th>Nama Operator</th>
                 <th>Cabang</th>
-                <th class="text-center">Jml Transaksi</th>
-                <th class="text-right">Profit Kontribusi</th>
+                <th class="text-center">Trx</th>
+                <th class="text-right">Laba Kotor</th>
+                <th class="text-right">Biaya</th>
+                <th class="text-right">Profit</th>
             </tr>
         </thead>
         <tbody>
             @forelse ($rekapUser as $u)
+                @php $userProfit = ($u['omzet'] ?? 0) - ($u['pengeluaran'] ?? 0); @endphp
                 <tr>
                     <td class="font-bold">{{ $u['nama'] }}</td>
                     <td>{{ $u['cabang'] }}</td>
                     <td class="text-center">{{ number_format($u['total_trx']) }}</td>
-                    <td class="text-right font-bold blue">Rp {{ number_format($u['omzet'], 0, ',', '.') }}</td>
+                    <td class="text-right blue">Rp {{ number_format($u['omzet'] ?? 0, 0, ',', '.') }}</td>
+                    <td class="text-right red">Rp {{ number_format($u['pengeluaran'] ?? 0, 0, ',', '.') }}</td>
+                    <td class="text-right font-bold {{ $userProfit >= 0 ? 'green' : 'text-negative' }}">
+                        {{ $userProfit >= 0 ? '' : '-' }}Rp {{ number_format(abs($userProfit), 0, ',', '.') }}
+                    </td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="4" class="text-center" style="color: #94a3b8; font-style: italic;">Tidak ada data
-                        operator</td>
+                    <td colspan="6" class="text-center" style="color: #94a3b8;">Tidak ada data operator</td>
                 </tr>
             @endforelse
         </tbody>

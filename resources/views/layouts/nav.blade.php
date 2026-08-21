@@ -22,6 +22,50 @@
                     </span>
                 </a>
             </div>
+            {{-- ✅ Tengah: Tanggal + Status + Upgrade Button (Desktop) --}}
+            @unless (session('impersonator_id'))
+                <div class="hidden lg:flex items-center gap-3 flex-1 justify-center">
+                    <span class="text-sm text-blue-100 font-medium">
+                        {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}
+                    </span>
+
+                    <span class="text-blue-400">|</span>
+
+                    @auth
+                        @php
+                            $currentPlan = Auth::user()->tenant?->plan;
+                            $isFree = !$currentPlan || $currentPlan->harga == 0;
+                        @endphp
+
+                        @if (Auth::user()->tenant && Auth::user()->tenant->isLocked())
+                            <span
+                                class="text-[10px] bg-amber-400/20 text-amber-200 px-3 py-1 rounded-full font-bold flex items-center gap-1.5 border border-amber-400/30">
+                                <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                                PENDING
+                            </span>
+                        @else
+                            <span
+                                class="text-[10px] bg-emerald-400/20 text-emerald-200 px-3 py-1 rounded-full font-bold flex items-center gap-1.5 border border-emerald-400/30">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                                AKTIF
+                            </span>
+                        @endif
+
+                        {{-- ✅ Tombol Upgrade kalau Gratis --}}
+                        @if ($isFree)
+                            <a href="{{ route('upgrade') }}"
+                                class="flex items-center gap-1.5 bg-white text-blue-600 px-3 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider hover:bg-blue-50 hover:scale-105 transition-all shadow-sm">
+                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd"
+                                        d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                                Upgrade PRO
+                            </a>
+                        @endif
+                    @endauth
+                </div>
+            @endunless
 
             {{-- Tengah: Banner Impersonation --}}
             @if (session('impersonator_id'))

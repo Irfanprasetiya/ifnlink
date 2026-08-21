@@ -7,62 +7,96 @@
 
         {{-- Top Bar Header & Filter Modern --}}
         <div
-            class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-sm">
-            <div>
+            class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 sm:gap-5 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm">
+
+            {{-- Judul --}}
+            <div class="shrink-0">
                 <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Dashboard Overview</h1>
-                <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Ringkasan performa bisnis dan transaksi agen Anda secara
-                    real-time.</p>
+                {{-- Penjelasan disembunyikan di mobile (hidden) agar tidak makan tempat, tapi tetap muncul di PC (sm:block) --}}
+                <p class="hidden sm:block text-sm text-slate-500 mt-1">Ringkasan performa bisnis dan transaksi agen Anda
+                    secara real-time.</p>
             </div>
 
-            {{-- Filter Form --}}
-            <form method="GET" class="flex flex-wrap items-center gap-2.5">
+            {{-- Filter Layout: Grid 2 kolom di HP, sejajar (flex) di PC --}}
+            <form method="GET" class="grid grid-cols-2 sm:flex sm:flex-row sm:items-center gap-2.5 w-full lg:w-auto">
+
                 <select name="periode"
-                    class="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition">
+                    class="col-span-1 w-full sm:w-auto bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs sm:text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition truncate">
                     <option value="harian" {{ $periode == 'harian' ? 'selected' : '' }}>Harian</option>
                     <option value="mingguan" {{ $periode == 'mingguan' ? 'selected' : '' }}>Mingguan</option>
                     <option value="bulanan" {{ $periode == 'bulanan' ? 'selected' : '' }}>Bulanan</option>
                 </select>
+
                 <select name="cabang_id"
-                    class="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition">
+                    class="col-span-1 w-full sm:w-auto bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs sm:text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition truncate">
                     <option value="semua" {{ $cabangId == 'semua' ? 'selected' : '' }}>Semua Cabang</option>
                     @foreach ($cabangs as $cabang)
                         <option value="{{ $cabang->id }}" {{ $cabangId == $cabang->id ? 'selected' : '' }}>
-                            {{ $cabang->nama_cabang }}</option>
+                            {{ $cabang->nama_cabang }}
+                        </option>
                     @endforeach
                 </select>
+
                 <button type="submit"
-                    class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold shadow-md shadow-blue-500/20 transition-all">Terapkan</button>
+                    class="col-span-2 sm:col-span-1 w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold shadow-md shadow-blue-500/20 transition-all active:scale-95">
+                    {{-- Icon filter kecil ditambahkan agar tombol tidak terlihat kosong --}}
+                    <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z">
+                        </path>
+                    </svg>
+                    Terapkan
+                </button>
+
             </form>
         </div>
 
-        {{-- Quick Actions + Jam Realtime --}}
+        {{-- Quick Actions + Jam --}}
         <div
-            class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-slate-900 text-white p-4 rounded-2xl shadow-lg">
-            <div class="flex flex-wrap gap-2">
-                <a href="{{ route('trx-bank.index') }}"
-                    class="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white px-3.5 py-2 rounded-xl text-xs font-semibold transition shadow-sm"><span>➕</span>
-                    Transaksi</a>
-                <a href="{{ route('laporan-bank.admin.index') }}"
-                    class="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 px-3.5 py-2 rounded-xl text-xs font-semibold transition border border-slate-700"><span>📄</span>
-                    Laporan</a>
-                <a href="{{ route('users.index') }}"
-                    class="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 px-3.5 py-2 rounded-xl text-xs font-semibold transition border border-slate-700"><span>👥</span>
-                    User</a>
-                <a href="{{ route('data_master.cabang.index') }}"
-                    class="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 px-3.5 py-2 rounded-xl text-xs font-semibold transition border border-slate-700"><span>🏢</span>
-                    Cabang</a>
+            class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 bg-slate-900 p-3 sm:p-4 rounded-2xl shadow-lg">
+
+            {{-- Bagian Kiri: Label & Jam (Satu baris di mobile) --}}
+            <div class="flex items-center justify-between w-full sm:w-auto shrink-0">
+                <span class="text-[11px] font-bold text-slate-400 sm:hidden tracking-widest uppercase">Menu Cepat</span>
+
+                <div
+                    class="text-[10px] sm:text-xs font-medium text-slate-400 bg-slate-800/80 px-2.5 sm:px-3 py-1.5 rounded-xl border border-slate-700/60 flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>🕒 <span id="jam" class="text-slate-200 font-semibold tracking-wide"></span></span>
+                </div>
             </div>
-            <div
-                class="text-xs font-medium text-slate-400 bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-700/60 flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span>🕒 <span id="jam" class="text-slate-200 font-semibold"></span></span>
+
+            {{-- Bagian Kanan: Tombol Aksi --}}
+            <div class="flex items-center gap-2 w-full sm:w-auto overflow-x-auto hide-scrollbar pb-0.5 sm:pb-0">
+
+                {{-- Tombol Utama: Teks Tetap Muncul --}}
+                <a href="{{ route('trx-bank.index') }}"
+                    class="shrink-0 flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white px-3 sm:px-3.5 py-2 rounded-xl text-xs font-semibold transition shadow-sm active:scale-95">
+                    <span>➕</span> Transaksi
+                </a>
+
+                {{-- Tombol Sekunder: Teks dipangkas (hidden) di Mobile agar jadi tombol icon kotak --}}
+                <a href="{{ route('laporan-bank.admin.index') }}" title="Laporan"
+                    class="shrink-0 inline-flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-slate-200 w-9 h-9 sm:w-auto sm:h-auto sm:px-3.5 sm:py-2 rounded-xl text-xs font-semibold transition border border-slate-700 active:scale-95">
+                    <span>📄</span> <span class="hidden sm:inline-block sm:ml-1.5">Laporan</span>
+                </a>
+
+                <a href="{{ route('users.index') }}" title="User"
+                    class="shrink-0 inline-flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-slate-200 w-9 h-9 sm:w-auto sm:h-auto sm:px-3.5 sm:py-2 rounded-xl text-xs font-semibold transition border border-slate-700 active:scale-95">
+                    <span>👥</span> <span class="hidden sm:inline-block sm:ml-1.5">User</span>
+                </a>
+
+                <a href="{{ route('data_master.cabang.index') }}" title="Cabang"
+                    class="shrink-0 inline-flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-slate-200 w-9 h-9 sm:w-auto sm:h-auto sm:px-3.5 sm:py-2 rounded-xl text-xs font-semibold transition border border-slate-700 active:scale-95">
+                    <span>🏢</span> <span class="hidden sm:inline-block sm:ml-1.5">Cabang</span>
+                </a>
+
             </div>
         </div>
 
-        {{-- ✅ 2 Card Utama: Profit + Saldo Kas --}}
+        {{-- 2 Card Utama --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-            {{-- Profit (Omzet - Pengeluaran) --}}
+            {{-- Profit --}}
             <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 hover:shadow-md transition-all">
                 <div class="flex items-center justify-between mb-3">
                     <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Profit</span>
@@ -95,14 +129,13 @@
                         </svg>
                     </div>
                 </div>
-                <div class="text-xl sm:text-2xl font-extrabold text-purple-600 truncate">
-                    Rp {{ number_format($totalSaldoKas ?? 0, 0, ',', '.') }}
-                </div>
+                <div class="text-xl sm:text-2xl font-extrabold text-purple-600 truncate">Rp
+                    {{ number_format($totalSaldoKas ?? 0, 0, ',', '.') }}</div>
                 <p class="text-xs text-slate-400 mt-2 font-medium">Akumulasi kas saat ini</p>
             </div>
         </div>
 
-        {{-- Card Sekunder (Metrik Ringkas) --}}
+        {{-- Card Sekunder --}}
         <div class="grid grid-cols-2 sm:grid-cols-5 gap-4">
             <div class="bg-white rounded-2xl border border-slate-200/80 p-4 text-center shadow-sm">
                 <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Transaksi</p>
@@ -132,17 +165,22 @@
 
         {{-- Grafik Section --}}
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {{-- Grafik Profit --}}
             <div class="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/80 shadow-sm">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-base font-bold text-slate-900">Grafik Profit</h2>
-                    <span class="text-xs font-medium text-slate-400 bg-slate-100 px-2.5 py-1 rounded-lg">Real-time</span>
+                    <span
+                        class="text-xs font-medium text-slate-400 bg-slate-100 px-2.5 py-1 rounded-lg">{{ $periode == 'harian' ? '7 Hari Terakhir' : ($periode == 'mingguan' ? '8 Minggu Terakhir' : '6 Bulan Terakhir') }}</span>
                 </div>
                 <div class="w-full h-64 sm:h-72"><canvas id="chartOmzet"></canvas></div>
             </div>
+
+            {{-- Perbandingan Cabang --}}
             <div class="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/80 shadow-sm">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-base font-bold text-slate-900">Perbandingan Cabang</h2>
-                    <span class="text-xs font-medium text-slate-400 bg-slate-100 px-2.5 py-1 rounded-lg">Kinerja Toko</span>
+                    <span class="text-xs font-medium text-slate-400 bg-slate-100 px-2.5 py-1 rounded-lg">Total
+                        Profit</span>
                 </div>
                 <div class="w-full h-64 sm:h-72"><canvas id="chartCabang"></canvas></div>
             </div>
@@ -211,29 +249,58 @@
             setInterval(updateJam, 1000);
             updateJam();
 
+            // ✅ Grafik Profit
             new Chart(document.getElementById('chartOmzet'), {
                 type: 'line',
                 data: {
                     labels: {!! json_encode($labelsOmzet) !!},
                     datasets: [{
-                        label: 'Profit',
-                        data: {!! json_encode($dataOmzet) !!},
-                        borderColor: '#059669',
-                        backgroundColor: 'rgba(5,150,105,0.08)',
-                        borderWidth: 2.5,
-                        fill: true,
-                        tension: 0.4,
-                        pointBackgroundColor: '#059669',
-                        pointRadius: 3,
-                        pointHoverRadius: 5
-                    }]
+                            label: 'Omzet',
+                            data: {!! json_encode($dataOmzetKotor) !!},
+                            borderColor: '#2563eb',
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            fill: false,
+                            tension: 0.4,
+                        },
+                        {
+                            label: 'Pengeluaran',
+                            data: {!! json_encode($dataPengeluaranChart) !!},
+                            borderColor: '#dc2626',
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            fill: false,
+                            tension: 0.4,
+                        },
+                        {
+                            label: 'Profit',
+                            data: {!! json_encode($dataOmzet) !!},
+                            borderColor: '#059669',
+                            backgroundColor: 'rgba(5, 150, 105, 0.08)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: '#059669',
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                        }
+                    ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            display: false
+                            display: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': Rp ' + new Intl.NumberFormat('id-ID').format(
+                                        context.parsed.y);
+                                }
+                            }
                         }
                     },
                     scales: {
@@ -245,18 +312,26 @@
                         y: {
                             grid: {
                                 color: '#f1f5f9'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return 'Rp ' + new Intl.NumberFormat('id-ID', {
+                                        notation: 'compact'
+                                    }).format(value);
+                                }
                             }
                         }
                     }
                 }
             });
 
+            // ✅ Perbandingan Cabang
             new Chart(document.getElementById('chartCabang'), {
                 type: 'bar',
                 data: {
                     labels: {!! json_encode($labelsCabang) !!},
                     datasets: [{
-                        label: 'Total Omzet per Cabang',
+                        label: 'Total Profit',
                         data: {!! json_encode($dataCabang) !!},
                         backgroundColor: '#4f46e5',
                         borderRadius: 8,
@@ -270,17 +345,39 @@
                     plugins: {
                         legend: {
                             display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Rp ' + new Intl.NumberFormat('id-ID').format(context.parsed.y);
+                                }
+                            }
                         }
                     },
                     scales: {
                         x: {
                             grid: {
                                 display: false
+                            },
+                            ticks: {
+                                font: {
+                                    size: 11
+                                }
                             }
                         },
                         y: {
                             grid: {
                                 color: '#f1f5f9'
+                            },
+                            ticks: {
+                                font: {
+                                    size: 11
+                                },
+                                callback: function(value) {
+                                    return 'Rp ' + new Intl.NumberFormat('id-ID', {
+                                        notation: 'compact'
+                                    }).format(value);
+                                }
                             }
                         }
                     }
