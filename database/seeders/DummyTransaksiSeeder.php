@@ -4,95 +4,67 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\TransaksiBank;
-use App\Models\Bank;
-use App\Models\User;
 use App\Models\JenisTransaksi;
-use App\Models\AkunPengeluaran;
 use Carbon\Carbon;
 
 class DummyTransaksiSeeder extends Seeder
 {
     public function run()
     {
-        $tenantId = 53;
-        $kasId = Bank::where('nama_bank', 'Kas')->first()?->id;
+        $tenantId = 3;
 
-        // Jenis transaksi
-        $jenisTransfer = JenisTransaksi::where('nama_transaksi', 'Transfer')->first();
-        $jenisTarikTunai = JenisTransaksi::where('nama_transaksi', 'Tarik Tunai')->first();
-        $jenisNumpang = JenisTransaksi::where('nama_transaksi', 'Numpang Transfer')->first();
-        $jenisPenambahan = JenisTransaksi::where('nama_transaksi', 'Penambahan Kas')->first();
-        $jenisPengurangan = JenisTransaksi::where('nama_transaksi', 'Pengurangan Kas')->first();
+        // ✅ Jenis Transaksi
+        $jenisTransfer = JenisTransaksi::where('id', 2)
+            ->orWhere('nama_transaksi', 'Transfer')
+            ->first();
 
-        // Bank selain Kas
-        $banks = Bank::where('id', '!=', $kasId)
-            ->where(function ($q) use ($tenantId) {
-                $q->where('tenant_id', $tenantId)->orWhereNull('tenant_id');
-            })->get();
+        $jenisTarikTunai = JenisTransaksi::where('id', 1)
+            ->orWhere('nama_transaksi', 'Tarik Tunai')
+            ->first();
 
-        // Akun pengeluaran yang tersedia (ID: 15, 16, 17, 18)
-        $akunIds = AkunPengeluaran::pluck('id')->toArray();
-        $akunNama = AkunPengeluaran::pluck('nama_akun')->toArray();
-
-        // Users
-        $users = User::whereIn('id', [126, 129])->get();
-
-        // ==========================================
-        // SALDO AWAL (7 hari terakhir)
-        // ==========================================
-        for ($i = 7; $i >= 0; $i--) {
-            $tanggal = now()->subDays($i);
-
-            foreach ($users as $user) {
-                // Saldo awal Kas
-                TransaksiBank::create([
-                    'tenant_id' => $tenantId,
-                    'cabang_id' => $user->cabang_id,
-                    'user_id' => $user->id,
-                    'bank_id' => $kasId,
-                    'jenis_transaksi_id' => $jenisPenambahan->id,
-                    'nominal' => 5000000,
-                    'bayar' => 5000000,
-                    'debit' => 5000000,
-                    'kredit' => 0,
-                    'is_saldo_awal' => 1,
-                    'keterangan' => 'Saldo Awal',
-                    'waktu_transaksi' => $tanggal->copy()->setTime(8, 0, 0),
-                ]);
-
-                // Saldo awal bank lain
-                foreach ($banks as $bank) {
-                    $saldo = rand(1000000, 3000000);
-                    TransaksiBank::create([
-                        'tenant_id' => $tenantId,
-                        'cabang_id' => $user->cabang_id,
-                        'user_id' => $user->id,
-                        'bank_id' => $bank->id,
-                        'jenis_transaksi_id' => $jenisPenambahan->id,
-                        'nominal' => $saldo,
-                        'bayar' => $saldo,
-                        'debit' => $saldo,
-                        'kredit' => 0,
-                        'is_saldo_awal' => 1,
-                        'keterangan' => 'Saldo Awal',
-                        'waktu_transaksi' => $tanggal->copy()->setTime(8, 0, 0),
-                    ]);
-                }
-            }
+        if (!$jenisTransfer || !$jenisTarikTunai) {
+            $this->command->error('Jenis transaksi tidak ditemukan.');
+            return;
         }
 
-        // ==========================================
-        // TRANSAKSI HARIAN (7 hari terakhir)
-        // ==========================================
-        for ($i = 7; $i >= 0; $i--) {
-            $tanggal = now()->subDays($i);
+        $this->command->info('Jenis Transfer: ' . $jenisTransfer->nama_transaksi . ' (ID: ' . $jenisTransfer->id . ')');
+        $this->command->info('Jenis Tarik Tunai: ' . $jenisTarikTunai->nama_transaksi . ' (ID: ' . $jenisTarikTunai->id . ')');
 
-            foreach ($users as $user) {
-                $jmlTransaksi = rand(5, 10);
+        // ✅ Data User
+        $users = [
+            ['id' => 9, 'name' => 'Asep', 'cabang_id' => 50],
+            ['id' => 10, 'name' => 'Supendi', 'cabang_id' => 49],
+            ['id' => 11, 'name' => 'Wartam', 'cabang_id' => 48],
+        ];
+
+        // ✅ Bank selain Kas
+        $bankIds = [44, 45, 46]; // BRI, BCA, Dana
+
+        $totalTransaksi = 0;
+
+        // ==========================================
+        // ✅ TRANSAKSI 15 HARI TERAKHIR
+        // Jam 6-7 pagi
+        // ==========================================
+        for ($i = 0; $i < 15; $i++) {
+            $tanggal = Carbon::today()->subDays($i);
+            $hari = $tanggal->format('d M Y');
+
+            $this->command->info("Transaksi: {$hari}");
+
+            foreach ($users as $userData) {
+                // 2-3 transaksi per user per hari
+                $jmlTransaksi = rand(2, 3);
 
                 for ($j = 0; $j < $jmlTransaksi; $j++) {
-                    $bank = $banks->random();
-                    $waktu = $tanggal->copy()->setTime(rand(9, 20), rand(0, 59), 0);
+                    // Pilih bank acak
+                    $bankId = $bankIds[array_rand($bankIds)];
+
+                    // ✅ Jam 6-7 pagi (06:00 - 07:59)
+                    $jam = rand(6, 7);
+                    $menit = rand(0, 59);
+                    $waktu = $tanggal->copy()->setTime($jam, $menit, 0);
+
                     $rand = rand(1, 10);
 
                     if ($rand <= 6) {
@@ -103,146 +75,110 @@ class DummyTransaksiSeeder extends Seeder
 
                         // Transaksi Bank
                         TransaksiBank::create([
-                            'tenant_id' => $tenantId,
-                            'cabang_id' => $user->cabang_id,
-                            'user_id' => $user->id,
-                            'bank_id' => $bank->id,
+                            'user_id' => $userData['id'],
+                            'bank_id' => $bankId,
                             'jenis_transaksi_id' => $jenisTransfer->id,
+                            'akun_pengeluaran_id' => null,
+                            'kredit' => $nominal,
+                            'no_tujuan' => null,
+                            'waktu_transaksi' => $waktu,
                             'nominal' => $nominal,
                             'bayar' => $bayar,
-                            'debit' => 0,
-                            'kredit' => $nominal,
-                            'is_saldo_awal' => 0,
                             'keterangan' => 'Transfer',
-                            'waktu_transaksi' => $waktu,
+                            'is_saldo_awal' => 0,
+                            'created_at' => $waktu,
+                            'updated_at' => $waktu,
+                            'saldo_akhir' => 0.00,
+                            'debit' => 0.00,
+                            'cabang_id' => $userData['cabang_id'],
+                            'tenant_id' => $tenantId,
                         ]);
 
                         // Pasangan Kas
                         TransaksiBank::create([
-                            'tenant_id' => $tenantId,
-                            'cabang_id' => $user->cabang_id,
-                            'user_id' => $user->id,
-                            'bank_id' => $kasId,
+                            'user_id' => $userData['id'],
+                            'bank_id' => 7, // Kas
                             'jenis_transaksi_id' => $jenisTransfer->id,
+                            'akun_pengeluaran_id' => null,
+                            'kredit' => 0.00,
+                            'no_tujuan' => null,
+                            'waktu_transaksi' => $waktu,
                             'nominal' => $nominal,
                             'bayar' => $bayar,
-                            'debit' => $bayar,
-                            'kredit' => 0,
-                            'is_saldo_awal' => 0,
                             'keterangan' => 'Transfer',
-                            'waktu_transaksi' => $waktu,
+                            'is_saldo_awal' => 0,
+                            'created_at' => $waktu,
+                            'updated_at' => $waktu,
+                            'saldo_akhir' => 0.00,
+                            'debit' => $bayar,
+                            'cabang_id' => $userData['cabang_id'],
+                            'tenant_id' => $tenantId,
                         ]);
 
-                    } elseif ($rand <= 9) {
-                        // ========== TARIK TUNAI (30%) ==========
+                        $totalTransaksi += 2;
+
+                    } else {
+                        // ========== TARIK TUNAI (40%) ==========
                         $bayar = [50000, 100000, 200000][rand(0, 2)];
                         $admin = [5000, 7000, 10000][rand(0, 2)];
                         $nominal = $bayar + $admin;
 
                         // Transaksi Bank
                         TransaksiBank::create([
-                            'tenant_id' => $tenantId,
-                            'cabang_id' => $user->cabang_id,
-                            'user_id' => $user->id,
-                            'bank_id' => $bank->id,
+                            'user_id' => $userData['id'],
+                            'bank_id' => $bankId,
                             'jenis_transaksi_id' => $jenisTarikTunai->id,
+                            'akun_pengeluaran_id' => null,
+                            'kredit' => 0.00,
+                            'no_tujuan' => null,
+                            'waktu_transaksi' => $waktu,
                             'nominal' => $nominal,
                             'bayar' => $bayar,
+                            'keterangan' => 'Tarik Tunai',
+                            'is_saldo_awal' => 0,
+                            'created_at' => $waktu,
+                            'updated_at' => $waktu,
+                            'saldo_akhir' => 0.00,
                             'debit' => $nominal,
-                            'kredit' => 0,
-                            'is_saldo_awal' => 0,
-                            'keterangan' => 'Tarik Tunai',
-                            'waktu_transaksi' => $waktu,
+                            'cabang_id' => $userData['cabang_id'],
+                            'tenant_id' => $tenantId,
                         ]);
 
                         // Pasangan Kas
                         TransaksiBank::create([
-                            'tenant_id' => $tenantId,
-                            'cabang_id' => $user->cabang_id,
-                            'user_id' => $user->id,
-                            'bank_id' => $kasId,
+                            'user_id' => $userData['id'],
+                            'bank_id' => 7, // Kas
                             'jenis_transaksi_id' => $jenisTarikTunai->id,
+                            'akun_pengeluaran_id' => null,
+                            'kredit' => $bayar,
+                            'no_tujuan' => null,
+                            'waktu_transaksi' => $waktu,
                             'nominal' => $nominal,
                             'bayar' => $bayar,
-                            'debit' => 0,
-                            'kredit' => $bayar,
-                            'is_saldo_awal' => 0,
                             'keterangan' => 'Tarik Tunai',
-                            'waktu_transaksi' => $waktu,
-                        ]);
-
-                    } else {
-                        // ========== NUMPANG TRANSFER (10%) ==========
-                        $bayar = [5000, 7000, 10000][rand(0, 2)];
-
-                        // Transaksi Bank
-                        TransaksiBank::create([
-                            'tenant_id' => $tenantId,
-                            'cabang_id' => $user->cabang_id,
-                            'user_id' => $user->id,
-                            'bank_id' => $bank->id,
-                            'jenis_transaksi_id' => $jenisNumpang->id,
-                            'nominal' => 0,
-                            'bayar' => $bayar,
-                            'debit' => 0,
-                            'kredit' => 0,
                             'is_saldo_awal' => 0,
-                            'keterangan' => 'Numpang TF',
-                            'waktu_transaksi' => $waktu,
+                            'created_at' => $waktu,
+                            'updated_at' => $waktu,
+                            'saldo_akhir' => 0.00,
+                            'debit' => 0.00,
+                            'cabang_id' => $userData['cabang_id'],
+                            'tenant_id' => $tenantId,
                         ]);
 
-                        // Pasangan Kas
-                        TransaksiBank::create([
-                            'tenant_id' => $tenantId,
-                            'cabang_id' => $user->cabang_id,
-                            'user_id' => $user->id,
-                            'bank_id' => $kasId,
-                            'jenis_transaksi_id' => $jenisNumpang->id,
-                            'nominal' => 0,
-                            'bayar' => $bayar,
-                            'debit' => $bayar,
-                            'kredit' => 0,
-                            'is_saldo_awal' => 0,
-                            'keterangan' => 'Numpang TF',
-                            'waktu_transaksi' => $waktu,
-                        ]);
+                        $totalTransaksi += 2;
                     }
-                }
-
-                // ========== PENGELUARAN (1-2 per hari) ==========
-                $jmlPengeluaran = rand(1, 2);
-                for ($k = 0; $k < $jmlPengeluaran; $k++) {
-                    $nominal = [20000, 50000, 100000][rand(0, 2)];
-                    $waktu = $tanggal->copy()->setTime(rand(8, 17), rand(0, 59), 0);
-                    $idx = array_rand($akunIds);
-
-                    TransaksiBank::create([
-                        'tenant_id' => $tenantId,
-                        'cabang_id' => $user->cabang_id,
-                        'user_id' => $user->id,
-                        'bank_id' => $kasId,
-                        'jenis_transaksi_id' => $jenisPengurangan->id,
-                        'nominal' => $nominal,
-                        'bayar' => $nominal,
-                        'debit' => 0,
-                        'kredit' => $nominal,
-                        'is_saldo_awal' => 0,
-                        'akun_pengeluaran_id' => $akunIds[$idx],
-                        'keterangan' => $akunNama[$idx],
-                        'waktu_transaksi' => $waktu,
-                    ]);
                 }
             }
         }
 
         $this->command->newLine();
         $this->command->info('═══════════════════════════════════');
-        $this->command->info('  ✅ DATA DUMMY BERHASIL DIBUAT');
+        $this->command->info('  ✅ TRANSAKSI BERHASIL DIBUAT');
         $this->command->info('═══════════════════════════════════');
-        $this->command->info('Tenant ID: ' . $tenantId);
-        $this->command->info('Rizki (126): ' . TransaksiBank::where('user_id', 126)->count() . ' transaksi');
-        $this->command->info('Asep (129): ' . TransaksiBank::where('user_id', 129)->count() . ' transaksi');
-        $this->command->info('Total: ' . TransaksiBank::count() . ' transaksi');
+        $this->command->info('Jenis: Transfer & Tarik Tunai');
+        $this->command->info('Periode: 15 hari terakhir');
+        $this->command->info('Waktu: 06:00 - 07:59');
+        $this->command->info('Total Transaksi: ' . $totalTransaksi);
         $this->command->info('═══════════════════════════════════');
     }
 }
