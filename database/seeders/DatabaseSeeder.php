@@ -36,43 +36,43 @@ class DatabaseSeeder extends Seeder
         );
         $this->command->info("✅ Developer: prasetiya");
 
-        // ==========================================
-        // 2. TAMBAH CABANG GUDANG UNTUK SEMUA TENANT
-        // ==========================================
-        // $tenants = Tenant::all();
+        ==========================================
+        2. TAMBAH CABANG GUDANG UNTUK SEMUA TENANT
+        ==========================================
+        $tenants = Tenant::all();
 
-        // if ($tenants->isEmpty()) {
-        //     $this->command->warn('⚠️  Tidak ada tenant. Cabang Gudang tidak dibuat.');
-        // } else {
-        //     $created = 0;
+        if ($tenants->isEmpty()) {
+            $this->command->warn('⚠️  Tidak ada tenant. Cabang Gudang tidak dibuat.');
+        } else {
+            $created = 0;
 
-        //     foreach ($tenants as $tenant) {
-        //         // Cek manual tanpa firstOrCreate (hindari kolom yang tidak ada)
-        //         $exists = DB::table('cabangs')
-        //             ->where('tenant_id', $tenant->id)
-        //             ->where('nama_cabang', 'Gudang')
-        //             ->exists();
+            foreach ($tenants as $tenant) {
+                // Cek manual tanpa firstOrCreate (hindari kolom yang tidak ada)
+                $exists = DB::table('cabangs')
+                    ->where('tenant_id', $tenant->id)
+                    ->where('nama_cabang', 'Gudang')
+                    ->exists();
 
-        //         if (!$exists) {
-        //             // Insert HANYA kolom yang ada di tabel
-        //             DB::table('cabangs')->insert([
-        //                 'tenant_id' => $tenant->id,
-        //                 'nama_cabang' => 'Gudang',
-        //                 'alamat_cabang' => '-',
-        //                 'keterangan' => 'Saldo Pusat',
-        //                 'created_at' => now(),
-        //                 'updated_at' => now(),
-        //             ]);
+                if (!$exists) {
+                    // Insert HANYA kolom yang ada di tabel
+                    DB::table('cabangs')->insert([
+                        'tenant_id' => $tenant->id,
+                        'nama_cabang' => 'Gudang',
+                        'alamat_cabang' => '-',
+                        'keterangan' => 'Saldo Pusat',
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
 
-        //             $created++;
-        //             $this->command->info("✅ Cabang Gudang dibuat untuk: {$tenant->nama_toko}");
-        //         } else {
-        //             $this->command->line("⏭️  Sudah ada: {$tenant->nama_toko}");
-        //         }
-        //     }
+                    $created++;
+                    $this->command->info("✅ Cabang Gudang dibuat untuk: {$tenant->nama_toko}");
+                } else {
+                    $this->command->line("⏭️  Sudah ada: {$tenant->nama_toko}");
+                }
+            }
 
-        //     $this->command->info("📊 {$created} cabang Gudang baru dibuat");
-        // }
+            $this->command->info("📊 {$created} cabang Gudang baru dibuat");
+        }
 
         // ==========================================
         // 3. AKUN PENGELUARAN (DATA MASTER)
