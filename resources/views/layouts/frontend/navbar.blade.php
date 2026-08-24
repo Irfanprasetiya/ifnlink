@@ -28,7 +28,7 @@
                     <li class="relative" x-data="{ open: false }" x-on:click.outside="open = false">
                         <button type="button" x-on:click="open = !open"
                             class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors focus:outline-none
-                                {{ request()->routeIs('transaksi-bank') || request()->routeIs('vouchers') ? 'text-white font-semibold bg-white/10' : 'text-blue-200 hover:text-white hover:bg-white/10' }}">
+                                {{ request()->routeIs('transaksi-bank*') || request()->routeIs('transaksi_banks.*') || request()->routeIs('vouchers') ? 'text-white font-semibold bg-white/10' : 'text-blue-200 hover:text-white hover:bg-white/10' }}">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"
                                 stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                                 <path d="M21 12H3"></path>
@@ -53,7 +53,7 @@
                             </a> --}}
                             <a href="{{ route('transaksi-bank') }}"
                                 class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors
-                                    {{ request()->routeIs('transaksi-bank') ? 'text-blue-600 font-semibold' : '' }}">
+                                    {{ request()->routeIs('transaksi-bank*') || request()->routeIs('transaksi_banks.*') ? 'text-blue-600 font-semibold' : '' }}">
                                 Transaksi Bank
                             </a>
                         </div>
@@ -130,12 +130,12 @@
 <div class="fixed md:hidden bottom-0 inset-x-0 z-50 pointer-events-none" x-data="{ transaksiOpen: false, laporanOpen: false }">
 
 <div
-    class="bg-white/95 backdrop-blur-xl border-t border-slate-200/80 shadow-[0_-10px_30px_rgba(0,0,0,0.06)] flex items-center justify-around h-16 w-full px-4 relative pointer-events-auto pb-safe">
+    class="bg-white/95 backdrop-blur-xl border-t border-slate-200/80 shadow-[0_-10px_30px_rgba(0,0,0,0.06)] flex items-center justify-between h-16 w-full px-2 relative pointer-events-auto pb-safe">
 
     {{-- 1. Menu Home --}}
     @php $isHome = request()->routeIs('main'); @endphp
     <a href="{{ route('main') }}"
-        class="relative flex flex-col items-center justify-center w-full h-full transition-all duration-300 {{ $isHome ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600' }}">
+        class="relative flex-1 flex flex-col items-center justify-center h-full transition-all duration-300 {{ $isHome ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600' }}">
 
         <div
             class="flex flex-col items-center gap-1 transition-transform duration-300 {{ $isHome ? '-translate-y-1' : '' }}">
@@ -153,9 +153,9 @@
         @endif
     </a>
 
-    {{-- 2. Menu Transaksi --}}
-    @php $isTransaksi = request()->routeIs('transaksi-bank') || request()->routeIs('vouchers'); @endphp
-    <div class="relative flex items-center justify-center w-full h-full">
+    {{-- 2. Menu Transaksi (Tengah) --}}
+    @php $isTransaksi = request()->routeIs('transaksi-bank*') || request()->routeIs('transaksi_banks.*') || request()->routeIs('vouchers'); @endphp
+    <div class="relative flex-1 flex items-center justify-center h-full">
         <button type="button" x-on:click="transaksiOpen = !transaksiOpen; laporanOpen = false"
             class="relative flex flex-col items-center justify-center w-full h-full transition-all duration-300 outline-none {{ $isTransaksi ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600' }}">
 
@@ -175,7 +175,7 @@
             @endif
         </button>
 
-        <!-- Dropup Transaksi (Light Theme) -->
+        <!-- Dropup Transaksi (Tengah) -->
         <div x-show="transaksiOpen" x-cloak x-on:click.outside="transaksiOpen = false"
             x-transition:enter="transition ease-out duration-200"
             x-transition:enter-start="opacity-0 translate-y-3 scale-95"
@@ -183,11 +183,11 @@
             x-transition:leave="transition ease-in duration-150"
             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
             x-transition:leave-end="opacity-0 translate-y-3 scale-95"
-            class="absolute bottom-[calc(100%+12px)] left-1/2 -translate-x-1/2 w-52 bg-white backdrop-blur-xl border border-slate-200 rounded-[1.5rem] shadow-2xl p-2 overflow-hidden">
+            class="absolute bottom-[calc(100%+16px)] left-1/2 -translate-x-1/2 w-48 bg-white backdrop-blur-xl border border-slate-200 rounded-[1.2rem] shadow-2xl p-2 overflow-hidden origin-bottom">
 
-            @php $isTxBank = request()->routeIs('transaksi-bank'); @endphp
+            @php $isTxBank = request()->routeIs('transaksi-bank*') || request()->routeIs('transaksi_banks.*'); @endphp
             <a href="{{ route('transaksi-bank') }}"
-                class="flex items-center gap-3 px-4 py-3.5 text-sm rounded-xl transition-colors duration-200 {{ $isTxBank ? 'bg-blue-50 text-blue-700 font-bold' : 'text-slate-700 hover:bg-slate-50' }}">
+                class="flex items-center gap-3 px-3 py-3 text-sm rounded-xl transition-colors duration-200 {{ $isTxBank ? 'bg-blue-50 text-blue-700 font-bold' : 'text-slate-700 hover:bg-slate-50' }}">
                 <div class="p-1.5 rounded-lg {{ $isTxBank ? 'bg-blue-200/50' : 'bg-slate-100 text-slate-500' }}">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
@@ -196,25 +196,12 @@
                 </div>
                 Transaksi Bank
             </a>
-
-            {{-- @php $isTxKonter = request()->routeIs('vouchers'); @endphp
-            <a href="{{ route('vouchers') }}"
-                class="flex items-center gap-3 px-4 py-3.5 text-sm rounded-xl transition-colors duration-200 mt-1 {{ $isTxKonter ? 'bg-blue-50 text-blue-700 font-bold' : 'text-slate-700 hover:bg-slate-50' }}">
-                <div
-                    class="p-1.5 rounded-lg {{ $isTxKonter ? 'bg-blue-200/50' : 'bg-slate-100 text-slate-500' }}">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                            d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                    </svg>
-                </div>
-                Transaksi Konter
-            </a> --}}
         </div>
     </div>
 
-    {{-- 3. Menu Laporan --}}
+    {{-- 3. Menu Laporan (Kanan) --}}
     @php $isLaporan = request()->routeIs('laporan-bank') || request()->routeIs('laporan-bank.rekap') || request()->routeIs('laporan_konter'); @endphp
-    <div class="relative flex items-center justify-center w-full h-full">
+    <div class="relative flex-1 flex items-center justify-center h-full">
         <button type="button" x-on:click="laporanOpen = !laporanOpen; transaksiOpen = false"
             class="relative flex flex-col items-center justify-center w-full h-full transition-all duration-300 outline-none {{ $isLaporan ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600' }}">
 
@@ -234,7 +221,8 @@
             @endif
         </button>
 
-        <!-- Dropup Laporan (Light Theme) -->
+        <!-- Dropup Laporan (Kanan) -->
+        {{-- Menggunakan right-0 dan origin-bottom-right agar menempel di sisi kanan --}}
         <div x-show="laporanOpen" x-cloak x-on:click.outside="laporanOpen = false"
             x-transition:enter="transition ease-out duration-200"
             x-transition:enter-start="opacity-0 translate-y-3 scale-95"
@@ -242,11 +230,11 @@
             x-transition:leave="transition ease-in duration-150"
             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
             x-transition:leave-end="opacity-0 translate-y-3 scale-95"
-            class="absolute bottom-[calc(100%+12px)] left-1/2 -translate-x-1/2 w-52 bg-white backdrop-blur-xl border border-slate-200 rounded-[1.5rem] shadow-2xl p-2 overflow-hidden">
+            class="absolute bottom-[calc(100%+16px)] right-0 w-48 bg-white backdrop-blur-xl border border-slate-200 rounded-[1.2rem] shadow-2xl p-2 overflow-hidden origin-bottom-right">
 
             @php $isLapBank = request()->routeIs('laporan-bank') || request()->routeIs('laporan-bank.rekap'); @endphp
             <a href="{{ route('laporan-bank') }}"
-                class="flex items-center gap-3 px-4 py-3.5 text-sm rounded-xl transition-colors duration-200 {{ $isLapBank ? 'bg-blue-50 text-blue-700 font-bold' : 'text-slate-700 hover:bg-slate-50' }}">
+                class="flex items-center gap-3 px-3 py-3 text-sm rounded-xl transition-colors duration-200 {{ $isLapBank ? 'bg-blue-50 text-blue-700 font-bold' : 'text-slate-700 hover:bg-slate-50' }}">
                 <div class="p-1.5 rounded-lg {{ $isLapBank ? 'bg-blue-200/50' : 'bg-slate-100 text-slate-500' }}">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
@@ -255,19 +243,6 @@
                 </div>
                 Laporan Bank
             </a>
-
-            {{-- @php $isLapKonter = request()->routeIs('laporan_konter'); @endphp
-            <a href="{{ route('laporan_konter') }}"
-                class="flex items-center gap-3 px-4 py-3.5 text-sm rounded-xl transition-colors duration-200 mt-1 {{ $isLapKonter ? 'bg-blue-50 text-blue-700 font-bold' : 'text-slate-700 hover:bg-slate-50' }}">
-                <div
-                    class="p-1.5 rounded-lg {{ $isLapKonter ? 'bg-blue-200/50' : 'bg-slate-100 text-slate-500' }}">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                </div>
-                Laporan Konter
-            </a> --}}
         </div>
     </div>
 
