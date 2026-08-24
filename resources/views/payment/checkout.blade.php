@@ -7,6 +7,7 @@
     <title>Checkout — Omzetly.id</title>
     <link rel="icon" href="{{ asset('assets/images/omzetly.png') }}" type="image/png">
     <script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{fontFamily:{sans:["Figtree","Poppins","ui-sans-serif","system-ui"]}}}}</script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">

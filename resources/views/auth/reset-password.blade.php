@@ -10,9 +10,11 @@
     <link rel="icon" href="{{ asset('assets/images/favicon.ico') }}" type="image/png">
 
     @if (app()->isProduction())
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        <script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{fontFamily:{sans:["Figtree","Poppins","ui-sans-serif","system-ui"]}}}}</script>
     @else
         <script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{fontFamily:{sans:["Figtree","Poppins","ui-sans-serif","system-ui"]}}}}</script>
     @endif
 </head>
 

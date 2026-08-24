@@ -10,6 +10,7 @@
     {{-- <link rel="icon" href="{{ asset('assets/images/') }}" type="image/svg+xml"> --}}
     <link rel="manifest" href="{{ asset('assets/images/favicon.png') }}" />
     <script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{fontFamily:{sans:["Figtree","Poppins","ui-sans-serif","system-ui"]}}}}</script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"

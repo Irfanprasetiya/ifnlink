@@ -13,7 +13,6 @@ class PlanController extends Controller
     public function index()
     {
         $plans = Plan::orderBy('harga', 'asc')->get();
-
         return view('developer.paket.index', compact('plans'));
     }
 
@@ -26,7 +25,7 @@ class PlanController extends Controller
             'fitur' => 'nullable|string',
         ]);
 
-        Plan::create([
+        $plan = Plan::create([
             'nama_paket' => $request->nama_paket,
             'slug' => Str::slug($request->nama_paket),
             'harga' => $request->harga,
@@ -36,7 +35,6 @@ class PlanController extends Controller
         ]);
 
         ActivityLog::log('create', 'paket', "Tambah paket {$plan->nama_paket}");
-
 
         return back()->with('success', 'Paket berhasil ditambahkan');
     }
@@ -74,6 +72,7 @@ class PlanController extends Controller
 
     public function destroy(Plan $plan)
     {
+        $nama = $plan->nama_paket;
         $plan->delete();
 
         ActivityLog::log('delete', 'paket', "Hapus paket {$nama}");

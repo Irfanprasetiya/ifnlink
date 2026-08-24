@@ -9,6 +9,7 @@
     <link rel="icon" href="{{ asset('assets/images/omzetly.png') }}" type="image/png">
     <title>Omzetly.id - @yield('title')</title>
     <script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{fontFamily:{sans:["Figtree","Poppins","ui-sans-serif","system-ui"]}}}}</script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
         [x-cloak] {

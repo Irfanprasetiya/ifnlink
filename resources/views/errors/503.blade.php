@@ -7,6 +7,7 @@
     <title>Sistem Sedang Pemeliharaan</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{fontFamily:{sans:["Figtree","Poppins","ui-sans-serif","system-ui"]}}}}</script>
 </head>
 
 <body class="bg-slate-50 font-sans antialiased text-slate-800">

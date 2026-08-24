@@ -43,7 +43,7 @@ class LandingPageController extends Controller
         // =====================
         // SALDO KAS (pakai query SUM(debit) - SUM(kredit) — sama dengan halaman transaksi)
         // =====================
-        $bankId = 7; // ID Kas
+        $bankId = 1; // ID Kas
         $tenantId = $user->tenant_id;
         $cabangId = $user->cabang_id;
         $userId = $user->id;
