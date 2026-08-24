@@ -31,6 +31,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Nonaktifkan CSRF untuk route Midtrans
         $middleware->validateCsrfTokens(except: [
             '/midtrans/notification',
+	    '/deploy',
         ]);
     })
 

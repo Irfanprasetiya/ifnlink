@@ -286,9 +286,25 @@ Route::middleware(['auth', 'prevent-back'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+
+
 /*
 |--------------------------------------------------------------------------
 | AUTH ROUTES (Breeze)
 |--------------------------------------------------------------------------
 */
 require __DIR__ . '/auth.php';
+
+Route::post('/deploy', function () {
+    $secret = 'rahasia123';
+    $signature = request()->header('X-Hub-Signature-256');
+    $expected = 'sha256=' . hash_hmac('sha256', request()->getContent(), $secret);
+
+    if (!hash_equals($expected, $signature)) {
+        return response()->json(['error' => 'Invalid signature'], 403);
+    }
+
+    exec('nohup /var/www/deploy.sh > /var/www/deploy.log 2>&1 &');
+
+    return response()->json(['status' => 'Deploy started']);
+});
