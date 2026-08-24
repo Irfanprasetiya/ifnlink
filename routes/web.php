@@ -61,6 +61,13 @@ use App\Http\Controllers\SaldoGudangController;
 */
 Route::get('/', [LandingController::class, 'index'])->name('landing.index');
 Route::get('/pricing', [LandingController::class, 'pricing'])->name('landing.pricing');
+Route::get('/kebijakan-privasi', function () {
+    return view('legal.kebijakan-privasi');
+})->name('kebijakan-privasi');
+
+Route::get('/syarat-ketentuan', function () {
+    return view('legal.syarat-ketentuan');
+})->name('syarat-ketentuan');
 
 Route::get('/register-agen', [TenantController::class, 'showRegister'])
     ->name('agen.register')
