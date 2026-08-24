@@ -291,4 +291,4 @@ Route::middleware(['auth', 'prevent-back'])->group(function () {
 | AUTH ROUTES (Breeze)
 |--------------------------------------------------------------------------
 */
-require __DIR__ . '/auth.php';
+require __DIR__ . '/auth.php';// Test CI/CD
