@@ -1,7 +1,5 @@
 <?php
 
-// app/Http/Middleware/RedirectIfAuthenticatedByRole.php
-
 namespace App\Http\Middleware;
 
 use Closure;
@@ -13,7 +11,8 @@ class RedirectIfAuthenticatedByRole
     {
         if (auth()->check()) {
             return match (auth()->user()->role) {
-                'admin' => redirect()->route('dashboard'),
+                'developer' => redirect()->route('developer.dashboard'),
+                'super_admin', 'admin' => redirect()->route('dashboard'),
                 'user' => redirect()->route('main'),
                 default => redirect('/'),
             };
@@ -22,4 +21,3 @@ class RedirectIfAuthenticatedByRole
         return $next($request);
     }
 }
-
