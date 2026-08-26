@@ -7,6 +7,7 @@
     <title>Omzetly.id — Manajemen Transaksi Agen Digital Berbasis Cloud</title>
     <meta name="description"
         content="Platform cloud untuk owner agen digital: catat transaksi, hitung laba otomatis, dan pantau performa cabang dari mana saja." />
+    <meta name="google-site-verification" content="BEdzi2zW-7tUjaCJNDfToBYMbPc2lxiUWRskPdnmXQc" />
     {{-- <link rel="icon" href="{{ asset('assets/images/') }}" type="image/svg+xml"> --}}
     <link rel="manifest" href="{{ asset('assets/images/favicon.png') }}" />
     <script src="https://cdn.tailwindcss.com"></script>

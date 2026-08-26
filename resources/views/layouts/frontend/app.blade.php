@@ -5,7 +5,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
     <title>Omzetly.id — Manajemen Transaksi Agen Digital</title>
-    <meta name="description" content="Platform cloud untuk owner agen digital: catat transaksi, hitung laba otomatis, dan pantau performa cabang dari mana saja.">
+    <meta name="description"
+        content="Platform cloud untuk owner agen digital: catat transaksi, hitung laba otomatis, dan pantau performa cabang dari mana saja.">
+    <meta name="google-site-verification" content="BEdzi2zW-7tUjaCJNDfToBYMbPc2lxiUWRskPdnmXQc" />
 
     {{-- Alpine.js - WAJIB untuk dropdown --}}
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
