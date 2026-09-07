@@ -28,7 +28,7 @@
                     <li class="relative" x-data="{ open: false }" x-on:click.outside="open = false">
                         <button type="button" x-on:click="open = !open"
                             class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors focus:outline-none
-                                {{ request()->routeIs('transaksi-bank*') || request()->routeIs('transaksi_banks.*') || request()->routeIs('vouchers') ? 'text-white font-semibold bg-white/10' : 'text-blue-200 hover:text-white hover:bg-white/10' }}">
+                                {{ request()->routeIs('transaksi-bank*') || request()->routeIs('transaksi_banks.*') || request()->routeIs('pos.index') || request()->routeIs('vouchers') ? 'text-white font-semibold bg-white/10' : 'text-blue-200 hover:text-white hover:bg-white/10' }}">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"
                                 stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                                 <path d="M21 12H3"></path>
@@ -45,12 +45,12 @@
 
                         <div x-show="open" x-cloak
                             class="absolute left-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-1.5 z-30">
-                            {{-- <a href="{{ route('vouchers') }}"
-                                class="flex items-center justify-between px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors
-                                    {{ request()->routeIs('vouchers') ? 'text-blue-600 font-semibold' : '' }}">
-                                Transaksi Konter
-                                <span class="text-xs text-gray-400 bg-gray-100 rounded px-1.5 py-0.5">Beta</span>
-                            </a> --}}
+                            @php $isPos = request()->routeIs('pos.index'); @endphp
+                            <a href="{{ route('pos.index') }}"
+                                class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors
+                                    {{ $isPos ? 'text-blue-600 font-semibold' : '' }}">
+                                POS / Input Transaksi
+                            </a>
                             <a href="{{ route('transaksi-bank') }}"
                                 class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors
                                     {{ request()->routeIs('transaksi-bank*') || request()->routeIs('transaksi_banks.*') ? 'text-blue-600 font-semibold' : '' }}">
@@ -63,7 +63,7 @@
                     <li class="relative" x-data="{ open: false }" x-on:click.outside="open = false">
                         <button type="button" x-on:click="open = !open"
                             class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors focus:outline-none
-                                {{ request()->routeIs('laporan-bank') || request()->routeIs('laporan-bank.rekap') || request()->routeIs('laporan_konter') ? 'text-white font-semibold bg-white/10' : 'text-blue-200 hover:text-white hover:bg-white/10' }}">
+                                {{ request()->routeIs('laporan-bank') || request()->routeIs('laporan-bank.rekap') || request()->routeIs('laporan_konter') || request()->routeIs('pos.laporan') ? 'text-white font-semibold bg-white/10' : 'text-blue-200 hover:text-white hover:bg-white/10' }}">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"
                                 stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                                 <path
@@ -79,17 +79,33 @@
 
                         <div x-show="open" x-cloak
                             class="absolute left-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-1.5 z-30">
-                            {{-- <a href="{{ route('laporan_konter') }}"
+                            @php $isLapPos = request()->routeIs('pos.laporan'); @endphp
+                            <a href="{{ route('pos.laporan') }}"
                                 class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors
-                                    {{ request()->routeIs('laporan_konter') ? 'text-blue-600 font-semibold' : '' }}">
-                                Laporan Konter
-                            </a> --}}
+                                    {{ $isLapPos ? 'text-blue-600 font-semibold' : '' }}">
+                                Laporan POS
+                            </a>
                             <a href="{{ route('laporan-bank') }}"
                                 class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors
                                     {{ request()->routeIs('laporan-bank') || request()->routeIs('laporan-bank.rekap') ? 'text-blue-600 font-semibold' : '' }}">
                                 Laporan Bank
                             </a>
                         </div>
+                    </li>
+
+                    {{-- Retur --}}
+                    <li>
+                        @php $isRetur = request()->routeIs('retur.*'); @endphp
+                        <a href="{{ route('retur.riwayat') }}"
+                            class="flex items-center gap-1.5 px-3 py-2 rounded-lg transition-colors
+            {{ $isRetur ? 'text-white font-semibold bg-white/10' : 'text-blue-200 hover:text-white hover:bg-white/10' }}">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                <path
+                                    d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14v-2a4 4 0 00-3-3.87M4 7a3 3 0 013-3h1m8 0a3 3 0 013 3v1" />
+                            </svg>
+                            Retur
+                        </a>
                     </li>
                 </ul>
             </div>
@@ -126,7 +142,7 @@
 </div>
 </nav>
 
-{{-- Mobile Nav Bottom (Clean Light Dock - Menyatu dengan Tema Web) --}}
+{{-- Mobile Nav Bottom --}}
 <div class="fixed md:hidden bottom-0 inset-x-0 z-50 pointer-events-none" x-data="{ transaksiOpen: false, laporanOpen: false }">
 
 <div
@@ -153,8 +169,8 @@
         @endif
     </a>
 
-    {{-- 2. Menu Transaksi (Tengah) --}}
-    @php $isTransaksi = request()->routeIs('transaksi-bank*') || request()->routeIs('transaksi_banks.*') || request()->routeIs('vouchers'); @endphp
+    {{-- 2. Menu Transaksi --}}
+    @php $isTransaksi = request()->routeIs('transaksi-bank*') || request()->routeIs('transaksi_banks.*') || request()->routeIs('pos.index') || request()->routeIs('vouchers'); @endphp
     <div class="relative flex-1 flex items-center justify-center h-full">
         <button type="button" x-on:click="transaksiOpen = !transaksiOpen; laporanOpen = false"
             class="relative flex flex-col items-center justify-center w-full h-full transition-all duration-300 outline-none {{ $isTransaksi ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600' }}">
@@ -175,7 +191,6 @@
             @endif
         </button>
 
-        <!-- Dropup Transaksi (Tengah) -->
         <div x-show="transaksiOpen" x-cloak x-on:click.outside="transaksiOpen = false"
             x-transition:enter="transition ease-out duration-200"
             x-transition:enter-start="opacity-0 translate-y-3 scale-95"
@@ -184,6 +199,19 @@
             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
             x-transition:leave-end="opacity-0 translate-y-3 scale-95"
             class="absolute bottom-[calc(100%+16px)] left-1/2 -translate-x-1/2 w-48 bg-white backdrop-blur-xl border border-slate-200 rounded-[1.2rem] shadow-2xl p-2 overflow-hidden origin-bottom">
+
+            @php $isPosMobile = request()->routeIs('pos.index'); @endphp
+            <a href="{{ route('pos.index') }}"
+                class="flex items-center gap-3 px-3 py-3 text-sm rounded-xl transition-colors duration-200 {{ $isPosMobile ? 'bg-blue-50 text-blue-700 font-bold' : 'text-slate-700 hover:bg-slate-50' }}">
+                <div
+                    class="p-1.5 rounded-lg {{ $isPosMobile ? 'bg-blue-200/50' : 'bg-slate-100 text-slate-500' }}">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                            d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                POS / Input Transaksi
+            </a>
 
             @php $isTxBank = request()->routeIs('transaksi-bank*') || request()->routeIs('transaksi_banks.*'); @endphp
             <a href="{{ route('transaksi-bank') }}"
@@ -199,8 +227,8 @@
         </div>
     </div>
 
-    {{-- 3. Menu Laporan (Kanan) --}}
-    @php $isLaporan = request()->routeIs('laporan-bank') || request()->routeIs('laporan-bank.rekap') || request()->routeIs('laporan_konter'); @endphp
+    {{-- 3. Menu Laporan --}}
+    @php $isLaporan = request()->routeIs('laporan-bank') || request()->routeIs('laporan-bank.rekap') || request()->routeIs('laporan_konter') || request()->routeIs('pos.laporan'); @endphp
     <div class="relative flex-1 flex items-center justify-center h-full">
         <button type="button" x-on:click="laporanOpen = !laporanOpen; transaksiOpen = false"
             class="relative flex flex-col items-center justify-center w-full h-full transition-all duration-300 outline-none {{ $isLaporan ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600' }}">
@@ -221,8 +249,6 @@
             @endif
         </button>
 
-        <!-- Dropup Laporan (Kanan) -->
-        {{-- Menggunakan right-0 dan origin-bottom-right agar menempel di sisi kanan --}}
         <div x-show="laporanOpen" x-cloak x-on:click.outside="laporanOpen = false"
             x-transition:enter="transition ease-out duration-200"
             x-transition:enter-start="opacity-0 translate-y-3 scale-95"
@@ -231,6 +257,19 @@
             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
             x-transition:leave-end="opacity-0 translate-y-3 scale-95"
             class="absolute bottom-[calc(100%+16px)] right-0 w-48 bg-white backdrop-blur-xl border border-slate-200 rounded-[1.2rem] shadow-2xl p-2 overflow-hidden origin-bottom-right">
+
+            @php $isLapPosMobile = request()->routeIs('pos.laporan'); @endphp
+            <a href="{{ route('pos.laporan') }}"
+                class="flex items-center gap-3 px-3 py-3 text-sm rounded-xl transition-colors duration-200 {{ $isLapPosMobile ? 'bg-blue-50 text-blue-700 font-bold' : 'text-slate-700 hover:bg-slate-50' }}">
+                <div
+                    class="p-1.5 rounded-lg {{ $isLapPosMobile ? 'bg-blue-200/50' : 'bg-slate-100 text-slate-500' }}">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                            d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                </div>
+                Laporan POS
+            </a>
 
             @php $isLapBank = request()->routeIs('laporan-bank') || request()->routeIs('laporan-bank.rekap'); @endphp
             <a href="{{ route('laporan-bank') }}"
@@ -245,6 +284,19 @@
             </a>
         </div>
     </div>
+
+    {{-- Retur Mobile --}}
+    @php $isReturMobile = request()->routeIs('retur.*'); @endphp
+    <a href="{{ route('retur.riwayat') }}"
+        class="relative flex-1 flex flex-col items-center justify-center h-full transition-all duration-300 {{ $isReturMobile ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600' }}">
+        <div class="flex flex-col items-center gap-1">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" viewBox="0 0 24 24">
+                <path d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14v-2a4 4 0 00-3-3.87" />
+            </svg>
+            <span class="text-[10px] {{ $isReturMobile ? 'font-bold' : 'font-medium' }}">Retur</span>
+        </div>
+    </a>
 
 </div>
 </div>

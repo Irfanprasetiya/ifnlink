@@ -5,20 +5,45 @@ namespace App\Http\Controllers;
 use App\Models\Kategori;
 use App\Models\Voucher;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
+/**
+ * VoucherController
+ * 
+ * CATATAN: "Voucher" di sini adalah PRODUK UMUM.
+ * Bisa digunakan untuk:
+ * - Voucher pulsa
+ * - Alat listrik
+ * - Barang kelontong
+ * - dll.
+ */
 class VoucherController extends Controller
 {
     public function index()
     {
-        $vouchers = Voucher::with('kategori')->get();
-        $kategoris = Kategori::all();
+        $user = Auth::user();
+
+        // ✅ Filter multi-tenant: produk milik tenant + data master (tenant_id NULL)
+        $vouchers = Voucher::with('kategori')
+            ->where('tenant_id', $user->tenant_id)
+            ->orWhereNull('tenant_id')
+            ->get();
+
+        $kategoris = Kategori::where('tenant_id', $user->tenant_id)
+            ->orWhereNull('tenant_id')
+            ->get();
 
         return view('data_master.vouchers.index', compact('vouchers', 'kategoris'));
     }
 
     public function create()
     {
-        $kategoris = Kategori::all();
+        $user = Auth::user();
+
+        $kategoris = Kategori::where('tenant_id', $user->tenant_id)
+            ->orWhereNull('tenant_id')
+            ->get();
+
         return view('data_master.vouchers.create', compact('kategoris'));
     }
 
@@ -32,20 +57,26 @@ class VoucherController extends Controller
             'keterangan' => 'nullable|string',
         ]);
 
-        // Alternatif sementara: beri nilai default jika keterangan null
-        $data = $request->all();
-        $data['keterangan'] = $data['keterangan'] ?? '-';
+        Voucher::create([
+            'nama_produk' => $request->nama_produk,
+            'harga_beli' => $request->harga_beli,
+            'harga_jual' => $request->harga_jual,
+            'kategori_id' => $request->kategori_id,
+            'keterangan' => $request->keterangan ?? '-',
+            'tenant_id' => Auth::user()->tenant_id, // ✅ Simpan tenant_id
+        ]);
 
-        Voucher::create($data);
-
-        // Voucher::create($request->all());
-
-        return redirect()->route('data_master.vouchers.index')->with('success', 'Voucher berhasil ditambahkan.');
+        return redirect()->route('data_master.vouchers.index')->with('success', 'Produk berhasil ditambahkan.');
     }
 
     public function edit(Voucher $voucher)
     {
-        $kategoris = Kategori::all();
+        $user = Auth::user();
+
+        $kategoris = Kategori::where('tenant_id', $user->tenant_id)
+            ->orWhereNull('tenant_id')
+            ->get();
+
         return view('data_master.vouchers.edit', compact('voucher', 'kategoris'));
     }
 
@@ -59,14 +90,20 @@ class VoucherController extends Controller
             'keterangan' => 'nullable|string',
         ]);
 
-        $voucher->update($request->all());
+        $voucher->update([
+            'nama_produk' => $request->nama_produk,
+            'harga_beli' => $request->harga_beli,
+            'harga_jual' => $request->harga_jual,
+            'kategori_id' => $request->kategori_id,
+            'keterangan' => $request->keterangan ?? '-',
+        ]);
 
-        return redirect()->route('data_master.vouchers.index')->with('success', 'Voucher berhasil diperbarui.');
+        return redirect()->route('data_master.vouchers.index')->with('success', 'Produk berhasil diperbarui.');
     }
 
     public function destroy(Voucher $voucher)
     {
         $voucher->delete();
-        return redirect()->route('data_master.vouchers.index')->with('success', 'Voucher berhasil dihapus.');
+        return redirect()->route('data_master.vouchers.index')->with('success', 'Produk berhasil dihapus.');
     }
 }

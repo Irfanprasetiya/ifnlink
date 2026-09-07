@@ -43,6 +43,15 @@
                 $trxDiff = $todayTrx - $yesterdayTrx;
                 $trxUp = $trxDiff > 0;
                 $trxDown = $trxDiff < 0;
+
+                // ✅ Kalkulasi POS
+                $todayPos = App\Models\Penjualan::where('user_id', Auth::id())
+                    ->whereDate('created_at', now()->toDateString())
+                    ->count();
+
+                $todayPosTotal = App\Models\Penjualan::where('user_id', Auth::id())
+                    ->whereDate('created_at', now()->toDateString())
+                    ->sum('total_setelah_diskon');
             @endphp
 
             {{-- Grid 1: Transaksi & Perbandingan --}}
@@ -95,6 +104,31 @@
                         @endif
                     </div>
                 </div>
+            </div>
+
+            {{-- ✅ Card POS --}}
+            <div class="grid grid-cols-2 gap-3 mb-4">
+                <a href="{{ route('pos.index') }}"
+                    class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 flex flex-col justify-between relative overflow-hidden hover:border-blue-300 active:scale-[0.98] transition-all">
+                    <div class="absolute -right-4 -top-4 w-16 h-16 bg-indigo-50 rounded-full blur-xl opacity-60"></div>
+                    <p class="text-xs font-semibold text-slate-500 mb-3 relative z-10">Transaksi POS Hari Ini</p>
+                    <div class="flex items-end justify-between relative z-10">
+                        <p class="text-2xl sm:text-3xl font-extrabold text-slate-800 leading-none">{{ $todayPos }}</p>
+                        @if ($todayPos > 0)
+                            <span
+                                class="text-[10px] font-bold uppercase tracking-wider text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded-md">POS</span>
+                        @endif
+                    </div>
+                </a>
+
+                <a href="{{ route('pos.laporan') }}"
+                    class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 flex flex-col justify-between relative overflow-hidden hover:border-indigo-300 active:scale-[0.98] transition-all">
+                    <div class="absolute -right-4 -top-4 w-16 h-16 bg-indigo-50 rounded-full blur-xl opacity-60"></div>
+                    <p class="text-xs font-semibold text-slate-500 mb-3 relative z-10">Omzet POS Hari Ini</p>
+                    <p class="text-sm sm:text-base font-extrabold text-indigo-600 truncate relative z-10">
+                        Rp {{ number_format($todayPosTotal, 0, ',', '.') }}
+                    </p>
+                </a>
             </div>
 
             <!-- Kartu Utama: Saldo Kas (Hero Card) -->

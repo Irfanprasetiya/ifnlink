@@ -38,8 +38,15 @@
                         <x-sidebar-menu label="Transaksi Agen" route="trx-bank.index" active="trx-bank.*"
                             :locked="$isLocked" />
                     </x-sidebar-menu-dropdown>
+
+                    {{-- ✅ MENU RETUR --}}
+                    <x-sidebar-menu label="Daftar Retur" route="admin.retur.index" icon="laporan-transaksi"
+                        active="admin.retur*" :locked="$isLocked" />
+
                     <x-sidebar-menu-dropdown label="Laporan Transaksi" icon="laporan-transaksi" :locked="$isLocked">
                         <x-sidebar-menu label="Laporan Agen" route="laporan-bank.admin.index" active="laporan-bank*"
+                            :locked="$isLocked" />
+                        <x-sidebar-menu label="Laporan POS" route="admin.pos.laporan" active="admin.pos.laporan*"
                             :locked="$isLocked" />
                     </x-sidebar-menu-dropdown>
                     <x-sidebar-menu-dropdown label="Data Master" icon="data-master" :locked="$isLocked">
@@ -47,6 +54,14 @@
                             :locked="$isLocked" />
                         <x-sidebar-menu label="Daftar Bank" route="data_master.daftar_bank.index"
                             active="data_master.daftar_bank*" :locked="$isLocked" />
+                        {{-- ✅ MENU DATA MASTER TAMBAHAN --}}
+                        <x-sidebar-menu label="Kategori" route="data_master.kategoris.index" active="data_master.kategoris*"
+                            :locked="$isLocked" />
+                        <x-sidebar-menu label="Produk" route="data_master.vouchers.index" active="data_master.vouchers*"
+                            :locked="$isLocked" />
+                        <x-sidebar-menu label="Stok Produk" route="data_master.produk_konter.index"
+                            active="data_master.produk_konter*" :locked="$isLocked" />
+                        {{-- ============================ --}}
                     </x-sidebar-menu-dropdown>
 
                     @if (Auth::user()->tenant->plan && Auth::user()->tenant->plan->harga > 0)
@@ -85,8 +100,15 @@
                         <x-sidebar-menu label="Transaksi Saldo" route="trx-bank.index" active="trx-bank.*"
                             :locked="$isLocked" />
                     </x-sidebar-menu-dropdown>
+
+                    {{-- ✅ MENU RETUR --}}
+                    <x-sidebar-menu label="Daftar Retur" route="admin.retur.index" icon="laporan-transaksi"
+                        active="admin.retur*" :locked="$isLocked" />
+
                     <x-sidebar-menu-dropdown label="Laporan Transaksi" icon="laporan-transaksi" :locked="$isLocked">
                         <x-sidebar-menu label="Laporan Agen" route="laporan-bank.admin.index" active="laporan-bank*"
+                            :locked="$isLocked" />
+                        <x-sidebar-menu label="Laporan POS" route="admin.pos.laporan" active="admin.pos.laporan*"
                             :locked="$isLocked" />
                     </x-sidebar-menu-dropdown>
                     <x-sidebar-menu-dropdown label="Data Master" icon="data-master" :locked="$isLocked">
@@ -96,6 +118,14 @@
                             active="data_master.daftar_bank*" :locked="$isLocked" />
                         <x-sidebar-menu label="Akun Pengeluaran" route="data_master.akun_pengeluaran.index"
                             active="data_master.akun_pengeluaran*" :locked="$isLocked" />
+                        {{-- ✅ MENU DATA MASTER TAMBAHAN --}}
+                        <x-sidebar-menu label="Kategori" route="data_master.kategoris.index"
+                            active="data_master.kategoris*" :locked="$isLocked" />
+                        <x-sidebar-menu label="Produk" route="data_master.vouchers.index" active="data_master.vouchers*"
+                            :locked="$isLocked" />
+                        <x-sidebar-menu label="Stok Produk" route="data_master.produk_konter.index"
+                            active="data_master.produk_konter*" :locked="$isLocked" />
+                        {{-- ============================ --}}
                     </x-sidebar-menu-dropdown>
                     <x-sidebar-menu label="Manajemen Akun" route="users.index" icon="users" active="users*"
                         :locked="$isLocked" />

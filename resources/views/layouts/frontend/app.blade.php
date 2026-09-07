@@ -8,6 +8,7 @@
     <meta name="description"
         content="Platform cloud untuk owner agen digital: catat transaksi, hitung laba otomatis, dan pantau performa cabang dari mana saja.">
     <meta name="google-site-verification" content="BEdzi2zW-7tUjaCJNDfToBYMbPc2lxiUWRskPdnmXQc" />
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     {{-- Alpine.js - WAJIB untuk dropdown --}}
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>

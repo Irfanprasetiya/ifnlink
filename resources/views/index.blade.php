@@ -8,13 +8,15 @@
     <meta name="description"
         content="Platform cloud untuk owner agen digital: catat transaksi, hitung laba otomatis, dan pantau performa cabang dari mana saja." />
     <meta name="google-site-verification" content="BEdzi2zW-7tUjaCJNDfToBYMbPc2lxiUWRskPdnmXQc" />
-    {{-- <link rel="icon" href="{{ asset('assets/images/') }}" type="image/svg+xml"> --}}
-    <link rel="manifest" href="{{ asset('assets/images/favicon.png') }}" />
-    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="icon" href="{{ asset('assets/images/logo/omzetly.png') }}" type="image/png">
+    <link rel="manifest" href="{{ asset('assets/images/omzetly.png') }}" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
         rel="stylesheet" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {

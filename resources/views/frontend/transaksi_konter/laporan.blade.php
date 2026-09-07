@@ -16,9 +16,7 @@
                         {{ Auth::user()->cabang->nama_cabang }}
                     </h2>
                 </div>
-                <!-- <div class="text-right text-sm lg:text-gray-800 select-none cursor-default max-sm:pt-3">
-                                                                                                                                                                                                                                                                                                                                                        Hallo {{ Auth::user()->name }}, Selamat Datang
-                                                                                                                                                                                                                                                                                                                                                    </div> -->
+            </div> -->
             </div>
             <!-- breadcrumb -->
             <x-breadcrumb />

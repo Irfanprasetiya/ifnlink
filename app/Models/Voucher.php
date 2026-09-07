@@ -1,40 +1,43 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
+/**
+ * Voucher (PRODUK UMUM)
+ * 
+ * CATATAN: Model ini untuk SEMUA produk, bukan hanya voucher.
+ * Bisa untuk: alat listrik, kelontong, pulsa, dll.
+ */
 class Voucher extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
+        'kategori_id',
         'nama_produk',
         'harga_beli',
         'harga_jual',
-        'kategori_id',
         'keterangan',
+        'tenant_id', // ✅ Multi-tenant
     ];
+
+    protected $casts = [
+        'harga_beli' => 'decimal:2',
+        'harga_jual' => 'decimal:2',
+    ];
+
+    public function tenant()
+    {
+        return $this->belongsTo(Tenant::class, 'tenant_id', 'id_tenant');
+    }
 
     public function kategori()
     {
         return $this->belongsTo(Kategori::class);
     }
 
-    public function produk_konter()
+    public function produkKonters()
     {
         return $this->hasMany(ProdukKonter::class);
     }
-
-    public function produk_konter_cabang()
-    {
-        return $this->hasMany(ProdukKonter::class)->where('cabang_id', auth()->user()->cabang_id);
-    }
-
-
-    // public function produk()
-    // {
-    //     return $this->belongsTo(Produk::class, 'produk_id');
-    // }
-
 }

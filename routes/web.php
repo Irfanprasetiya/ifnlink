@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminStokController;
 use App\Http\Controllers\Developer\PembayaranController;
 use Illuminate\Support\Facades\Route;
 
@@ -52,6 +53,8 @@ use App\Http\Controllers\ProfileController;
 
 // ==================== Controllers: Unused (keep for auth.php) ====================
 use App\Http\Controllers\PlanController;
+use App\Http\Controllers\PosController;
+use App\Http\Controllers\ReturController;
 use App\Http\Controllers\SaldoGudangController;
 
 /*
@@ -187,6 +190,12 @@ Route::middleware(['auth', 'check.pending', 'check.tenant.active', 'role:super_a
     Route::get('/get-users-by-cabang/{cabang_id}', [BankSaldoController::class, 'getUsersByCabang'])->name('get.users.by.cabang');
     Route::post('/cek-saldo-awal-bank', [BankSaldoController::class, 'cekSaldoAwal'])->name('cek.saldo.awal.bank');
 
+    // Stok Produk
+    Route::get('/admin/stok', [AdminStokController::class, 'index'])->name('admin.stok.index');
+    Route::get('/admin/stok/create', [AdminStokController::class, 'create'])->name('admin.stok.create');
+    Route::post('/admin/stok', [AdminStokController::class, 'store'])->name('admin.stok.store');
+    Route::get('/admin/stok/riwayat', [AdminStokController::class, 'riwayat'])->name('admin.stok.riwayat');
+
     // Manajemen Users
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::post('/users/register', [UserRegisterController::class, 'store'])->name('users.register');
@@ -232,6 +241,12 @@ Route::middleware(['auth', 'check.pending', 'check.tenant.active', 'role:super_a
     // Barang Masuk
     Route::resource('barang_masuk', BarangMasukController::class)->except(['show']);
 
+    Route::get('/admin/pos/laporan', [PosController::class, 'adminLaporan'])->name('admin.pos.laporan');
+    Route::delete('/admin/pos/{id}', [PosController::class, 'destroy'])->name('admin.pos.destroy');
+    Route::get('/admin/pos/{id}/edit', [PosController::class, 'edit'])->name('admin.pos.edit');
+    Route::put('/admin/pos/{id}/update', [PosController::class, 'update'])->name('admin.pos.update');
+
+
     // Laporan Bank Admin
     Route::get('/laporan-bank-admin', [LaporanBankAdminController::class, 'index'])->name('laporan-bank.admin.index');
     Route::get('/laporan_bank/rekap', [LaporanBankAdminController::class, 'rekap'])->name('laporan_bank.rekap');
@@ -250,6 +265,12 @@ Route::middleware(['auth', 'check.pending', 'check.tenant.active', 'role:super_a
     Route::get('/rekap', [RekapController::class, 'index'])->name('rekap.index');
     Route::get('/rekap/pdf', [RekapController::class, 'exportPdf'])->name('rekap.pdf');
     Route::get('/rekap/excel', [RekapController::class, 'exportExcel'])->name('rekap.excel');
+
+    // Retur Admin
+    Route::get('/admin/retur', [ReturController::class, 'index'])->name('admin.retur.index');
+    Route::get('/admin/retur/{id}', [ReturController::class, 'show'])->name('admin.retur.show');
+    Route::post('/admin/retur/{id}/approve', [ReturController::class, 'approve'])->name('admin.retur.approve');
+    Route::post('/admin/retur/{id}/reject', [ReturController::class, 'reject'])->name('admin.retur.reject');
 });
 
 /*
@@ -270,6 +291,18 @@ Route::middleware(['auth', 'role:user', 'check.tenant.active', 'prevent-back'])-
     Route::get('/transaksi-bank', [TransaksiBankController::class, 'index'])->name('transaksi-bank');
     Route::post('/transaksi-bank', [TransaksiBankController::class, 'store'])->name('transaksi_banks.store');
     Route::get('/transaksi-bank/detail/{bank_id}', [TransaksiBankController::class, 'detail'])->name('transaksi_banks.detail');
+
+    // ✅ POS Routes
+    Route::get('/pos', [PosController::class, 'index'])->name('pos.index');
+    Route::post('/pos', [PosController::class, 'store'])->name('pos.store');
+    Route::get('/pos/laporan', [PosController::class, 'laporan'])->name('pos.laporan');
+    Route::get('/pos/laporan/pdf', [PosController::class, 'laporanPdf'])->name('pos.laporan.pdf');
+    Route::get('/pos/struk/{kode}', [PosController::class, 'struk'])->name('pos.struk');
+
+    // Retur Routes
+    Route::get('/retur/create', [ReturController::class, 'create'])->name('retur.create');
+    Route::post('/retur', [ReturController::class, 'store'])->name('retur.store');
+    Route::get('/retur/riwayat', [ReturController::class, 'riwayat'])->name('retur.riwayat');
 
     Route::get('/laporanBank', [LaporanBankController::class, 'index'])->name('laporan-bank');
     Route::get('/laporan-bank/rekap', [LaporanBankController::class, 'rekap'])->name('laporan-bank.rekap');

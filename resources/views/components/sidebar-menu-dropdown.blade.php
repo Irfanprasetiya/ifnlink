@@ -44,7 +44,7 @@
             class="flex items-center w-full p-2.5 sm:p-3 lg:p-2.5 transition-all duration-200 rounded-xl group font-medium
                    {{ $childActive
                        ? 'bg-blue-600 text-white shadow-md font-semibold'
-                       : 'text-gray-700 hover:bg-blue-600 hover:text-white hover:shadow-md dark:text-gray-300 dark:hover:bg-blue-600 dark:hover:text-white' }}"
+                       : 'text-white hover:bg-blue-600 hover:text-white hover:shadow-md dark:text-gray-300 dark:hover:bg-blue-600 dark:hover:text-white' }}"
             :class="{ 'bg-blue-600 text-white shadow-md font-semibold': open }">
 
             @if ($icon)

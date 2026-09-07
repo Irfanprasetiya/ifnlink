@@ -3,13 +3,18 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Kategori extends Model
 {
-    use HasFactory;
+    protected $fillable = [
+        'nama_kategori',
+        'tenant_id', // ✅ Multi-tenant
+    ];
 
-    protected $fillable = ['nama_kategori'];
+    public function tenant()
+    {
+        return $this->belongsTo(Tenant::class, 'tenant_id', 'id_tenant');
+    }
 
     public function vouchers()
     {
