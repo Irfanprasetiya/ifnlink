@@ -122,12 +122,12 @@ class PosController extends Controller
 
                 // Catat history stok
                 StokHistory::create([
-                    'tenant_id' => $penjualan->tenant_id,
-                    'cabang_id' => $penjualan->cabang_id,
-                    'voucher_id' => $detail->voucher_id,
-                    'jenis' => 'masuk', // stok kembali
-                    'qty' => $detail->qty,
-                    'keterangan' => 'Hapus transaksi #' . ($penjualan->kode_transaksi ?? 'TRX-' . $penjualan->id),
+                    'tenant_id' => $user->tenant_id,
+                    'cabang_id' => $user->cabang_id,
+                    'voucher_id' => $item['voucher_id'],
+                    'jenis' => 'keluar',
+                    'qty' => $item['qty'],
+                    'keterangan' => 'Penjualan #' . $penjualan->kode_transaksi,
                     'user_id' => $user->id,
                 ]);
             }
