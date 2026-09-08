@@ -236,6 +236,107 @@ class PosController extends Controller
     }
 
     /**
+     * PDF laporan POS Admin
+     */
+    public function adminLaporanPdf(Request $request)
+    {
+        $user = Auth::user();
+
+        $startDate = $request->start_date ?? now()->toDateString();
+        $endDate = $request->end_date ?? now()->toDateString();
+
+        $query = Penjualan::with(['details.voucher.kategori', 'cabang', 'user'])
+            ->where('tenant_id', $user->tenant_id)
+            ->whereBetween('created_at', [
+                $startDate . ' 00:00:00',
+                $endDate . ' 23:59:59',
+            ]);
+
+        if ($request->cabang_id) {
+            $query->where('cabang_id', $request->cabang_id);
+        }
+
+        $penjualans = $query->orderBy('created_at', 'asc')->get();
+
+        $totalPenjualan = $penjualans->sum('total_setelah_diskon');
+        $totalTransaksi = $penjualans->count();
+        $totalProdukTerjual = PenjualanDetail::whereIn('penjualan_id', $penjualans->pluck('id'))->sum('qty');
+
+        $pdf = \PDF::loadView('admin_pos.pdf', compact(
+            'penjualans',
+            'totalPenjualan',
+            'totalTransaksi',
+            'totalProdukTerjual',
+            'startDate',
+            'endDate'
+        ));
+
+        return $pdf->download('laporan-pos-admin-' . $startDate . '-sd-' . $endDate . '.pdf');
+    }
+
+    /**
+     * Excel laporan POS Admin
+     */
+    public function adminLaporanExcel(Request $request)
+    {
+        $user = Auth::user();
+
+        $startDate = $request->start_date ?? now()->toDateString();
+        $endDate = $request->end_date ?? now()->toDateString();
+
+        $query = Penjualan::with(['details.voucher.kategori', 'cabang', 'user'])
+            ->where('tenant_id', $user->tenant_id)
+            ->whereBetween('created_at', [
+                $startDate . ' 00:00:00',
+                $endDate . ' 23:59:59',
+            ]);
+
+        if ($request->cabang_id) {
+            $query->where('cabang_id', $request->cabang_id);
+        }
+
+        $penjualans = $query->orderBy('created_at', 'asc')->get();
+
+        $filename = 'laporan-pos-admin-' . $startDate . '-sd-' . $endDate . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+
+        $callback = function () use ($penjualans) {
+            $file = fopen('php://output', 'w');
+            fputs($file, "\xEF\xBB\xBF");
+
+            fputcsv($file, ['No', 'ID Transaksi', 'Waktu', 'Produk', 'Kategori', 'Cabang', 'Kasir', 'Qty', 'Harga', 'Subtotal', 'Diskon', 'Total']);
+
+            $no = 1;
+            foreach ($penjualans as $p) {
+                foreach ($p->details as $d) {
+                    fputcsv($file, [
+                        $no++,
+                        $p->kode_transaksi ?? 'TRX-' . $p->id,
+                        $p->created_at->format('d/m/Y H:i'),
+                        $d->voucher->nama_produk ?? '-',
+                        $d->voucher->kategori->nama_kategori ?? '-',
+                        $p->cabang->nama_cabang ?? '-',
+                        $p->user->name ?? '-',
+                        $d->qty,
+                        $d->harga_satuan,
+                        $d->subtotal,
+                        $p->diskon,
+                        $p->total_setelah_diskon,
+                    ]);
+                }
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
      * Hapus transaksi POS (Admin)
      */
     public function destroy($id)

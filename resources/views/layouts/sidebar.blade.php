@@ -102,8 +102,8 @@
                     </x-sidebar-menu-dropdown>
 
                     {{-- ✅ MENU RETUR --}}
-                    <x-sidebar-menu label="Daftar Retur" route="admin.retur.index" icon="laporan-transaksi"
-                        active="admin.retur*" :locked="$isLocked" />
+                    <x-sidebar-menu label="Daftar Retur" route="admin.retur.index" icon="retur" active="admin.retur*"
+                        :locked="$isLocked" />
 
                     <x-sidebar-menu-dropdown label="Laporan Transaksi" icon="laporan-transaksi" :locked="$isLocked">
                         <x-sidebar-menu label="Laporan Agen" route="laporan-bank.admin.index" active="laporan-bank*"
@@ -127,9 +127,19 @@
                             active="data_master.produk_konter*" :locked="$isLocked" />
                         {{-- ============================ --}}
                     </x-sidebar-menu-dropdown>
+
+                    <x-sidebar-menu label="Barang Masuk" route="barang_masuk.index" icon="barang-masuk"
+                        active="barang_masuk*" :locked="$isLocked" />
+                    {{-- ✅ Stok Opname --}}
+                    <x-sidebar-menu label="Stok Opname" route="data_master.stok_opname.index" icon="stok-opname"
+                        active="data_master.stok_opname*" :locked="$isLocked" />
+                    <x-sidebar-menu label="Riwayat Stok" route="stok_history.index" icon="riwayat-stok"
+                        active="stok_history.index*" :locked="$isLocked" />
+                    <x-sidebar-menu label="Laporan Stok" route="stok_history.laporan" icon="laporan-stok"
+                        active="stok_history.laporan*" :locked="$isLocked" />
                     <x-sidebar-menu label="Manajemen Akun" route="users.index" icon="users" active="users*"
                         :locked="$isLocked" />
-                    <x-sidebar-menu label="Rekap" route="rekap.index" icon="laporan-transaksi" active="rekap*"
+                    <x-sidebar-menu label="Rekap" route="rekap.index" icon="rekap" active="rekap*"
                         :locked="$isLocked" />
                     <x-sidebar-menu label="Status Langganan" route="status.langganan" icon="status-langganan"
                         active="status*" :locked="false" />

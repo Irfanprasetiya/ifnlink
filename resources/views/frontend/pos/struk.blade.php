@@ -101,12 +101,133 @@
             <p class="text-slate-500">Barang yang sudah dibeli tidak dapat dikembalikan</p>
         </div>
 
-        {{-- Tombol Print --}}
-        <button onclick="window.print()"
-            class="no-print w-full mt-4 bg-blue-600 text-white font-bold py-2.5 rounded-lg text-sm">
-            Cetak Struk
-        </button>
+        {{-- ✅ Tombol Bluetooth & Print --}}
+        <div class="no-print mt-4 space-y-2">
+            <button onclick="connectBluetooth()" id="btn-bluetooth"
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg text-sm flex items-center justify-center gap-2">
+                <svg id="bt-spinner" class="hidden animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg"
+                    fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                        stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+                <span id="bt-text">Connect Bluetooth</span>
+            </button>
+
+            <button onclick="printStruk()" id="btn-print-bt" disabled
+                class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                Cetak via Bluetooth
+            </button>
+
+            <button onclick="window.print()"
+                class="w-full bg-slate-600 hover:bg-slate-700 text-white font-bold py-2.5 rounded-lg text-sm">
+                Print Biasa
+            </button>
+        </div>
     </div>
+
+    <script>
+        let bluetoothDevice = null;
+        let bluetoothCharacteristic = null;
+
+        // ✅ Connect Bluetooth
+        async function connectBluetooth() {
+            const btn = document.getElementById('btn-bluetooth');
+            const spinner = document.getElementById('bt-spinner');
+            const text = document.getElementById('bt-text');
+
+            try {
+                if (!navigator.bluetooth) {
+                    alert('Browser tidak support Bluetooth. Gunakan Chrome Android.');
+                    return;
+                }
+
+                btn.disabled = true;
+                spinner.classList.remove('hidden');
+                text.textContent = 'Menghubungkan...';
+
+                bluetoothDevice = await navigator.bluetooth.requestDevice({
+                    acceptAllDevices: true,
+                    optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb']
+                });
+
+                const server = await bluetoothDevice.gatt.connect();
+                const service = await server.getPrimaryService('000018f0-0000-1000-8000-00805f9b34fb');
+                bluetoothCharacteristic = await service.getCharacteristic('00002af1-0000-1000-8000-00805f9b34fb');
+
+                text.textContent = '✓ Terhubung';
+                document.getElementById('btn-print-bt').disabled = false;
+
+                alert('Bluetooth berhasil terhubung!');
+
+            } catch (error) {
+                console.error('Bluetooth error:', error);
+                text.textContent = 'Connect Bluetooth';
+                alert('Gagal terhubung: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                spinner.classList.add('hidden');
+            }
+        }
+
+        // ✅ Print via Bluetooth
+        async function printStruk() {
+            if (!bluetoothCharacteristic) {
+                alert('Hubungkan Bluetooth dulu!');
+                return;
+            }
+
+            const struk = `
+{{ $penjualan->tenant->nama_toko ?? 'OMZETLY.ID' }}
+{{ $penjualan->cabang->nama_cabang ?? '' }}
+{{ $penjualan->created_at->format('d/m/Y H:i') }}
+----------------------------
+No: {{ $penjualan->kode_transaksi }}
+Kasir: {{ $penjualan->user->name ?? '-' }}
+----------------------------
+@foreach ($penjualan->details as $d)
+{{ $d->voucher->nama_produk }}
+{{ $d->qty }} x Rp {{ number_format($d->harga_satuan, 0, ',', '.') }} = Rp {{ number_format($d->subtotal, 0, ',', '.') }}
+@endforeach
+----------------------------
+@if ($penjualan->diskon > 0)
+Diskon: -Rp {{ number_format($penjualan->diskon, 0, ',', '.') }}
+@endif
+TOTAL: Rp {{ number_format($penjualan->total_setelah_diskon, 0, ',', '.') }}
+BAYAR: Rp {{ number_format($penjualan->bayar, 0, ',', '.') }}
+KEMBALI: Rp {{ number_format($penjualan->kembalian, 0, ',', '.') }}
+----------------------------
+Terima Kasih!
+`;
+
+            try {
+                const encoder = new TextEncoder();
+
+                const init = new Uint8Array([0x1B, 0x40]);
+                const center = new Uint8Array([0x1B, 0x61, 0x01]);
+                const left = new Uint8Array([0x1B, 0x61, 0x00]);
+                const cut = new Uint8Array([0x1D, 0x56, 0x41, 0x10]);
+
+                const textBytes = encoder.encode(struk);
+
+                const data = new Uint8Array([
+                    ...init,
+                    ...center,
+                    ...textBytes,
+                    ...left,
+                    ...cut
+                ]);
+
+                await bluetoothCharacteristic.writeValue(data);
+
+                alert('Struk berhasil dicetak!');
+
+            } catch (error) {
+                console.error('Print error:', error);
+                alert('Gagal cetak: ' + error.message);
+            }
+        }
+    </script>
 </body>
 
 </html>

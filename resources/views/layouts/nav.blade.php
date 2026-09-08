@@ -22,6 +22,7 @@
                     </span>
                 </a>
             </div>
+
             {{-- ✅ Tengah: Tanggal + Status + Upgrade Button (Desktop) --}}
             @unless (session('impersonator_id'))
                 <div class="hidden lg:flex items-center gap-3 flex-1 justify-center">
@@ -51,7 +52,6 @@
                             </span>
                         @endif
 
-                        {{-- ✅ Tombol Upgrade kalau Gratis --}}
                         @if ($isFree)
                             <a href="{{ route('upgrade') }}"
                                 class="flex items-center gap-1.5 bg-white text-blue-600 px-3 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider hover:bg-blue-50 hover:scale-105 transition-all shadow-sm">
@@ -100,9 +100,32 @@
                 </div>
             @endif
 
-            {{-- Kanan: User Profile Menu --}}
+            {{-- Kanan: Notifikasi & User Profile --}}
             <div class="flex items-center shrink-0">
                 <div class="flex items-center gap-3">
+
+                    {{-- ✅ Notifikasi Stok Menipis --}}
+                    @php
+                        $stokMenipisCount = App\Models\ProdukKonter::where('tenant_id', Auth::user()->tenant_id)
+                            ->where('stok', '<=', 5)
+                            ->count();
+                    @endphp
+
+                    <a href="{{ route('stok_history.menipis') }}"
+                        class="relative flex items-center justify-center w-10 h-10 text-blue-100 rounded-full hover:bg-blue-700 hover:text-white transition-colors"
+                        title="Stok Menipis">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        </svg>
+
+                        @if ($stokMenipisCount > 0)
+                            <span
+                                class="absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-blue-600">
+                                {{ $stokMenipisCount }}
+                            </span>
+                        @endif
+                    </a>
 
                     {{-- Nama User --}}
                     @auth
@@ -126,7 +149,6 @@
                     <div class="z-50 hidden my-4 list-none bg-white border border-slate-100 rounded-xl shadow-xl w-52 overflow-hidden dark:bg-slate-800 dark:border-slate-700"
                         id="dropdown-user">
 
-                        {{-- Fallback Impersonate untuk Mobile --}}
                         @if (session('impersonator_id'))
                             <div
                                 class="block lg:hidden px-4 py-3 bg-amber-50 border-b border-amber-100 text-xs text-amber-800">

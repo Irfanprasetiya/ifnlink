@@ -56,6 +56,8 @@ use App\Http\Controllers\PlanController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\ReturController;
 use App\Http\Controllers\SaldoGudangController;
+use App\Http\Controllers\StokHistoryController;
+use App\Http\Controllers\StokOpnameController;
 
 /*
 |--------------------------------------------------------------------------
@@ -242,9 +244,29 @@ Route::middleware(['auth', 'check.pending', 'check.tenant.active', 'role:super_a
     Route::resource('barang_masuk', BarangMasukController::class)->except(['show']);
 
     Route::get('/admin/pos/laporan', [PosController::class, 'adminLaporan'])->name('admin.pos.laporan');
+    Route::get('/admin/pos/laporan/pdf', [PosController::class, 'adminLaporanPdf'])->name('admin.pos.laporan.pdf');
+    Route::get('/admin/pos/laporan/excel', [PosController::class, 'adminLaporanExcel'])->name('admin.pos.laporan.excel');
     Route::delete('/admin/pos/{id}', [PosController::class, 'destroy'])->name('admin.pos.destroy');
     Route::get('/admin/pos/{id}/edit', [PosController::class, 'edit'])->name('admin.pos.edit');
     Route::put('/admin/pos/{id}/update', [PosController::class, 'update'])->name('admin.pos.update');
+
+    // Stok Opname
+    Route::get('/stok-opname', [StokOpnameController::class, 'index'])->name('data_master.stok_opname.index');
+    Route::get('/stok-opname/create', [StokOpnameController::class, 'create'])->name('data_master.stok_opname.create');
+    Route::post('/stok-opname', [StokOpnameController::class, 'store'])->name('data_master.stok_opname.store');
+    Route::get('/stok-opname/produk/{cabangId}', [StokOpnameController::class, 'getProdukByCabang'])->name('data_master.stok_opname.produk');
+    Route::get('/stok-opname/{kode}', [StokOpnameController::class, 'show'])->name('data_master.stok_opname.show');
+    Route::get('/stok-opname/{kode}/pdf', [StokOpnameController::class, 'pdf'])->name('data_master.stok_opname.pdf');
+
+    // stok history
+    Route::get('/stok-history', [StokHistoryController::class, 'index'])->name('stok_history.index');
+    Route::get('/stok-laporan', [StokHistoryController::class, 'laporan'])->name('stok_history.laporan');
+    Route::get('/stok-menipis', [StokHistoryController::class, 'stokMenipis'])->name('stok_history.menipis');
+    // Halaman stok menipis
+    Route::get('/stok-menipis', [StokHistoryController::class, 'halamanMenipis'])->name('stok_history.menipis');
+
+    // API JSON
+    Route::get('/api/stok-menipis', [StokHistoryController::class, 'stokMenipis'])->name('stok_history.api-menipis');
 
 
     // Laporan Bank Admin

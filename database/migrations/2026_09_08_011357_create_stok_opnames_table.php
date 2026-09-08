@@ -1,0 +1,26 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration {
+    public function up(): void
+    {
+        Schema::create('stok_opnames', function (Blueprint $table) {
+            $table->id();
+            $table->string('kode_opname')->unique();
+            $table->unsignedBigInteger('tenant_id')->nullable();
+            $table->unsignedBigInteger('cabang_id')->nullable();
+            $table->unsignedBigInteger('user_id')->nullable();
+            $table->date('tanggal_opname');
+            $table->text('catatan')->nullable();
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('stok_opnames');
+    }
+};
