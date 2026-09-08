@@ -7,12 +7,15 @@ use App\Models\Bank;
 use App\Models\Cabang;
 use App\Models\User;
 use App\Models\AkunPengeluaran;
+use App\Models\Tenant;
+use App\Models\Penjualan;
+use App\Models\ProdukKonter;
+use App\Models\Retur;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\RekapExport;
-use App\Models\Tenant;
 use Carbon\Carbon;
 
 class RekapController extends Controller
@@ -36,6 +39,25 @@ class RekapController extends Controller
         $transaksis = $query->orderBy('waktu_transaksi', 'asc')->get();
 
         $data = $this->hitungRekap($transaksis, $tenantId, $tanggal, $cabangs, $cabangId);
+
+        // ✅ Tambahan data POS & Stok
+        $data['totalPos'] = Penjualan::where('tenant_id', $tenantId)
+            ->whereDate('created_at', $tanggal)
+            ->when($cabangId && $cabangId !== 'semua', fn($q) => $q->where('cabang_id', $cabangId))
+            ->count();
+
+        $data['totalPosNominal'] = Penjualan::where('tenant_id', $tenantId)
+            ->whereDate('created_at', $tanggal)
+            ->when($cabangId && $cabangId !== 'semua', fn($q) => $q->where('cabang_id', $cabangId))
+            ->sum('total_setelah_diskon');
+
+        $data['stokMenipisCount'] = ProdukKonter::where('tenant_id', $tenantId)
+            ->where('stok', '<=', 5)
+            ->count();
+
+        $data['returPendingCount'] = Retur::where('tenant_id', $tenantId)
+            ->where('status', 'pending')
+            ->count();
 
         return view('rekap.index', $data);
     }
@@ -97,7 +119,6 @@ class RekapController extends Controller
 
     private function hitungRekap($transaksis, $tenantId, $tanggal, $cabangs, $cabangId = null)
     {
-        // ✅ Ambil ID Oper Saldo
         $operSaldoId = AkunPengeluaran::where('nama_akun', 'Oper Saldo')->value('id');
 
         $totalOmzet = 0;
@@ -118,7 +139,6 @@ class RekapController extends Controller
             $jenis = strtolower($trx->jenis_transaksi->nama_transaksi ?? '');
             $bankId = $trx->bank_id;
 
-            // Omzet hanya dari transaksi NON-KAS
             if ($bankId !== $kasId) {
                 if ($jenis === 'transfer') {
                     $totalOmzet += $trx->bayar - $trx->nominal;
@@ -132,7 +152,6 @@ class RekapController extends Controller
                 }
             }
 
-            // Hitung penambahan/pengurangan kas
             if ($bankId === $kasId) {
                 if ($jenis === 'penambahan kas' || str_contains($jenis, 'penambahan')) {
                     $totalPenambahanKas++;
@@ -142,7 +161,6 @@ class RekapController extends Controller
             }
         }
 
-        // ✅ PENGELUARAN OPERASIONAL (SEMUA bank, skip Oper Saldo)
         $totalPengeluaran = TransaksiBank::where('tenant_id', $tenantId)
             ->whereDate('waktu_transaksi', $tanggal)
             ->whereNotNull('akun_pengeluaran_id')
@@ -150,10 +168,8 @@ class RekapController extends Controller
             ->when($cabangId && $cabangId !== 'semua', fn($q) => $q->where('cabang_id', $cabangId))
             ->sum('nominal');
 
-        // ✅ PROFIT = Omzet - Pengeluaran Operasional
         $profit = $totalOmzet - $totalPengeluaran;
 
-        // Saldo Kas
         $totalSaldoKas = 0;
         if ($kasId) {
             $saldoKasQuery = TransaksiBank::where('bank_id', $kasId)
@@ -168,7 +184,6 @@ class RekapController extends Controller
             $totalSaldoKas = ($rowKas->total_debit ?? 0) - ($rowKas->total_kredit ?? 0);
         }
 
-        // Rekap per Bank
         $banks = Bank::where(function ($q) use ($tenantId) {
             $q->where('tenant_id', $tenantId)->orWhereNull('tenant_id');
         })->get();
@@ -184,7 +199,6 @@ class RekapController extends Controller
             ];
         });
 
-        // Rekap per Cabang
         $rekapCabang = $cabangs->map(function ($c) use ($transaksis, $kasId, $operSaldoId) {
             $trxCabang = $transaksis->where('cabang_id', $c->id);
             $trxNonKas = $trxCabang->where('bank_id', '!=', $kasId);
@@ -200,7 +214,6 @@ class RekapController extends Controller
                 return 0;
             });
 
-            // ✅ Pengeluaran cabang (SEMUA bank, skip Oper Saldo)
             $pengeluaranCabang = $trxCabang
                 ->whereNotNull('akun_pengeluaran_id')
                 ->when($operSaldoId, fn($q) => $q->where('akun_pengeluaran_id', '!=', $operSaldoId))
@@ -216,7 +229,6 @@ class RekapController extends Controller
             ];
         });
 
-        // ✅ Rekap per User
         $users = User::with('cabang')
             ->where('tenant_id', $tenantId)
             ->when($cabangId && $cabangId !== 'semua', fn($q) => $q->where('cabang_id', $cabangId))
@@ -226,7 +238,6 @@ class RekapController extends Controller
             $trxUser = $transaksis->where('user_id', $u->id);
             $trxNonKas = $trxUser->where('bank_id', '!=', $kasId);
 
-            // ✅ Pengeluaran user (SEMUA bank, skip Oper Saldo)
             $pengeluaranUser = $trxUser
                 ->whereNotNull('akun_pengeluaran_id')
                 ->when($operSaldoId, fn($q) => $q->where('akun_pengeluaran_id', '!=', $operSaldoId))
@@ -253,7 +264,6 @@ class RekapController extends Controller
             ];
         });
 
-        // ✅ Grafik 7 Hari (Profit = Omzet - Pengeluaran)
         $labelsOmzet7Hari = [];
         $dataOmzet7Hari = [];
         $dataPengeluaran7Hari = [];
@@ -263,7 +273,6 @@ class RekapController extends Controller
             $d = now()->subDays($i)->toDateString();
             $labelsOmzet7Hari[] = Carbon::parse($d)->translatedFormat('d M');
 
-            // Omzet harian
             $omzetHarian = TransaksiBank::where('tenant_id', $tenantId)
                 ->whereDate('waktu_transaksi', $d)
                 ->where('bank_id', '!=', $kasId)
@@ -280,12 +289,11 @@ class RekapController extends Controller
                     return 0;
                 });
 
-            // Pengeluaran harian
             $pengeluaranHarian = TransaksiBank::where('tenant_id', $tenantId)
                 ->whereDate('waktu_transaksi', $d)
                 ->whereNotNull('akun_pengeluaran_id')
                 ->when($operSaldoId, fn($q) => $q->where('akun_pengeluaran_id', '!=', $operSaldoId))
-                ->when($cabangId && $cabangId !== 'semana', fn($q) => $q->where('cabang_id', $cabangId))
+                ->when($cabangId && $cabangId !== 'semua', fn($q) => $q->where('cabang_id', $cabangId))
                 ->sum('nominal');
 
             $dataOmzet7Hari[] = $omzetHarian;
@@ -293,7 +301,6 @@ class RekapController extends Controller
             $dataProfit7Hari[] = $omzetHarian - $pengeluaranHarian;
         }
 
-        // Grafik per Jam
         $labelsPerJam = [];
         $dataPerJam = [];
         for ($h = 8; $h <= 20; $h++) {

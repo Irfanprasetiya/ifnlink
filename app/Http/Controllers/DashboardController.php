@@ -8,6 +8,9 @@ use Illuminate\Http\Request;
 use App\Models\TransaksiBank;
 use App\Models\User;
 use App\Models\Cabang;
+use App\Models\Penjualan;
+use App\Models\ProdukKonter;
+use App\Models\Retur;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
@@ -54,7 +57,6 @@ class DashboardController extends Controller
             $chartStart = now()->subMonths(5)->startOfMonth();
         }
 
-        // ✅ Ambil ID Oper Saldo
         $operSaldoId = AkunPengeluaran::where('nama_akun', 'Oper Saldo')->value('id');
 
         // DATA KARTU RINGKASAN
@@ -97,7 +99,6 @@ class DashboardController extends Controller
             }
         }
 
-        // ✅ Pengeluaran Operasional (semua bank, skip Oper Saldo)
         $totalPengeluaran = TransaksiBank::where('tenant_id', $tenantId)
             ->whereIn('user_id', $userIds)
             ->whereBetween('waktu_transaksi', [$metricStart, $metricEnd])
@@ -106,14 +107,33 @@ class DashboardController extends Controller
             ->where('is_saldo_awal', 0)
             ->sum('nominal');
 
-        // ✅ Profit
         $profit = $totalLabaKotor - $totalPengeluaran;
 
-        // ✅ Saldo Kas
         $totalSaldoKas = $this->hitungSaldoKas($trxMetric);
 
+        // ✅ DATA POS
+        $totalPos = Penjualan::where('tenant_id', $tenantId)
+            ->when($cabangId !== 'semua', fn($q) => $q->where('cabang_id', $cabangId))
+            ->whereBetween('created_at', [$metricStart, $metricEnd])
+            ->count();
+
+        $totalPosNominal = Penjualan::where('tenant_id', $tenantId)
+            ->when($cabangId !== 'semua', fn($q) => $q->where('cabang_id', $cabangId))
+            ->whereBetween('created_at', [$metricStart, $metricEnd])
+            ->sum('total_setelah_diskon');
+
+        // ✅ Data Stok Menipis
+        $stokMenipisCount = ProdukKonter::where('tenant_id', $tenantId)
+            ->where('stok', '<=', 5)
+            ->count();
+
+        // ✅ Data Retur Pending
+        $returPendingCount = Retur::where('tenant_id', $tenantId)
+            ->where('status', 'pending')
+            ->count();
+
         // =============================================
-        // ✅ DATA GRAFIK 3 GARIS (Omzet + Pengeluaran + Profit)
+        // DATA GRAFIK 3 GARIS
         // =============================================
         $trxChart = TransaksiBank::with(['jenis_transaksi', 'bank'])
             ->where('tenant_id', $tenantId)
@@ -123,7 +143,6 @@ class DashboardController extends Controller
             ->orderBy('waktu_transaksi', 'asc')
             ->get();
 
-        // ✅ 1. Omzet per periode
         $omzetChart = [];
         foreach ($trxChart as $trx) {
             $bankName = strtolower(trim($trx->bank->nama_bank ?? ''));
@@ -150,7 +169,6 @@ class DashboardController extends Controller
             $omzetChart[$label] += $laba;
         }
 
-        // ✅ 2. Pengeluaran per periode
         $pengeluaranChart = TransaksiBank::where('tenant_id', $tenantId)
             ->whereIn('user_id', $userIds)
             ->where('waktu_transaksi', '>=', $chartStart)
@@ -164,7 +182,6 @@ class DashboardController extends Controller
             })
             ->map(fn($items) => $items->sum('nominal'));
 
-        // ✅ 3. Profit per periode = Omzet - Pengeluaran
         $profitChart = $omzetChart;
         foreach ($pengeluaranChart as $label => $pengeluaran) {
             if (isset($profitChart[$label])) {
@@ -174,7 +191,6 @@ class DashboardController extends Controller
             }
         }
 
-        // ✅ Gabungkan semua label
         $allLabels = array_unique(array_merge(
             array_keys($omzetChart),
             array_keys($pengeluaranChart->toArray()),
@@ -195,7 +211,7 @@ class DashboardController extends Controller
         }
 
         // =============================================
-        // PERBANDINGAN CABANG (Profit per cabang)
+        // PERBANDINGAN CABANG
         // =============================================
         $labelsCabang = [];
         $dataCabang = [];
@@ -307,7 +323,12 @@ class DashboardController extends Controller
             'transaksiTerbaru',
             'labelsCabang',
             'dataCabang',
-            'tenant'
+            'tenant',
+            // ✅ Tambahan POS
+            'totalPos',
+            'totalPosNominal',
+            'stokMenipisCount',
+            'returPendingCount'
         ));
     }
 

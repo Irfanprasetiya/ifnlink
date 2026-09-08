@@ -170,7 +170,7 @@
             }
         }
 
-        // ✅ Print via Bluetooth
+        // ✅ Print via Bluetooth dengan chunk & font besar
         async function printStruk() {
             if (!bluetoothCharacteristic) {
                 alert('Hubungkan Bluetooth dulu!');
@@ -203,28 +203,60 @@ Terima Kasih!
             try {
                 const encoder = new TextEncoder();
 
-                const init = new Uint8Array([0x1B, 0x40]);
-                const center = new Uint8Array([0x1B, 0x61, 0x01]);
-                const left = new Uint8Array([0x1B, 0x61, 0x00]);
-                const cut = new Uint8Array([0x1D, 0x56, 0x41, 0x10]);
+                // ESC/POS commands
+                const init = new Uint8Array([0x1B, 0x40]); // Initialize
+                const center = new Uint8Array([0x1B, 0x61, 0x01]); // Center
+                const left = new Uint8Array([0x1B, 0x61, 0x00]); // Left
+                const boldOn = new Uint8Array([0x1B, 0x45, 0x01]); // Bold on
+                const boldOff = new Uint8Array([0x1B, 0x45, 0x00]); // Bold off
+                const doubleHeight = new Uint8Array([0x1D, 0x21, 0x11]); // Double height
+                const normalSize = new Uint8Array([0x1D, 0x21, 0x00]); // Normal size
+                const feed = new Uint8Array([0x1B, 0x64, 0x04]); // Feed 4 lines
+                const cut = new Uint8Array([0x1D, 0x56, 0x42, 0x00]); // Partial cut
 
-                const textBytes = encoder.encode(struk);
+                // ✅ Init printer
+                await bluetoothCharacteristic.writeValue(init);
+                await new Promise(r => setTimeout(r, 50));
 
-                const data = new Uint8Array([
-                    ...init,
-                    ...center,
-                    ...textBytes,
-                    ...left,
-                    ...cut
-                ]);
+                // ✅ Header - Double height & bold
+                await bluetoothCharacteristic.writeValue(center);
+                await bluetoothCharacteristic.writeValue(doubleHeight);
+                await bluetoothCharacteristic.writeValue(boldOn);
 
-                await bluetoothCharacteristic.writeValue(data);
+                const header = `{{ $penjualan->tenant->nama_toko ?? 'OMZETLY.ID' }}\n{{ $penjualan->cabang->nama_cabang ?? '' }}\n{{ $penjualan->created_at->format('d/m/Y H:i') }}\n`;
+                await sendChunk(encoder.encode(header));
+
+                await bluetoothCharacteristic.writeValue(boldOff);
+                await bluetoothCharacteristic.writeValue(normalSize);
+                await bluetoothCharacteristic.writeValue(left);
+
+                // ✅ Body
+                const body = `----------------------------\nNo: {{ $penjualan->kode_transaksi }}\nKasir: {{ $penjualan->user->name ?? '-' }}\n----------------------------\n@foreach ($penjualan->details as $d){{ $d->voucher->nama_produk }}\n{{ $d->qty }} x Rp {{ number_format($d->harga_satuan, 0, ',', '.') }} = Rp {{ number_format($d->subtotal, 0, ',', '.') }}\n@endforeach----------------------------\n@if ($penjualan->diskon > 0)Diskon: -Rp {{ number_format($penjualan->diskon, 0, ',', '.') }}\n@endifTOTAL: Rp {{ number_format($penjualan->total_setelah_diskon, 0, ',', '.') }}\nBAYAR: Rp {{ number_format($penjualan->bayar, 0, ',', '.') }}\nKEMBALI: Rp {{ number_format($penjualan->kembalian, 0, ',', '.') }}\n`;
+                await sendChunk(encoder.encode(body));
+
+                // ✅ Footer - Bold
+                await bluetoothCharacteristic.writeValue(boldOn);
+                await sendChunk(encoder.encode('----------------------------\n'));
+                await bluetoothCharacteristic.writeValue(boldOff);
+
+                // ✅ Feed & Cut
+                await bluetoothCharacteristic.writeValue(feed);
+                await bluetoothCharacteristic.writeValue(cut);
 
                 alert('Struk berhasil dicetak!');
 
             } catch (error) {
                 console.error('Print error:', error);
                 alert('Gagal cetak: ' + error.message);
+            }
+        }
+
+        // ✅ Helper: Kirim per chunk 32 byte
+        async function sendChunk(data) {
+            for (let i = 0; i < data.length; i += 32) {
+                const chunk = data.slice(i, i + 32);
+                await bluetoothCharacteristic.writeValue(chunk);
+                await new Promise(r => setTimeout(r, 20)); // Jeda 20ms
             }
         }
     </script>

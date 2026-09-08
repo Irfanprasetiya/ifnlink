@@ -4,7 +4,7 @@
 
     {{-- Container untuk Menu (Bisa di-scroll) --}}
     <div class="px-3 flex-1 overflow-y-auto pb-4">
-        <ul class="space-y-3 font-medium pt-4">
+        <ul class="space-y-2 font-medium pt-4">
             @auth
                 @php
                     $isLocked = Auth::user()->tenant && Auth::user()->tenant->isLocked();
@@ -32,76 +32,15 @@
                         </div>
                     @endif
 
+                    {{-- ===== MENU UTAMA ===== --}}
                     <x-sidebar-menu label="Dashboard" route="dashboard" icon="dashboard" active="dashboard"
                         :locked="$isLocked" />
+
                     <x-sidebar-menu-dropdown label="Transaksi" icon="transaksi" :locked="$isLocked">
                         <x-sidebar-menu label="Transaksi Agen" route="trx-bank.index" active="trx-bank.*"
                             :locked="$isLocked" />
                     </x-sidebar-menu-dropdown>
 
-                    {{-- ✅ MENU RETUR --}}
-                    <x-sidebar-menu label="Daftar Retur" route="admin.retur.index" icon="laporan-transaksi"
-                        active="admin.retur*" :locked="$isLocked" />
-
-                    <x-sidebar-menu-dropdown label="Laporan Transaksi" icon="laporan-transaksi" :locked="$isLocked">
-                        <x-sidebar-menu label="Laporan Agen" route="laporan-bank.admin.index" active="laporan-bank*"
-                            :locked="$isLocked" />
-                        <x-sidebar-menu label="Laporan POS" route="admin.pos.laporan" active="admin.pos.laporan*"
-                            :locked="$isLocked" />
-                    </x-sidebar-menu-dropdown>
-                    <x-sidebar-menu-dropdown label="Data Master" icon="data-master" :locked="$isLocked">
-                        <x-sidebar-menu label="Cabang" route="data_master.cabang.index" active="data_master.cabang*"
-                            :locked="$isLocked" />
-                        <x-sidebar-menu label="Daftar Bank" route="data_master.daftar_bank.index"
-                            active="data_master.daftar_bank*" :locked="$isLocked" />
-                        {{-- ✅ MENU DATA MASTER TAMBAHAN --}}
-                        <x-sidebar-menu label="Kategori" route="data_master.kategoris.index" active="data_master.kategoris*"
-                            :locked="$isLocked" />
-                        <x-sidebar-menu label="Produk" route="data_master.vouchers.index" active="data_master.vouchers*"
-                            :locked="$isLocked" />
-                        <x-sidebar-menu label="Stok Produk" route="data_master.produk_konter.index"
-                            active="data_master.produk_konter*" :locked="$isLocked" />
-                        {{-- ============================ --}}
-                    </x-sidebar-menu-dropdown>
-
-                    @if (Auth::user()->tenant->plan && Auth::user()->tenant->plan->harga > 0)
-                        <x-sidebar-menu label="Laporan Saldo" route="laporan_saldo.index" icon="laporan-saldo"
-                            active="laporan_saldo*" :locked="$isLocked" />
-                    @else
-                        <x-sidebar-menu label="Laporan Saldo" route="upgrade" icon="laporan-saldo" badge="PRO"
-                            :locked="false" />
-                    @endif
-
-                    @if (Auth::user()->tenant->plan && Auth::user()->tenant->plan->harga > 0)
-                        <x-sidebar-menu label="Laba Rugi" route="laba_rugi.index" icon="laba-rugi" active="laba_rugi*"
-                            :locked="$isLocked" />
-                    @else
-                        <x-sidebar-menu label="Laba Rugi" route="upgrade" icon="laba-rugi" badge="PRO"
-                            :locked="false" />
-                    @endif
-
-                    @if (Auth::user()->tenant->plan && Auth::user()->tenant->plan->harga > 0)
-                        <x-sidebar-menu label="Rekap" route="rekap.index" icon="laporan-transaksi" active="rekap*"
-                            :locked="$isLocked" />
-                    @else
-                        <x-sidebar-menu label="Rekap" route="upgrade" icon="laporan-transaksi" badge="PRO"
-                            :locked="false" />
-                    @endif
-                    <x-sidebar-menu label="Status Langganan" route="status.langganan" icon="status-langganan"
-                        active="status*" :locked="false" />
-                @endif
-
-                @if (Auth::user()->role === 'admin')
-                    <x-sidebar-menu label="Dashboard" route="dashboard" icon="dashboard" active="dashboard"
-                        :locked="$isLocked" />
-                    <x-sidebar-menu label="Saldo Awal" route="saldo.index" icon="pengeluaran" active="saldo*"
-                        :locked="$isLocked" />
-                    <x-sidebar-menu-dropdown label="Transaksi" icon="transaksi" :locked="$isLocked">
-                        <x-sidebar-menu label="Transaksi Saldo" route="trx-bank.index" active="trx-bank.*"
-                            :locked="$isLocked" />
-                    </x-sidebar-menu-dropdown>
-
-                    {{-- ✅ MENU RETUR --}}
                     <x-sidebar-menu label="Daftar Retur" route="admin.retur.index" icon="retur" active="admin.retur*"
                         :locked="$isLocked" />
 
@@ -111,6 +50,71 @@
                         <x-sidebar-menu label="Laporan POS" route="admin.pos.laporan" active="admin.pos.laporan*"
                             :locked="$isLocked" />
                     </x-sidebar-menu-dropdown>
+
+                    <x-sidebar-menu-dropdown label="Data Master" icon="data-master" :locked="$isLocked">
+                        <x-sidebar-menu label="Cabang" route="data_master.cabang.index" active="data_master.cabang*"
+                            :locked="$isLocked" />
+                        <x-sidebar-menu label="Daftar Bank" route="data_master.daftar_bank.index"
+                            active="data_master.daftar_bank*" :locked="$isLocked" />
+                        <x-sidebar-menu label="Kategori" route="data_master.kategoris.index" active="data_master.kategoris*"
+                            :locked="$isLocked" />
+                        <x-sidebar-menu label="Produk" route="data_master.vouchers.index" active="data_master.vouchers*"
+                            :locked="$isLocked" />
+                        <x-sidebar-menu label="Stok Produk" route="data_master.produk_konter.index"
+                            active="data_master.produk_konter*" :locked="$isLocked" />
+                    </x-sidebar-menu-dropdown>
+
+                    {{-- ===== MENU STOK ===== --}}
+                    <x-sidebar-menu label="Barang Masuk" route="barang_masuk.index" icon="barang-masuk"
+                        active="barang_masuk*" :locked="$isLocked" />
+                    <x-sidebar-menu label="Stok Opname" route="data_master.stok_opname.index" icon="stok-opname"
+                        active="data_master.stok_opname*" :locked="$isLocked" />
+                    <x-sidebar-menu label="Riwayat Stok" route="stok_history.index" icon="riwayat-stok"
+                        active="stok_history.index*" :locked="$isLocked" />
+                    <x-sidebar-menu label="Laporan Stok" route="stok_history.laporan" icon="laporan-stok"
+                        active="stok_history.laporan*" :locked="$isLocked" />
+
+                    {{-- ===== MENU PRO ===== --}}
+                    @if (Auth::user()->tenant->plan && Auth::user()->tenant->plan->harga > 0)
+                        <x-sidebar-menu label="Laporan Saldo" route="laporan_saldo.index" icon="laporan-saldo"
+                            active="laporan_saldo*" :locked="$isLocked" />
+                        <x-sidebar-menu label="Laba Rugi" route="laba_rugi.index" icon="laba-rugi" active="laba_rugi*"
+                            :locked="$isLocked" />
+                        <x-sidebar-menu label="Rekap" route="rekap.index" icon="rekap" active="rekap*"
+                            :locked="$isLocked" />
+                    @else
+                        <x-sidebar-menu label="Laporan Saldo" route="upgrade" icon="laporan-saldo" badge="PRO"
+                            :locked="false" />
+                        <x-sidebar-menu label="Laba Rugi" route="upgrade" icon="laba-rugi" badge="PRO"
+                            :locked="false" />
+                        <x-sidebar-menu label="Rekap" route="upgrade" icon="rekap" badge="PRO" :locked="false" />
+                    @endif
+
+                    <x-sidebar-menu label="Status Langganan" route="status.langganan" icon="status-langganan"
+                        active="status*" :locked="false" />
+                @endif
+
+                @if (Auth::user()->role === 'admin')
+                    <x-sidebar-menu label="Dashboard" route="dashboard" icon="dashboard" active="dashboard"
+                        :locked="$isLocked" />
+                    <x-sidebar-menu label="Saldo Awal" route="saldo.index" icon="pengeluaran" active="saldo*"
+                        :locked="$isLocked" />
+
+                    <x-sidebar-menu-dropdown label="Transaksi" icon="transaksi" :locked="$isLocked">
+                        <x-sidebar-menu label="Transaksi Saldo" route="trx-bank.index" active="trx-bank.*"
+                            :locked="$isLocked" />
+                    </x-sidebar-menu-dropdown>
+
+                    <x-sidebar-menu label="Daftar Retur" route="admin.retur.index" icon="retur" active="admin.retur*"
+                        :locked="$isLocked" />
+
+                    <x-sidebar-menu-dropdown label="Laporan Transaksi" icon="laporan-transaksi" :locked="$isLocked">
+                        <x-sidebar-menu label="Laporan Agen" route="laporan-bank.admin.index" active="laporan-bank*"
+                            :locked="$isLocked" />
+                        <x-sidebar-menu label="Laporan POS" route="admin.pos.laporan" active="admin.pos.laporan*"
+                            :locked="$isLocked" />
+                    </x-sidebar-menu-dropdown>
+
                     <x-sidebar-menu-dropdown label="Data Master" icon="data-master" :locked="$isLocked">
                         <x-sidebar-menu label="Cabang" route="data_master.cabang.index" active="data_master.cabang*"
                             :locked="$isLocked" />
@@ -118,25 +122,24 @@
                             active="data_master.daftar_bank*" :locked="$isLocked" />
                         <x-sidebar-menu label="Akun Pengeluaran" route="data_master.akun_pengeluaran.index"
                             active="data_master.akun_pengeluaran*" :locked="$isLocked" />
-                        {{-- ✅ MENU DATA MASTER TAMBAHAN --}}
                         <x-sidebar-menu label="Kategori" route="data_master.kategoris.index"
                             active="data_master.kategoris*" :locked="$isLocked" />
                         <x-sidebar-menu label="Produk" route="data_master.vouchers.index" active="data_master.vouchers*"
                             :locked="$isLocked" />
                         <x-sidebar-menu label="Stok Produk" route="data_master.produk_konter.index"
                             active="data_master.produk_konter*" :locked="$isLocked" />
-                        {{-- ============================ --}}
                     </x-sidebar-menu-dropdown>
 
+                    {{-- ===== MENU STOK ===== --}}
                     <x-sidebar-menu label="Barang Masuk" route="barang_masuk.index" icon="barang-masuk"
                         active="barang_masuk*" :locked="$isLocked" />
-                    {{-- ✅ Stok Opname --}}
                     <x-sidebar-menu label="Stok Opname" route="data_master.stok_opname.index" icon="stok-opname"
                         active="data_master.stok_opname*" :locked="$isLocked" />
                     <x-sidebar-menu label="Riwayat Stok" route="stok_history.index" icon="riwayat-stok"
                         active="stok_history.index*" :locked="$isLocked" />
                     <x-sidebar-menu label="Laporan Stok" route="stok_history.laporan" icon="laporan-stok"
                         active="stok_history.laporan*" :locked="$isLocked" />
+
                     <x-sidebar-menu label="Manajemen Akun" route="users.index" icon="users" active="users*"
                         :locked="$isLocked" />
                     <x-sidebar-menu label="Rekap" route="rekap.index" icon="rekap" active="rekap*"

@@ -46,8 +46,6 @@
 
         {{-- ========== SUMMARY CARDS ========== --}}
         <div class="grid grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-5">
-
-            <!-- Card 1: Transaksi -->
             <div
                 class="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-5 shadow-sm sm:shadow-soft border border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-center sm:justify-start gap-1 sm:gap-4 text-center sm:text-left">
                 <div
@@ -65,7 +63,6 @@
                 </div>
             </div>
 
-            <!-- Card 2: Produk -->
             <div
                 class="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-5 shadow-sm sm:shadow-soft border border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-center sm:justify-start gap-1 sm:gap-4 text-center sm:text-left">
                 <div
@@ -82,7 +79,6 @@
                 </div>
             </div>
 
-            <!-- Card 3: Total Penjualan -->
             <div
                 class="col-span-2 lg:col-span-1 relative overflow-hidden rounded-xl sm:rounded-2xl p-3.5 sm:p-5 shadow-sm sm:shadow-md border border-blue-600 bg-gradient-to-br from-blue-600 to-blue-800 text-white flex items-center justify-center sm:justify-start gap-3 sm:gap-4 text-center sm:text-left">
                 <div class="hidden sm:block absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
@@ -99,7 +95,7 @@
             </div>
         </div>
 
-        {{-- ========== TABEL DATA (DESKTOP) & CARDS (MOBILE) ========== --}}
+        {{-- ========== TABEL DATA ========== --}}
         <div
             class="bg-white lg:bg-transparent rounded-2xl lg:shadow-soft lg:border lg:border-slate-200/80 overflow-hidden flex flex-col">
             <div class="p-4 border-b border-slate-100 flex items-center gap-2 bg-slate-50/50">
@@ -110,7 +106,7 @@
                 <h3 class="font-bold text-slate-800 text-sm">Rincian Transaksi</h3>
             </div>
 
-            {{-- 1. TAMPILAN DESKTOP (TABEL) --}}
+            {{-- DESKTOP TABLE --}}
             <div class="hidden lg:block overflow-x-auto bg-white">
                 <table class="w-full text-left whitespace-nowrap">
                     <thead
@@ -126,6 +122,7 @@
                             <th class="px-4 py-3.5 text-right">Subtotal</th>
                             <th class="px-4 py-3.5 text-right">Diskon</th>
                             <th class="px-4 py-3.5 text-right">Total Akhir</th>
+                            <th class="px-4 py-3.5 text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 text-sm">
@@ -176,11 +173,24 @@
                                             </span>
                                         @endif
                                     </td>
+                                    <td class="px-4 py-3 text-center">
+                                        @if ($loop->first)
+                                            <a href="{{ route('pos.struk', $p->kode_transaksi) }}" target="_blank"
+                                                class="inline-flex items-center gap-1 px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                                </svg>
+                                                Cetak
+                                            </a>
+                                        @endif
+                                    </td>
                                 </tr>
                             @endforeach
                         @empty
                             <tr>
-                                <td colspan="10" class="px-4 py-16 text-center">
+                                <td colspan="11" class="px-4 py-16 text-center">
                                     <p class="font-medium text-slate-500">Belum ada data penjualan</p>
                                 </td>
                             </tr>
@@ -189,7 +199,7 @@
                 </table>
             </div>
 
-            {{-- 2. TAMPILAN MOBILE (CLEAN CARDS) --}}
+            {{-- MOBILE CARDS --}}
             <div class="block lg:hidden bg-slate-50/50 rounded-b-2xl border-x border-b border-slate-200/80 space-y-4 p-3">
                 @php $noMobile = 1; @endphp
                 @forelse($penjualans as $p)
@@ -236,6 +246,16 @@
                                     {{ number_format($p->total_setelah_diskon, 0, ',', '.') }}</span>
                             </div>
                         </div>
+
+                        {{-- ✅ Tombol Cetak Struk Mobile --}}
+                        <a href="{{ route('pos.struk', $p->kode_transaksi) }}" target="_blank"
+                            class="flex items-center justify-center gap-1.5 mt-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 rounded-lg text-xs transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                            </svg>
+                            Cetak Struk
+                        </a>
                     </div>
                 @empty
                     <div class="py-12 text-center flex flex-col items-center">
