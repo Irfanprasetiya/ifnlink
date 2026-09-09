@@ -40,6 +40,7 @@ class PosController extends Controller
             'items' => 'required|array|min:1',
             'items.*.voucher_id' => 'required|exists:vouchers,id',
             'items.*.qty' => 'required|integer|min:1',
+            'items.*.diskon' => 'nullable|numeric|min:0', // ✅ Tambahkan validasi diskon per item
             'bayar' => 'required|numeric|min:0',
             'diskon' => 'nullable|numeric|min:0',
         ]);
@@ -50,6 +51,7 @@ class PosController extends Controller
 
         try {
             $totalHarga = 0;
+            $totalDiskonItem = 0; // ✅ Total diskon per item
             $items = [];
 
             // Cek stok & hitung total
@@ -64,24 +66,46 @@ class PosController extends Controller
 
                 $voucher = Voucher::find($item['voucher_id']);
                 $subtotal = $voucher->harga_jual * $item['qty'];
+
+                // ✅ Ambil diskon per item
+                $diskonItem = $item['diskon'] ?? 0;
+
+                // Validasi diskon item tidak melebihi subtotal
+                if ($diskonItem > $subtotal) {
+                    throw new \Exception('Diskon item tidak boleh melebihi subtotal');
+                }
+
+                $totalSetelahDiskonItem = $subtotal - $diskonItem;
                 $totalHarga += $subtotal;
+                $totalDiskonItem += $diskonItem; // ✅ Akumulasi diskon item
 
                 $items[] = [
                     'voucher_id' => $voucher->id,
                     'qty' => $item['qty'],
                     'harga_satuan' => $voucher->harga_jual,
                     'subtotal' => $subtotal,
+                    'diskon' => $diskonItem, // ✅ Simpan diskon item
+                    'total_setelah_diskon' => $totalSetelahDiskonItem, // ✅ Simpan total setelah diskon item
                     'produk_konter' => $produk,
                 ];
             }
 
-            // ✅ Hitung diskon
-            $diskon = $request->diskon ?? 0;
-            $totalSetelahDiskon = $totalHarga - $diskon;
+            // ✅ Hitung diskon total
+            $diskonTambahan = $request->diskon ?? 0; // Diskon tambahan (global)
+            $totalSetelahDiskonItem = $totalHarga - $totalDiskonItem; // Total setelah diskon per item
+            $totalSetelahDiskon = $totalSetelahDiskonItem - $diskonTambahan; // Total setelah semua diskon
 
             // Validasi diskon tidak melebihi total
-            if ($diskon > $totalHarga) {
-                throw new \Exception('Diskon tidak boleh melebihi total');
+            if ($totalDiskonItem > $totalHarga) {
+                throw new \Exception('Total diskon item tidak boleh melebihi total');
+            }
+
+            if ($diskonTambahan > $totalSetelahDiskonItem) {
+                throw new \Exception('Diskon tambahan tidak boleh melebihi total setelah diskon item');
+            }
+
+            if ($totalSetelahDiskon < 0) {
+                throw new \Exception('Total tidak boleh negatif');
             }
 
             // Validasi bayar pakai total setelah diskon
@@ -91,15 +115,15 @@ class PosController extends Controller
 
             // Simpan penjualan
             $penjualan = Penjualan::create([
-                'kode_transaksi' => 'TRX-' . date('Ymd') . '-' . strtoupper(Str::random(6)), // ✅ Acak
+                'kode_transaksi' => 'TRX-' . date('Ymd') . '-' . strtoupper(Str::random(6)),
                 'user_id' => $user->id,
                 'tenant_id' => $user->tenant_id,
                 'cabang_id' => $user->cabang_id,
                 'total_harga' => $totalHarga,
-                'diskon' => $diskon, // ✅
-                'total_setelah_diskon' => $totalSetelahDiskon, // ✅
+                'diskon' => $totalDiskonItem + $diskonTambahan, // ✅ Total semua diskon
+                'total_setelah_diskon' => $totalSetelahDiskon,
                 'bayar' => $request->bayar,
-                'kembalian' => $request->bayar - $totalSetelahDiskon, // ✅
+                'kembalian' => $request->bayar - $totalSetelahDiskon,
                 'status' => 'lunas',
             ]);
 
@@ -113,6 +137,8 @@ class PosController extends Controller
                     'qty' => $item['qty'],
                     'harga_satuan' => $item['harga_satuan'],
                     'subtotal' => $item['subtotal'],
+                    'diskon' => $item['diskon'], // ✅ Diskon per item
+                    'total_setelah_diskon' => $item['total_setelah_diskon'], // ✅ Total setelah diskon item
                 ]);
 
                 // Kurangi stok
@@ -137,7 +163,7 @@ class PosController extends Controller
             return response()->json([
                 'success' => true,
                 'penjualan_id' => $penjualan->id,
-                'kode_transaksi' => $penjualan->kode_transaksi, // ✅
+                'kode_transaksi' => $penjualan->kode_transaksi,
                 'kembalian' => $penjualan->kembalian,
                 'message' => 'Transaksi berhasil',
             ]);
@@ -150,7 +176,6 @@ class PosController extends Controller
             ], 422);
         }
     }
-
     /**
      * Laporan penjualan
      */

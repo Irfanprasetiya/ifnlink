@@ -52,15 +52,30 @@
         <div class="border-t border-dashed border-slate-300 my-3"></div>
 
         {{-- Items --}}
-        <div class="space-y-2 mb-4">
+        <div class="space-y-3 mb-4">
             @foreach ($penjualan->details as $d)
-                <div class="flex justify-between text-xs">
-                    <div>
-                        <p class="font-bold">{{ $d->voucher->nama_produk }}</p>
-                        <p class="text-slate-500">{{ $d->qty }} x Rp
-                            {{ number_format($d->harga_satuan, 0, ',', '.') }}</p>
+                <div>
+                    {{-- Produk --}}
+                    <div class="flex justify-between text-xs">
+                        <div>
+                            <p class="font-bold">{{ $d->voucher->nama_produk }}</p>
+                            <p class="text-slate-500">{{ $d->qty }} x Rp
+                                {{ number_format($d->harga_satuan, 0, ',', '.') }}</p>
+                        </div>
+                        <span class="font-bold">Rp {{ number_format($d->subtotal, 0, ',', '.') }}</span>
                     </div>
-                    <span class="font-bold">Rp {{ number_format($d->subtotal, 0, ',', '.') }}</span>
+
+                    {{-- ✅ Diskon per item di bawah produk --}}
+                    @if ($d->diskon > 0)
+                        <div class="flex justify-between text-xs text-rose-600 mt-1 pl-3">
+                            <span>Diskon Item</span>
+                            <span>- Rp {{ number_format($d->diskon, 0, ',', '.') }}</span>
+                        </div>
+                        <div class="flex justify-between text-xs font-bold mt-0.5 pl-3">
+                            <span>Subtotal</span>
+                            <span>Rp {{ number_format($d->total_setelah_diskon, 0, ',', '.') }}</span>
+                        </div>
+                    @endif
                 </div>
             @endforeach
         </div>
@@ -73,12 +88,14 @@
                 <span>Total</span>
                 <span>Rp {{ number_format($penjualan->total_harga, 0, ',', '.') }}</span>
             </div>
+
             @if ($penjualan->diskon > 0)
                 <div class="flex justify-between text-rose-600">
-                    <span>Diskon</span>
+                    <span>Total Diskon</span>
                     <span>- Rp {{ number_format($penjualan->diskon, 0, ',', '.') }}</span>
                 </div>
             @endif
+
             <div class="flex justify-between font-bold text-base border-t border-slate-200 pt-2">
                 <span>Grand Total</span>
                 <span>Rp {{ number_format($penjualan->total_setelah_diskon, 0, ',', '.') }}</span>
@@ -177,28 +194,37 @@
                 return;
             }
 
-            const struk = `
-{{ $penjualan->tenant->nama_toko ?? 'OMZETLY.ID' }}
-{{ $penjualan->cabang->nama_cabang ?? '' }}
-{{ $penjualan->created_at->format('d/m/Y H:i') }}
-----------------------------
-No: {{ $penjualan->kode_transaksi }}
-Kasir: {{ $penjualan->user->name ?? '-' }}
-----------------------------
-@foreach ($penjualan->details as $d)
-{{ $d->voucher->nama_produk }}
-{{ $d->qty }} x Rp {{ number_format($d->harga_satuan, 0, ',', '.') }} = Rp {{ number_format($d->subtotal, 0, ',', '.') }}
-@endforeach
-----------------------------
-@if ($penjualan->diskon > 0)
-Diskon: -Rp {{ number_format($penjualan->diskon, 0, ',', '.') }}
-@endif
-TOTAL: Rp {{ number_format($penjualan->total_setelah_diskon, 0, ',', '.') }}
-BAYAR: Rp {{ number_format($penjualan->bayar, 0, ',', '.') }}
-KEMBALI: Rp {{ number_format($penjualan->kembalian, 0, ',', '.') }}
-----------------------------
-Terima Kasih!
-`;
+            // ✅ Build struk dengan diskon per item
+            let strukText = `{{ $penjualan->tenant->nama_toko ?? 'OMZETLY.ID' }}\n`;
+            strukText += `{{ $penjualan->cabang->nama_cabang ?? '' }}\n`;
+            strukText += `{{ $penjualan->created_at->format('d/m/Y H:i') }}\n`;
+            strukText += `----------------------------\n`;
+            strukText += `No: {{ $penjualan->kode_transaksi }}\n`;
+            strukText += `Kasir: {{ $penjualan->user->name ?? '-' }}\n`;
+            strukText += `----------------------------\n`;
+
+            @foreach ($penjualan->details as $d)
+                strukText += `{{ $d->voucher->nama_produk }}\n`;
+                strukText +=
+                    `{{ $d->qty }} x Rp {{ number_format($d->harga_satuan, 0, ',', '.') }} = Rp {{ number_format($d->subtotal, 0, ',', '.') }}\n`;
+
+                @if ($d->diskon > 0)
+                    strukText += `  Diskon Item: -Rp {{ number_format($d->diskon, 0, ',', '.') }}\n`;
+                    strukText += `  Subtotal: Rp {{ number_format($d->total_setelah_diskon, 0, ',', '.') }}\n`;
+                @endif
+            @endforeach
+
+            strukText += `----------------------------\n`;
+
+            @if ($penjualan->diskon > 0)
+                strukText += `Total Diskon: -Rp {{ number_format($penjualan->diskon, 0, ',', '.') }}\n`;
+            @endif
+
+            strukText += `TOTAL: Rp {{ number_format($penjualan->total_setelah_diskon, 0, ',', '.') }}\n`;
+            strukText += `BAYAR: Rp {{ number_format($penjualan->bayar, 0, ',', '.') }}\n`;
+            strukText += `KEMBALI: Rp {{ number_format($penjualan->kembalian, 0, ',', '.') }}\n`;
+            strukText += `----------------------------\n`;
+            strukText += `Terima Kasih!\n`;
 
             try {
                 const encoder = new TextEncoder();
@@ -223,7 +249,7 @@ Terima Kasih!
                 await bluetoothCharacteristic.writeValue(doubleHeight);
                 await bluetoothCharacteristic.writeValue(boldOn);
 
-                const header = `{{ $penjualan->tenant->nama_toko ?? 'OMZETLY.ID' }}\n{{ $penjualan->cabang->nama_cabang ?? '' }}\n{{ $penjualan->created_at->format('d/m/Y H:i') }}\n`;
+                const header = strukText.split('\n').slice(0, 3).join('\n') + '\n';
                 await sendChunk(encoder.encode(header));
 
                 await bluetoothCharacteristic.writeValue(boldOff);
@@ -231,7 +257,7 @@ Terima Kasih!
                 await bluetoothCharacteristic.writeValue(left);
 
                 // ✅ Body
-                const body = `----------------------------\nNo: {{ $penjualan->kode_transaksi }}\nKasir: {{ $penjualan->user->name ?? '-' }}\n----------------------------\n@foreach ($penjualan->details as $d){{ $d->voucher->nama_produk }}\n{{ $d->qty }} x Rp {{ number_format($d->harga_satuan, 0, ',', '.') }} = Rp {{ number_format($d->subtotal, 0, ',', '.') }}\n@endforeach----------------------------\n@if ($penjualan->diskon > 0)Diskon: -Rp {{ number_format($penjualan->diskon, 0, ',', '.') }}\n@endifTOTAL: Rp {{ number_format($penjualan->total_setelah_diskon, 0, ',', '.') }}\nBAYAR: Rp {{ number_format($penjualan->bayar, 0, ',', '.') }}\nKEMBALI: Rp {{ number_format($penjualan->kembalian, 0, ',', '.') }}\n`;
+                const body = strukText.split('\n').slice(3).join('\n');
                 await sendChunk(encoder.encode(body));
 
                 // ✅ Footer - Bold

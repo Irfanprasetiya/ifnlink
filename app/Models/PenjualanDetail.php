@@ -14,6 +14,8 @@ class PenjualanDetail extends Model
         'qty',
         'harga_satuan',
         'subtotal',
+        'diskon', // ✅
+        'total_setelah_diskon', // ✅
     ];
 
     protected $casts = [

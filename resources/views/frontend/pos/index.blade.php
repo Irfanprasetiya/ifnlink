@@ -195,6 +195,7 @@
 
     <script>
         let cart = [];
+        let activeDiskonInput = null; // ✅ Track input yang sedang fokus
 
         function formatRupiah(angka) {
             return 'Rp ' + Math.round(angka).toLocaleString('id-ID');
@@ -236,7 +237,8 @@
                         nama,
                         harga,
                         qty: 1,
-                        stok
+                        stok,
+                        diskon: 0
                     });
                 }
 
@@ -265,24 +267,43 @@
 
                 container.innerHTML = cart.map((item, index) => {
                     const subtotal = item.harga * item.qty;
-                    total += subtotal;
+                    const diskonItem = item.diskon || 0;
+                    const totalItem = subtotal - diskonItem;
+                    total += totalItem;
                     totalItems += item.qty;
 
                     return `
-                    <div class="flex justify-between items-center bg-slate-50 border border-slate-100 rounded-xl p-2.5 sm:p-3 mb-2">
+                <div class="bg-slate-50 border border-slate-100 rounded-xl p-2.5 sm:p-3 mb-2">
+                    <div class="flex justify-between items-start">
                         <div class="min-w-0 flex-1 pr-2">
                             <p class="font-bold text-sm text-slate-800 truncate">${item.nama}</p>
-                            <p class="text-[11px] sm:text-xs text-slate-500 font-medium mt-0.5">${formatRupiah(item.harga)}</p>
+                            <p class="text-[11px] sm:text-xs text-slate-500 font-medium mt-0.5">
+                                ${item.qty} x ${formatRupiah(item.harga)}
+                                ${diskonItem > 0 ? `<span class="text-rose-500 font-bold"> (-${formatRupiah(diskonItem)})</span>` : ''}
+                            </p>
+                            <p class="text-xs font-bold text-slate-700 mt-1">${formatRupiah(totalItem)}</p>
                         </div>
                         <div class="flex items-center gap-1.5 shrink-0">
                             <button onclick="updateQty(${index}, -1)" class="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center bg-white border border-slate-200 text-slate-600 rounded-lg font-bold shadow-sm hover:bg-slate-100 transition active:scale-90">-</button>
                             <span class="font-bold text-sm w-5 sm:w-6 text-center">${item.qty}</span>
                             <button onclick="updateQty(${index}, 1)" class="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center bg-white border border-slate-200 text-slate-600 rounded-lg font-bold shadow-sm hover:bg-slate-100 transition active:scale-90">+</button>
+                            <button onclick="removeItem(${index})" class="shrink-0 w-7 h-7 sm:w-8 sm:h-8 ml-1 flex items-center justify-center bg-rose-50 hover:bg-rose-100 text-rose-500 rounded-lg transition active:scale-90">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
                         </div>
-                        <button onclick="removeItem(${index})" class="shrink-0 w-7 h-7 sm:w-8 sm:h-8 ml-2 flex items-center justify-center bg-rose-50 hover:bg-rose-100 text-rose-500 rounded-lg transition active:scale-90">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                        </button>
-                    </div>`;
+                    </div>
+                    {{-- ✅ Input Diskon Per Item --}}
+                    <div class="mt-2 flex items-center gap-2">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase">Diskon Item</label>
+                        <input type="text" 
+                            id="diskon-item-${index}"
+                            value="${diskonItem > 0 ? diskonItem.toLocaleString('id-ID') : ''}"
+                            onfocus="activeDiskonInput = ${index}"
+                            oninput="setDiskonItem(${index}, this.value)"
+                            placeholder="0"
+                            class="diskon-item-input w-28 bg-white border border-slate-200 rounded-lg px-2 py-1 text-xs font-bold text-rose-500 text-right focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500">
+                    </div>
+                </div>`;
                 }).join('');
 
                 badgeCount.textContent = `${totalItems} Item`;
@@ -290,6 +311,56 @@
                 fabBadge.classList.remove('hidden');
                 fabCart.classList.remove('translate-y-20', 'opacity-0');
             }
+
+            // ✅ Kembalikan fokus ke input diskon yang aktif
+            if (activeDiskonInput !== null) {
+                const activeInput = document.getElementById(`diskon-item-${activeDiskonInput}`);
+                if (activeInput) {
+                    const length = activeInput.value.length;
+                    activeInput.focus();
+                    activeInput.setSelectionRange(length, length);
+                }
+            }
+
+            document.getElementById('total-harga').textContent = formatRupiah(total);
+            hitungKembalian();
+        }
+
+        // ✅ Set Diskon Per Item
+        function setDiskonItem(index, value) {
+            let clean = value.replace(/[^\d]/g, '');
+            if (clean) {
+                cart[index].diskon = parseInt(clean) || 0;
+            } else {
+                cart[index].diskon = 0;
+            }
+
+            // Simpan posisi cursor
+            const input = document.getElementById(`diskon-item-${index}`);
+            const cursorPos = input ? input.selectionStart : null;
+
+            // Update hanya nilai input yang sedang diedit
+            if (input) {
+                input.value = cart[index].diskon > 0 ? cart[index].diskon.toLocaleString('id-ID') : '';
+            }
+
+            // Update total dan kembalian tanpa render ulang seluruh cart
+            updateTotals();
+
+            // Kembalikan posisi cursor
+            if (input && cursorPos !== null) {
+                const newPos = input.value.length;
+                input.setSelectionRange(newPos, newPos);
+            }
+        }
+
+        // ✅ Fungsi baru untuk update total tanpa render ulang
+        function updateTotals() {
+            const total = cart.reduce((sum, item) => {
+                const subtotal = item.harga * item.qty;
+                const diskonItem = item.diskon || 0;
+                return sum + (subtotal - diskonItem);
+            }, 0);
 
             document.getElementById('total-harga').textContent = formatRupiah(total);
             hitungKembalian();
@@ -312,8 +383,13 @@
             renderCart();
         }
 
+        // ✅ Total sudah termasuk diskon per item
         function getTotal() {
-            return cart.reduce((sum, item) => sum + (item.harga * item.qty), 0);
+            return cart.reduce((sum, item) => {
+                const subtotal = item.harga * item.qty;
+                const diskonItem = item.diskon || 0;
+                return sum + (subtotal - diskonItem);
+            }, 0);
         }
 
         function getDiskon() {
@@ -407,7 +483,8 @@
                     body: JSON.stringify({
                         items: cart.map(item => ({
                             voucher_id: item.id,
-                            qty: item.qty
+                            qty: item.qty,
+                            diskon: item.diskon || 0,
                         })),
                         bayar: bayar,
                         diskon: diskon,
@@ -418,8 +495,6 @@
                     if (data.success) {
                         const modal = document.getElementById('success-modal');
                         document.getElementById('success-kembalian').textContent = formatRupiah(data.kembalian);
-
-                        // ✅ Set link struk pakai kode_transaksi
                         document.getElementById('btn-struk').href = '{{ url('/pos/struk') }}/' + data
                             .kode_transaksi;
 
