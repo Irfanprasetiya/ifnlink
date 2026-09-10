@@ -19,16 +19,30 @@ use Illuminate\Support\Facades\Auth;
  */
 class VoucherController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
 
-        // ✅ Filter multi-tenant: produk milik tenant + data master (tenant_id NULL)
-        $vouchers = Voucher::with('kategori')
-            ->where('tenant_id', $user->tenant_id)
-            ->orWhereNull('tenant_id')
-            ->get();
+        // ✅ Query dasar dengan filter tenant + data master
+        $query = Voucher::with('kategori')
+            ->where(function ($q) use ($user) {
+                $q->where('tenant_id', $user->tenant_id)
+                    ->orWhereNull('tenant_id');
+            });
 
+        // ✅ Filter berdasarkan search (nama produk)
+        if ($request->filled('search')) {
+            $query->where('nama_produk', 'like', '%' . $request->search . '%');
+        }
+
+        // ✅ Filter berdasarkan kategori
+        if ($request->filled('kategori_id')) {
+            $query->where('kategori_id', $request->kategori_id);
+        }
+
+        $vouchers = $query->orderBy('id', 'desc')->get();
+
+        // ✅ Kategori untuk dropdown filter
         $kategoris = Kategori::where('tenant_id', $user->tenant_id)
             ->orWhereNull('tenant_id')
             ->get();

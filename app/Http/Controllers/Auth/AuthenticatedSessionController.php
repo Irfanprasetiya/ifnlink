@@ -26,38 +26,49 @@ class AuthenticatedSessionController extends Controller
     // Di AuthenticatedSessionController@store
     public function store(LoginRequest $request): RedirectResponse
     {
+        // ✅ 1. Authenticate dulu
         $request->authenticate();
+
+        // ✅ 2. Regenerate session (WAJIB setelah auth berhasil - cegah session fixation)
         $request->session()->regenerate();
 
         $user = Auth::user();
 
-        // ✅ Cek soft delete
+        // ✅ 3. Cek soft delete tenant (sebelum redirect)
         if ($user->role !== 'developer' && $user->tenant && $user->tenant->trashed()) {
-            Auth::guard('web')->logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-            return redirect()->route('login')->with('error', 'Akun Anda telah dinonaktifkan. Hubungi customer service.');
+            return $this->logoutWithError($request, 'Akun Anda telah dinonaktifkan. Hubungi customer service.');
         }
 
-        // ✅ Cek suspended untuk role user → logout
+        // ✅ 4. Cek suspended untuk role user
         if ($user->role === 'user' && $user->tenant && $user->tenant->status_langganan === 'suspended') {
-            Auth::guard('web')->logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-            return redirect()->route('login')->with('error', 'Toko Anda sedang dinonaktifkan sementara.');
+            return $this->logoutWithError($request, 'Toko Anda sedang dinonaktifkan sementara.');
         }
 
-        // ✅ Cek suspended & pending → arahkan ke dashboard.pending (untuk admin/super_admin)
+        // ✅ 5. Cek pending & suspended untuk admin/super_admin/owner
         if ($user->tenant && in_array($user->tenant->status_langganan, ['pending', 'suspended'])) {
             return redirect()->route('dashboard.pending');
         }
 
+        // ✅ 6. Redirect sesuai role
         return match ($user->role) {
             'developer' => redirect()->intended(route('developer.dashboard')),
             'owner', 'admin', 'super_admin' => redirect()->intended(route('dashboard')),
             'user' => redirect()->intended(route('main')),
-            default => redirect()->route('login')->with('error', 'Role tidak dikenali.'),
+            default => $this->logoutWithError($request, 'Role tidak dikenali.'),
         };
+    }
+
+    /**
+     * ✅ Helper: Logout & redirect dengan error message
+     * Mengurangi duplikasi kode logout
+     */
+    private function logoutWithError($request, string $message): RedirectResponse
+    {
+        Auth::guard('web')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('login')->with('error', $message);
     }
 
     /**

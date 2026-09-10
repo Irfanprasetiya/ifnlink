@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Login | Omzetly.id</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -115,7 +116,8 @@
             </div>
 
             {{-- Form Login --}}
-            <form method="POST" action="{{ route('login') }}" class="space-y-5">
+            <form method="POST" action="{{ route('login') }}" class="space-y-5" id="loginForm"
+                onsubmit="return handleLogin(this)">
                 @csrf
 
                 <div>
@@ -130,7 +132,6 @@
                                     d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                             </svg>
                         </div>
-                        {{-- Class 'text-base sm:text-sm' mencegah auto-zoom di iOS --}}
                         <input type="text" name="username" id="username" value="{{ old('username') }}" required
                             autofocus autocomplete="username"
                             class="w-full pl-11 pr-4 py-3.5 sm:py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 text-gray-900 dark:text-white text-base sm:text-sm focus:bg-white dark:focus:bg-gray-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 outline-none transition-all"
@@ -160,11 +161,19 @@
                 </div>
 
                 <div class="pt-2">
-                    <button type="submit"
-                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl text-sm shadow-md shadow-blue-500/20 transition-all active:scale-95 flex items-center justify-center gap-2">
-                        Masuk ke Dasbor
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                            stroke-width="2.5">
+                    <button type="submit" id="btnLogin"
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl text-sm shadow-md shadow-blue-500/20 transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed disabled:active:scale-100">
+                        <svg id="loginSpinner" class="hidden w-4 h-4 animate-spin" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                            </path>
+                        </svg>
+                        <span id="btnLoginText">Masuk ke Dasbor</span>
+                        <svg id="loginArrow" class="w-4 h-4" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24" stroke-width="2.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
                         </svg>
                     </button>
@@ -198,6 +207,30 @@
             </p>
         </div>
     </section>
+
+    <script>
+        // ✅ Cegah double submit & tampilkan loading
+        function handleLogin(form) {
+            const btn = document.getElementById('btnLogin');
+            const spinner = document.getElementById('loginSpinner');
+            const text = document.getElementById('btnLoginText');
+            const arrow = document.getElementById('loginArrow');
+
+            // Cegah double submit
+            if (btn.disabled) {
+                return false;
+            }
+
+            // Disable tombol & tampilkan loading
+            btn.disabled = true;
+            btn.classList.add('disabled:opacity-70', 'disabled:cursor-not-allowed');
+            spinner.classList.remove('hidden');
+            arrow.classList.add('hidden');
+            text.textContent = 'Memproses...';
+
+            return true;
+        }
+    </script>
 </body>
 
 </html>

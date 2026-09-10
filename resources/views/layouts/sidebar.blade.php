@@ -37,7 +37,7 @@
                         :locked="$isLocked" />
 
                     <x-sidebar-menu-dropdown label="Transaksi" icon="transaksi" :locked="$isLocked">
-                        <x-sidebar-menu label="Transaksi Agen" route="trx-bank.index" active="trx-bank.*"
+                        <x-sidebar-menu label="Transaksi Saldo" route="trx-bank.index" active="trx-bank.*"
                             :locked="$isLocked" />
                     </x-sidebar-menu-dropdown>
 
@@ -45,7 +45,7 @@
                         :locked="$isLocked" />
 
                     <x-sidebar-menu-dropdown label="Laporan Transaksi" icon="laporan-transaksi" :locked="$isLocked">
-                        <x-sidebar-menu label="Laporan Agen" route="laporan-bank.admin.index" active="laporan-bank*"
+                        <x-sidebar-menu label="Laporan Saldo" route="laporan-bank.admin.index" active="laporan-bank*"
                             :locked="$isLocked" />
                         <x-sidebar-menu label="Laporan POS" route="admin.pos.laporan" active="admin.pos.laporan*"
                             :locked="$isLocked" />
@@ -151,6 +151,8 @@
                             active="stok_history.index*" :locked="$isLocked" />
                         <x-sidebar-menu label="Laporan Stok" route="stok_history.laporan" icon="laporan-stok"
                             active="stok_history.laporan*" :locked="$isLocked" />
+                        <x-sidebar-menu label="Rekap" route="rekap.index" icon="rekap" active="rekap*"
+                            :locked="$isLocked" />
                     @else
                         <x-sidebar-menu label="Stok Opname" route="data_master.stok_opname.index" icon="stok-opname"
                             badge="PRO" active="data_master.stok_opname*" :locked="false" />
@@ -158,10 +160,10 @@
                             badge="PRO" active="stok_history.index*" :locked="false" />
                         <x-sidebar-menu label="Laporan Stok" route="stok_history.laporan" icon="laporan-stok"
                             badge="PRO" active="stok_history.laporan*" :locked="false" />
+                        <x-sidebar-menu label="Rekap" route="rekap.index" icon="rekap" badge="PRO"
+                            active="rekap*" :locked="false" />
                     @endif
                     <x-sidebar-menu label="Manajemen Akun" route="users.index" icon="users" active="users*"
-                        :locked="$isLocked" />
-                    <x-sidebar-menu label="Rekap" route="rekap.index" icon="rekap" active="rekap*"
                         :locked="$isLocked" />
                     <x-sidebar-menu label="Status Langganan" route="status.langganan" icon="status-langganan"
                         active="status*" :locked="false" />
