@@ -171,7 +171,19 @@
                                             <p class="mt-1.5 text-xs font-medium text-rose-500">{{ $message }}</p>
                                         @enderror
 
-                                        {{-- ✅ INFO BIAYA ADMIN (Realtime) --}}
+                                        {{-- ✅ KETERANGAN RUMUS TOTAL BAYAR --}}
+                                        <div id="hint_rumus_bayar"
+                                            class="hidden mt-2 p-2.5 bg-slate-50 border border-slate-200 rounded-lg flex items-start gap-2">
+                                            <svg class="w-4 h-4 text-blue-500 shrink-0 mt-0.5" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            <p id="teks_rumus_bayar"
+                                                class="text-[11px] font-medium text-slate-600 leading-relaxed"></p>
+                                        </div>
+
+                                        {{-- INFO BIAYA ADMIN (Realtime) --}}
                                         <div id="info_biaya_admin"
                                             class="hidden mt-2 p-3 bg-amber-50 border border-amber-200 rounded-xl text-sm">
                                             <div class="flex items-center justify-between">
@@ -413,6 +425,39 @@
                 btn.innerHTML =
                     `<svg class="animate-spin h-5 w-5 text-white shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Memproses...`;
             });
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const jenisTransaksiSelect = document.getElementById('jenis_transaksi_id');
+            const hintRumusBayar = document.getElementById('hint_rumus_bayar');
+            const teksRumusBayar = document.getElementById('teks_rumus_bayar');
+
+            // Fungsi untuk mengupdate keterangan rumus
+            function updateRumusKeterangan() {
+                if (jenisTransaksiSelect.selectedIndex === -1) return;
+
+                const selectedOption = jenisTransaksiSelect.options[jenisTransaksiSelect.selectedIndex];
+                const namaTransaksi = selectedOption.getAttribute('data-nama');
+
+                if (namaTransaksi === 'transfer') {
+                    hintRumusBayar.classList.remove('hidden');
+                    teksRumusBayar.innerHTML =
+                        'Keterangan pengisian: <strong>Nominal Transaksi + Biaya Admin</strong>';
+                } else if (namaTransaksi === 'tarik tunai') {
+                    hintRumusBayar.classList.remove('hidden');
+                    teksRumusBayar.innerHTML =
+                        'Keterangan pengisian: <strong>Nominal Transaksi - Biaya Admin</strong>';
+                } else {
+                    hintRumusBayar.classList.add('hidden');
+                    teksRumusBayar.innerHTML = '';
+                }
+            }
+
+            // Jalankan saat dropdown diubah
+            jenisTransaksiSelect.addEventListener('change', updateRumusKeterangan);
+
+            // Jalankan sekali saat halaman dimuat (untuk handle old() value)
+            updateRumusKeterangan();
         });
     </script>
 @endsection
