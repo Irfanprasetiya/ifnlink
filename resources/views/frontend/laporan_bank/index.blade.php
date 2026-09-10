@@ -213,7 +213,6 @@
                                     @endphp
 
                                     @if (!($isKas && $isTarikTunai))
-                                        @php $hasData = true; @endphp
                                         <tr class="hover:bg-slate-50/80 transition-colors">
                                             <td class="px-5 py-3.5 text-center text-slate-400 font-bold">
                                                 {{ $noDesktop++ }}</td>
@@ -275,4 +274,54 @@
 
         </div>
     </section>
+
+    {{-- ========== SMART SCROLL ARROW (Hanya Tampil Jika Ada Data & Di Layar Mobile) ========== --}}
+    @if ($hasData)
+        <button id="smartScrollBtn"
+            class="lg:hidden fixed bottom-24 right-5 z-[40] bg-blue-600/95 backdrop-blur-sm hover:bg-blue-700 text-white w-11 h-11 rounded-full shadow-[0_4px_12px_rgba(37,99,235,0.4)] flex items-center justify-center transition-transform active:scale-90">
+            <svg id="scrollIcon" class="w-5 h-5 transition-transform duration-300 ease-in-out" fill="none"
+                stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3">
+                </path>
+            </svg>
+        </button>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const scrollBtn = document.getElementById('smartScrollBtn');
+                const scrollIcon = document.getElementById('scrollIcon');
+
+                if (scrollBtn && scrollIcon) {
+                    let isPointingDown = true;
+
+                    window.addEventListener('scroll', () => {
+                        // Jika layar disekrol ke bawah lebih dari 300px
+                        if (window.scrollY > 300) {
+                            scrollIcon.style.transform = 'rotate(180deg)';
+                            isPointingDown = false;
+                        } else {
+                            scrollIcon.style.transform = 'rotate(0deg)';
+                            isPointingDown = true;
+                        }
+                    });
+
+                    scrollBtn.addEventListener('click', () => {
+                        if (isPointingDown) {
+                            // Scroll halus ke paling bawah
+                            window.scrollTo({
+                                top: document.body.scrollHeight,
+                                behavior: 'smooth'
+                            });
+                        } else {
+                            // Scroll halus ke paling atas
+                            window.scrollTo({
+                                top: 0,
+                                behavior: 'smooth'
+                            });
+                        }
+                    });
+                }
+            });
+        </script>
+    @endif
 @endsection

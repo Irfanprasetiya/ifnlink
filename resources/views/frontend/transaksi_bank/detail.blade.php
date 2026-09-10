@@ -16,38 +16,51 @@
                         </div>
 
                         <!-- Header Form -->
-                        <div class="border-b border-slate-100 px-4 py-4 sm:px-6 sm:py-5 relative z-10">
-                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                                <div class="flex items-center gap-3.5">
+                        <div class="border-b border-slate-100 px-4 py-3 sm:px-6 sm:py-5 relative z-10">
+                            <div class="flex items-center justify-between gap-3">
+
+                                <!-- Sisi Kiri: Judul -->
+                                <div class="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
                                     <div
-                                        class="w-10 h-10 sm:w-11 sm:h-11 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center shrink-0">
-                                        <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor"
+                                        class="w-8 h-8 sm:w-11 sm:h-11 bg-blue-50 text-blue-600 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0">
+                                        <svg class="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                         </svg>
                                     </div>
-                                    <div>
-                                        <h2 class="text-lg sm:text-xl font-extrabold text-slate-800 tracking-tight">Form
-                                            Transaksi</h2>
-                                        <p class="text-[11px] sm:text-xs font-medium text-slate-500 mt-0.5">Lengkapi form di
-                                            bawah untuk mencatat transaksi baru</p>
+                                    <div class="min-w-0">
+                                        <h2
+                                            class="text-sm sm:text-xl font-extrabold text-slate-800 tracking-tight truncate">
+                                            Form Transaksi</h2>
+                                        <p class="hidden sm:block text-xs font-medium text-slate-500 mt-0.5">Lengkapi form
+                                            di bawah untuk mencatat transaksi baru</p>
+                                        <!-- Teks lebih pendek khusus mobile -->
+                                        <p class="sm:hidden text-[10px] font-medium text-slate-500 mt-0.5 truncate">Catat
+                                            transaksi baru</p>
                                     </div>
                                 </div>
+
+                                <!-- Sisi Kanan: Info Bank Terpilih -->
                                 <div
-                                    class="flex items-center gap-3 bg-slate-50/50 p-2.5 sm:p-3 rounded-xl border border-slate-100 sm:w-auto w-full">
+                                    class="flex items-center gap-2 sm:gap-3 bg-slate-50/50 p-1.5 sm:p-3 rounded-lg sm:rounded-xl border border-slate-100 shrink-0">
                                     <div
-                                        class="w-9 h-9 sm:w-10 sm:h-10 bg-white shadow-sm border border-slate-200 rounded-lg flex items-center justify-center shrink-0">
+                                        class="w-7 h-7 sm:w-10 sm:h-10 bg-white shadow-sm border border-slate-200 rounded-md sm:rounded-lg flex items-center justify-center shrink-0">
                                         <span
-                                            class="text-blue-600 font-bold text-sm sm:text-base">{{ strtoupper(substr($bank->nama_bank, 0, 1)) }}</span>
+                                            class="text-blue-600 font-bold text-xs sm:text-base">{{ strtoupper(substr($bank->nama_bank, 0, 1)) }}</span>
                                     </div>
-                                    <div class="min-w-0 pr-2">
+                                    <div class="min-w-0 pr-1 sm:pr-2 hidden sm:block">
                                         <p class="text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-0.5">Bank
                                             Tujuan</p>
-                                        <p class="font-bold text-slate-800 text-xs sm:text-sm truncate">
+                                        <p class="font-bold text-slate-800 text-sm truncate">{{ $bank->nama_bank }}</p>
+                                    </div>
+                                    <!-- Nama bank tanpa label khusus mobile -->
+                                    <div class="min-w-0 pr-1 block sm:hidden">
+                                        <p class="font-bold text-slate-800 text-[11px] truncate max-w-[80px]">
                                             {{ $bank->nama_bank }}</p>
                                     </div>
                                 </div>
+
                             </div>
                         </div>
 
@@ -176,9 +189,10 @@
                                             Catatan Singkat <span
                                                 class="text-slate-400 font-medium normal-case tracking-normal">(Opsional)</span>
                                         </label>
-                                        <textarea name="keterangan" id="keterangan" rows="2"
-                                            class="bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 block w-full p-3 transition-all duration-200 font-medium placeholder:text-slate-400 placeholder:font-normal resize-none"
-                                            placeholder="Cth: Bayar tagihan listrik bulan ini...">{{ old('keterangan') }}</textarea>
+                                        <input type="text" name="keterangan" id="keterangan"
+                                            value="{{ old('keterangan') }}"
+                                            class="bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 block w-full p-3 transition-all duration-200 font-medium placeholder:text-slate-400 placeholder:font-normal"
+                                            placeholder="Cth: Bayar tagihan listrik bulan ini...">
                                         @error('keterangan')
                                             <p class="mt-1.5 text-xs font-medium text-rose-500">{{ $message }}</p>
                                         @enderror

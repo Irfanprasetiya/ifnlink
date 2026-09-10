@@ -22,10 +22,17 @@ class PosController extends Controller
     {
         $user = Auth::user();
 
-        // Produk tersedia di cabang user
-        $produks = ProdukKonter::with(['voucher.kategori'])
+        $produks = ProdukKonter::query()
+            ->select(['id', 'voucher_id', 'cabang_id', 'tenant_id', 'stok'])
+            ->with([
+                'voucher' => function ($q) {
+                    $q->select(['id', 'nama_produk', 'harga_jual', 'kategori_id'])
+                        ->with('kategori:id,nama_kategori');
+                }
+            ])
             ->where('cabang_id', $user->cabang_id)
-            ->where('stok', '>', 0)
+            ->where('tenant_id', $user->tenant_id) // ✅ Tambahan safety
+            ->orderBy('stok', 'desc')
             ->get();
 
         return view('frontend.pos.index', compact('produks'));
