@@ -384,7 +384,7 @@
                         <button type="button" onclick="closeModal('edit-modal-{{ $voucher->id }}')"
                             class="px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors">Batal</button>
                         <button type="submit" id="btn-submit-edit-{{ $voucher->id }}"
-                            class="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-sm font-bold transition-colors shadow-sm flex items-center gap-2">
+                            class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-colors shadow-sm flex items-center gap-2">
                             <svg id="loading-spinner-edit-{{ $voucher->id }}" class="hidden w-4 h-4 animate-spin"
                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
@@ -446,39 +446,60 @@
     <script>
         // ========== FORMAT CURRENCY ==========
         function formatCurrency(input) {
-            // Hapus semua karakter non-digit
             let value = input.value.replace(/[^\d]/g, '');
-
-            // Jika kosong, set placeholder
             if (value === '') {
                 input.value = '';
                 return;
             }
-
-            // Format dengan titik ribuan
             input.value = parseInt(value).toLocaleString('id-ID');
         }
 
-        // ========== SUBMIT FORM DENGAN ANIMASI LOADING ==========
+        // ========== FUNGSI MODAL ==========
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('modal-open');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('modal-open');
+                document.body.style.overflow = 'auto';
+
+                // Reset form jika modal create
+                if (modalId === 'create-modal') {
+                    resetCreateForm();
+                }
+
+                // Reset form jika modal edit
+                if (modalId.startsWith('edit-modal-')) {
+                    const voucherId = modalId.replace('edit-modal-', '');
+                    resetEditForm(voucherId);
+                }
+            }
+        }
+
+        // ========== SUBMIT FORM CREATE ==========
         function submitForm(form) {
             event.preventDefault();
 
-            // Ambil tombol submit
             const submitBtn = document.getElementById('btn-submit-create');
             const spinner = document.getElementById('loading-spinner');
             const btnText = document.getElementById('btn-text-submit');
 
-            // Disable tombol dan tampilkan loading
             submitBtn.disabled = true;
             submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
             spinner.classList.remove('hidden');
             btnText.textContent = 'Menyimpan...';
 
-            // Convert format currency ke number sebelum submit
             const hargaBeliInput = document.getElementById('harga_beli');
             const hargaJualInput = document.getElementById('harga_jual');
 
-            // Buat hidden input untuk nilai yang sudah dibersihkan
             const hargaBeliClean = document.createElement('input');
             hargaBeliClean.type = 'hidden';
             hargaBeliClean.name = 'harga_beli';
@@ -489,91 +510,118 @@
             hargaJualClean.name = 'harga_jual';
             hargaJualClean.value = hargaJualInput.value.replace(/[^\d]/g, '');
 
-            // Hapus input lama
             hargaBeliInput.removeAttribute('name');
             hargaJualInput.removeAttribute('name');
 
-            // Tambahkan hidden input ke form
             form.appendChild(hargaBeliClean);
             form.appendChild(hargaJualClean);
 
-            // Submit form
             form.submit();
         }
 
-        // ========== RESET FORM SAAT MODAL DITUTUP ==========
+        // ========== SUBMIT FORM EDIT ==========
+        function submitEditForm(form, voucherId) {
+            event.preventDefault();
+
+            const submitBtn = document.getElementById('btn-submit-edit-' + voucherId);
+            const spinner = document.getElementById('loading-spinner-edit-' + voucherId);
+            const btnText = document.getElementById('btn-text-edit-' + voucherId);
+
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            spinner.classList.remove('hidden');
+            btnText.textContent = 'Menyimpan...';
+
+            const hargaBeliInput = document.getElementById('edit-harga-beli-' + voucherId);
+            const hargaJualInput = document.getElementById('edit-harga-jual-' + voucherId);
+
+            const hargaBeliClean = document.createElement('input');
+            hargaBeliClean.type = 'hidden';
+            hargaBeliClean.name = 'harga_beli';
+            hargaBeliClean.value = hargaBeliInput.value.replace(/[^\d]/g, '');
+
+            const hargaJualClean = document.createElement('input');
+            hargaJualClean.type = 'hidden';
+            hargaJualClean.name = 'harga_jual';
+            hargaJualClean.value = hargaJualInput.value.replace(/[^\d]/g, '');
+
+            hargaBeliInput.removeAttribute('name');
+            hargaJualInput.removeAttribute('name');
+
+            form.appendChild(hargaBeliClean);
+            form.appendChild(hargaJualClean);
+
+            form.submit();
+        }
+
+        // ========== RESET FORM CREATE ==========
         function resetCreateForm() {
             const form = document.getElementById('form-create-voucher');
             if (form) {
                 form.reset();
 
-                // Reset tombol submit
                 const submitBtn = document.getElementById('btn-submit-create');
                 const spinner = document.getElementById('loading-spinner');
                 const btnText = document.getElementById('btn-text-submit');
 
-                submitBtn.disabled = false;
-                submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                spinner.classList.add('hidden');
-                btnText.textContent = 'Simpan';
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+                if (spinner) spinner.classList.add('hidden');
+                if (btnText) btnText.textContent = 'Simpan';
 
-                // Reset name attributes
                 const hargaBeliInput = document.getElementById('harga_beli');
                 const hargaJualInput = document.getElementById('harga_jual');
-                hargaBeliInput.setAttribute('name', 'harga_beli');
-                hargaJualInput.setAttribute('name', 'harga_jual');
+                if (hargaBeliInput) hargaBeliInput.setAttribute('name', 'harga_beli');
+                if (hargaJualInput) hargaJualInput.setAttribute('name', 'harga_jual');
 
-                // Hapus hidden inputs
                 form.querySelectorAll('input[type="hidden"][name="harga_beli"]').forEach(el => el.remove());
                 form.querySelectorAll('input[type="hidden"][name="harga_jual"]').forEach(el => el.remove());
             }
         }
 
-        // Update closeModal untuk reset form
-        const originalCloseModal = closeModal;
-        closeModal = function(modalId) {
-            if (modalId === 'create-modal') {
-                resetCreateForm();
-            }
-            originalCloseModal(modalId);
-        };
-        // ========== FUNGSI MODAL ==========
-        function openModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.classList.remove('hidden');
-                modal.classList.add('modal-open');
-                document.body.style.overflow = 'hidden'; // Prevent scroll
+        // ========== RESET FORM EDIT ==========
+        function resetEditForm(voucherId) {
+            const form = document.getElementById('form-edit-voucher-' + voucherId);
+            if (form) {
+                const submitBtn = document.getElementById('btn-submit-edit-' + voucherId);
+                const spinner = document.getElementById('loading-spinner-edit-' + voucherId);
+                const btnText = document.getElementById('btn-text-edit-' + voucherId);
+
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+                if (spinner) spinner.classList.add('hidden');
+                if (btnText) btnText.textContent = 'Update Data';
+
+                const hargaBeliInput = document.getElementById('edit-harga-beli-' + voucherId);
+                const hargaJualInput = document.getElementById('edit-harga-jual-' + voucherId);
+                if (hargaBeliInput) hargaBeliInput.setAttribute('name', 'harga_beli');
+                if (hargaJualInput) hargaJualInput.setAttribute('name', 'harga_jual');
+
+                form.querySelectorAll('input[type="hidden"][name="harga_beli"]').forEach(el => el.remove());
+                form.querySelectorAll('input[type="hidden"][name="harga_jual"]').forEach(el => el.remove());
             }
         }
 
-        function closeModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.classList.add('hidden');
-                modal.classList.remove('modal-open');
-                document.body.style.overflow = 'auto'; // Restore scroll
-            }
-        }
-
-        // Tutup modal saat klik backdrop
+        // ========== TUTUP MODAL SAAT KLIK BACKDROP ==========
         document.addEventListener('click', function(event) {
             if (event.target.classList.contains('backdrop-blur-sm') &&
                 event.target.classList.contains('fixed') &&
                 event.target.classList.contains('inset-0')) {
-                event.target.classList.add('hidden');
-                document.body.style.overflow = 'auto';
+                closeModal(event.target.id);
             }
         });
 
-        // Tutup modal dengan tombol Escape
+        // ========== TUTUP MODAL DENGAN ESCAPE ==========
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
                 const openModals = document.querySelectorAll('.fixed.inset-0:not(.hidden)');
                 openModals.forEach(modal => {
-                    modal.classList.add('hidden');
+                    closeModal(modal.id);
                 });
-                document.body.style.overflow = 'auto';
             }
         });
 
