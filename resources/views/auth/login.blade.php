@@ -7,14 +7,35 @@
     <title>Login | Omzetly.id</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="icon" href="{{ asset('assets/images/favicon.ico') }}" type="image/png">
+    <link rel="icon" href="{{ asset('assets/images/logo/omzetly.png') }}" type="image/png">
+    <link rel="manifest" href="{{ asset('assets/images/omzetly.png') }}" />
 
     @if (app()->isProduction())
         <script src="https://cdn.tailwindcss.com"></script>
-<script>tailwind.config={theme:{extend:{fontFamily:{sans:["Figtree","Poppins","ui-sans-serif","system-ui"]}}}}</script>
+        <script>
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        fontFamily: {
+                            sans: ["Figtree", "Poppins", "ui-sans-serif", "system-ui"]
+                        }
+                    }
+                }
+            }
+        </script>
     @else
         <script src="https://cdn.tailwindcss.com"></script>
-<script>tailwind.config={theme:{extend:{fontFamily:{sans:["Figtree","Poppins","ui-sans-serif","system-ui"]}}}}</script>
+        <script>
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        fontFamily: {
+                            sans: ["Figtree", "Poppins", "ui-sans-serif", "system-ui"]
+                        }
+                    }
+                }
+            }
+        </script>
     @endif
 </head>
 

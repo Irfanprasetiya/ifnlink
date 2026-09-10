@@ -38,8 +38,8 @@
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 
     {{-- Favicon --}}
-    <link rel="icon" href="{{ asset('assets/images/omzetly.png') }}" type="image/png">
-
+    <link rel="icon" href="{{ asset('assets/images/logo/omzetly.png') }}" type="image/png">
+    <link rel="manifest" href="{{ asset('assets/images/omzetly.png') }}" />
     <style>
         body {
             font-family: 'Poppins', ui-sans-serif, system-ui, sans-serif;

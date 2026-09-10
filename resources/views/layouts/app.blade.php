@@ -8,7 +8,8 @@
     <meta name="google-site-verification" content="BEdzi2zW-7tUjaCJNDfToBYMbPc2lxiUWRskPdnmXQc" />
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="icon" href="{{ asset('assets/images/omzetly.png') }}" type="image/png">
+    <link rel="icon" href="{{ asset('assets/images/logo/omzetly.png') }}" type="image/png">
+    <link rel="manifest" href="{{ asset('assets/images/omzetly.png') }}" />
     <title>Omzetly.id - @yield('title')</title>
 
     <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" />
