@@ -40,7 +40,7 @@
                 </form>
 
                 {{-- Tombol Tambah --}}
-                <button data-modal-target="create-modal" data-modal-toggle="create-modal"
+                <button onclick="openModal('create-modal')"
                     class="w-full sm:w-auto justify-center bg-blue-600 hover:bg-blue-700 text-white px-3.5 sm:px-5 py-2.5 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 transition-all active:scale-95 shadow-sm mt-1 sm:mt-0">
                     <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" fill="none" stroke="currentColor"
                         viewBox="0 0 24 24">
@@ -123,7 +123,7 @@
                                 <td class="px-5 py-3.5 text-slate-500 text-xs truncate max-w-[200px]">
                                     {{ $voucher->keterangan ?: '-' }}</td>
                                 <td class="px-5 py-3.5 flex justify-center gap-2">
-                                    <button data-modal-toggle="edit-modal-{{ $voucher->id }}"
+                                    <button onclick="openModal('edit-modal-{{ $voucher->id }}')"
                                         class="inline-flex items-center justify-center px-3 py-1.5 bg-white border border-amber-300 text-amber-600 rounded-lg text-xs font-bold hover:bg-amber-50 transition-colors shadow-sm active:scale-95">
                                         Edit
                                     </button>
@@ -172,7 +172,7 @@
 
                             {{-- Action Mini (Mobile) --}}
                             <div class="flex items-center gap-1.5 shrink-0">
-                                <button data-modal-toggle="edit-modal-{{ $voucher->id }}"
+                                <button onclick="openModal('edit-modal-{{ $voucher->id }}')"
                                     class="p-1.5 bg-amber-50 text-amber-600 rounded-md border border-amber-200 active:scale-90 transition-transform">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -238,15 +238,16 @@
     {{-- AREA MODAL (Disimpan di luar DOM utama agar bersih) --}}
     {{-- ========================================================= --}}
 
-    {{-- Modal Tambah Voucher --}}
-    <form method="POST" action="{{ route('data_master.vouchers.store') }}">
+    {{-- Modal Tambah Voucher/produk --}}
+    <form method="POST" action="{{ route('data_master.vouchers.store') }}" id="form-create-voucher"
+        onsubmit="submitForm(this)">
         @csrf
         <div id="create-modal" tabindex="-1" aria-hidden="true"
             class="hidden fixed inset-0 z-[60] bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
             <div class="bg-white rounded-2xl w-full max-w-md shadow-xl overflow-hidden transform transition-all my-8">
                 <div class="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                     <h3 class="text-base font-extrabold text-slate-800">Tambah Voucher Baru</h3>
-                    <button type="button" data-modal-toggle="create-modal"
+                    <button type="button" onclick="closeModal('create-modal')"
                         class="text-slate-400 hover:text-rose-500 transition-colors">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -259,27 +260,29 @@
                         <label class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">Nama
                             Produk</label>
                         <input type="text" name="nama_produk" required
-                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/30">
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/30 focus:bg-white transition-all">
                     </div>
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">Harga
                                 Beli</label>
-                            <input type="number" step="0.01" name="harga_beli" required
-                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/30">
+                            <input type="text" name="harga_beli" id="harga_beli" required
+                                oninput="formatCurrency(this)" placeholder="Rp 0"
+                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/30 focus:bg-white transition-all">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">Harga
                                 Jual</label>
-                            <input type="number" step="0.01" name="harga_jual" required
-                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/30">
+                            <input type="text" name="harga_jual" id="harga_jual" required
+                                oninput="formatCurrency(this)" placeholder="Rp 0"
+                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/30 focus:bg-white transition-all">
                         </div>
                     </div>
                     <div>
                         <label
                             class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">Kategori</label>
                         <select name="kategori_id" required
-                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/30">
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/30 focus:bg-white transition-all">
                             <option value="">-- Pilih Kategori --</option>
                             @foreach ($kategoris as $kategori)
                                 <option value="{{ $kategori->id }}">{{ $kategori->nama_kategori }}</option>
@@ -289,15 +292,25 @@
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">Keterangan
                             (Opsional)</label>
-                        <textarea name="keterangan" rows="3"
-                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/30"></textarea>
+                        <input type="text" name="keterangan" placeholder="Contoh: Voucher Kuota 10GB"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/30 focus:bg-white transition-all">
                     </div>
                 </div>
                 <div class="px-5 py-4 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-2">
-                    <button type="button" data-modal-toggle="create-modal"
+                    <button type="button" onclick="closeModal('create-modal')"
                         class="px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors">Batal</button>
-                    <button type="submit"
-                        class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-colors shadow-sm">Simpan</button>
+                    <button type="submit" id="btn-submit-create"
+                        class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-colors shadow-sm flex items-center gap-2">
+                        <svg id="loading-spinner" class="hidden w-4 h-4 animate-spin" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                            </path>
+                        </svg>
+                        <span id="btn-text-submit">Simpan</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -305,14 +318,15 @@
 
     {{-- Render Semua Modal Edit --}}
     @foreach ($vouchers as $voucher)
-        <form method="POST" action="{{ route('data_master.vouchers.update', $voucher->id) }}">
+        <form method="POST" action="{{ route('data_master.vouchers.update', $voucher->id) }}"
+            id="form-edit-voucher-{{ $voucher->id }}" onsubmit="submitEditForm(this, {{ $voucher->id }})">
             @csrf @method('PUT')
             <div id="edit-modal-{{ $voucher->id }}" tabindex="-1" aria-hidden="true"
                 class="hidden fixed inset-0 z-[60] bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
                 <div class="bg-white rounded-2xl w-full max-w-md shadow-xl overflow-hidden transform transition-all my-8">
                     <div class="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                         <h3 class="text-base font-extrabold text-slate-800">Edit Voucher</h3>
-                        <button type="button" data-modal-toggle="edit-modal-{{ $voucher->id }}"
+                        <button type="button" onclick="closeModal('edit-modal-{{ $voucher->id }}')"
                             class="text-slate-400 hover:text-rose-500 transition-colors">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -325,29 +339,31 @@
                             <label class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">Nama
                                 Produk</label>
                             <input type="text" name="nama_produk" value="{{ $voucher->nama_produk }}" required
-                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/30">
+                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/30 focus:bg-white transition-all">
                         </div>
                         <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <label class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">Harga
                                     Beli</label>
-                                <input type="number" step="0.01" name="harga_beli"
-                                    value="{{ $voucher->harga_beli }}" required
-                                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/30">
+                                <input type="text" name="harga_beli" id="edit-harga-beli-{{ $voucher->id }}"
+                                    value="{{ number_format($voucher->harga_beli, 0, ',', '.') }}" required
+                                    oninput="formatCurrency(this)" placeholder="Rp 0"
+                                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/30 focus:bg-white transition-all">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">Harga
                                     Jual</label>
-                                <input type="number" step="0.01" name="harga_jual"
-                                    value="{{ $voucher->harga_jual }}" required
-                                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/30">
+                                <input type="text" name="harga_jual" id="edit-harga-jual-{{ $voucher->id }}"
+                                    value="{{ number_format($voucher->harga_jual, 0, ',', '.') }}" required
+                                    oninput="formatCurrency(this)" placeholder="Rp 0"
+                                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/30 focus:bg-white transition-all">
                             </div>
                         </div>
                         <div>
                             <label
                                 class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">Kategori</label>
                             <select name="kategori_id" required
-                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/30">
+                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/30 focus:bg-white transition-all">
                                 @foreach ($kategoris as $kategori)
                                     <option value="{{ $kategori->id }}"
                                         {{ $voucher->kategori_id == $kategori->id ? 'selected' : '' }}>
@@ -357,18 +373,28 @@
                             </select>
                         </div>
                         <div>
-                            <label
-                                class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">Keterangan</label>
-                            <textarea name="keterangan" rows="3"
-                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/30">{{ $voucher->keterangan }}</textarea>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">Keterangan
+                                (Opsional)</label>
+                            <input type="text" name="keterangan" value="{{ $voucher->keterangan }}"
+                                placeholder="Contoh: Voucher Kuota 10GB"
+                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/30 focus:bg-white transition-all">
                         </div>
                     </div>
                     <div class="px-5 py-4 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-2">
-                        <button type="button" data-modal-toggle="edit-modal-{{ $voucher->id }}"
+                        <button type="button" onclick="closeModal('edit-modal-{{ $voucher->id }}')"
                             class="px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors">Batal</button>
-                        <button type="submit"
-                            class="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-sm font-bold transition-colors shadow-sm">Update
-                            Data</button>
+                        <button type="submit" id="btn-submit-edit-{{ $voucher->id }}"
+                            class="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-sm font-bold transition-colors shadow-sm flex items-center gap-2">
+                            <svg id="loading-spinner-edit-{{ $voucher->id }}" class="hidden w-4 h-4 animate-spin"
+                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                    stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                </path>
+                            </svg>
+                            <span id="btn-text-edit-{{ $voucher->id }}">Update Data</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -386,7 +412,7 @@
         </svg>
     </button>
 
-    {{-- Style Animation & Script Scroll --}}
+    {{-- Style Animation & Script Modal & Scroll --}}
     <style>
         @keyframes fadeIn {
             from {
@@ -399,9 +425,159 @@
                 transform: translateY(0);
             }
         }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .modal-open {
+            animation: modalIn 0.2s ease-out;
+        }
     </style>
 
     <script>
+        // ========== FORMAT CURRENCY ==========
+        function formatCurrency(input) {
+            // Hapus semua karakter non-digit
+            let value = input.value.replace(/[^\d]/g, '');
+
+            // Jika kosong, set placeholder
+            if (value === '') {
+                input.value = '';
+                return;
+            }
+
+            // Format dengan titik ribuan
+            input.value = parseInt(value).toLocaleString('id-ID');
+        }
+
+        // ========== SUBMIT FORM DENGAN ANIMASI LOADING ==========
+        function submitForm(form) {
+            event.preventDefault();
+
+            // Ambil tombol submit
+            const submitBtn = document.getElementById('btn-submit-create');
+            const spinner = document.getElementById('loading-spinner');
+            const btnText = document.getElementById('btn-text-submit');
+
+            // Disable tombol dan tampilkan loading
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            spinner.classList.remove('hidden');
+            btnText.textContent = 'Menyimpan...';
+
+            // Convert format currency ke number sebelum submit
+            const hargaBeliInput = document.getElementById('harga_beli');
+            const hargaJualInput = document.getElementById('harga_jual');
+
+            // Buat hidden input untuk nilai yang sudah dibersihkan
+            const hargaBeliClean = document.createElement('input');
+            hargaBeliClean.type = 'hidden';
+            hargaBeliClean.name = 'harga_beli';
+            hargaBeliClean.value = hargaBeliInput.value.replace(/[^\d]/g, '');
+
+            const hargaJualClean = document.createElement('input');
+            hargaJualClean.type = 'hidden';
+            hargaJualClean.name = 'harga_jual';
+            hargaJualClean.value = hargaJualInput.value.replace(/[^\d]/g, '');
+
+            // Hapus input lama
+            hargaBeliInput.removeAttribute('name');
+            hargaJualInput.removeAttribute('name');
+
+            // Tambahkan hidden input ke form
+            form.appendChild(hargaBeliClean);
+            form.appendChild(hargaJualClean);
+
+            // Submit form
+            form.submit();
+        }
+
+        // ========== RESET FORM SAAT MODAL DITUTUP ==========
+        function resetCreateForm() {
+            const form = document.getElementById('form-create-voucher');
+            if (form) {
+                form.reset();
+
+                // Reset tombol submit
+                const submitBtn = document.getElementById('btn-submit-create');
+                const spinner = document.getElementById('loading-spinner');
+                const btnText = document.getElementById('btn-text-submit');
+
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                spinner.classList.add('hidden');
+                btnText.textContent = 'Simpan';
+
+                // Reset name attributes
+                const hargaBeliInput = document.getElementById('harga_beli');
+                const hargaJualInput = document.getElementById('harga_jual');
+                hargaBeliInput.setAttribute('name', 'harga_beli');
+                hargaJualInput.setAttribute('name', 'harga_jual');
+
+                // Hapus hidden inputs
+                form.querySelectorAll('input[type="hidden"][name="harga_beli"]').forEach(el => el.remove());
+                form.querySelectorAll('input[type="hidden"][name="harga_jual"]').forEach(el => el.remove());
+            }
+        }
+
+        // Update closeModal untuk reset form
+        const originalCloseModal = closeModal;
+        closeModal = function(modalId) {
+            if (modalId === 'create-modal') {
+                resetCreateForm();
+            }
+            originalCloseModal(modalId);
+        };
+        // ========== FUNGSI MODAL ==========
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('modal-open');
+                document.body.style.overflow = 'hidden'; // Prevent scroll
+            }
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('modal-open');
+                document.body.style.overflow = 'auto'; // Restore scroll
+            }
+        }
+
+        // Tutup modal saat klik backdrop
+        document.addEventListener('click', function(event) {
+            if (event.target.classList.contains('backdrop-blur-sm') &&
+                event.target.classList.contains('fixed') &&
+                event.target.classList.contains('inset-0')) {
+                event.target.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+        });
+
+        // Tutup modal dengan tombol Escape
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const openModals = document.querySelectorAll('.fixed.inset-0:not(.hidden)');
+                openModals.forEach(modal => {
+                    modal.classList.add('hidden');
+                });
+                document.body.style.overflow = 'auto';
+            }
+        });
+
+        // ========== SMART SCROLL ==========
         document.addEventListener("DOMContentLoaded", function() {
             const scrollBtn = document.getElementById('smartScrollBtn');
             const scrollIcon = document.getElementById('scrollIcon');

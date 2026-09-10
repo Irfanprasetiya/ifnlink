@@ -220,8 +220,10 @@
                             <div class="relative flex items-center justify-between border-b border-slate-100 pb-6">
                                 <div class="flex items-center gap-3">
                                     <div
-                                        class="w-10 h-10 rounded-xl bg-blue-600 text-white font-bold grid place-items-center">
-                                        O</div>
+                                        class="w-10 h-10 rounded-xl bg-white text-white font-bold grid place-items-center">
+                                        <img src="{{ asset('assets/images/logo/omzetly.png') }}" alt="Omzetly"
+                                            class="h-full w-full object-contain">
+                                    </div>
                                     <div>
                                         <div class="text-sm font-bold text-slate-900">Omzetly Core</div>
                                         <div class="text-xs text-emerald-600 font-semibold flex items-center gap-1">●
@@ -263,31 +265,28 @@
         </div>
     </section>
 
-    <!-- STATS (MINIMALIST BAR) -->
+    <!-- SUPPORTED PLATFORMS BAR -->
     <section class="bg-slate-950 py-12 md:py-14 text-white">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div
-                class="grid grid-cols-2 gap-6 sm:gap-8 rounded-[2rem] border border-white/10 bg-white/5 px-4 py-8 text-center backdrop-blur-sm md:grid-cols-4 md:gap-4 md:px-10">
-                <div class="space-y-1 sm:space-y-2">
-                    <div class="text-2xl md:text-3xl font-extrabold text-blue-400">1.200+</div>
-                    <div class="text-[10px] md:text-xs text-slate-400 uppercase tracking-widest mt-1.5 font-semibold">
-                        Agen Aktif</div>
+                class="flex flex-col items-center justify-center rounded-[2rem] border border-white/10 bg-white/5 px-4 py-8 text-center backdrop-blur-sm md:px-10">
+
+                <h3 class="text-[10px] md:text-xs text-slate-400 uppercase tracking-widest mb-6 font-semibold">
+                    Siap Mencatat Transaksi Dari Berbagai Layanan
+                </h3>
+
+                <!-- Logo Placeholders (Tampil dengan warna aslinya secara permanen) -->
+                <div class="flex flex-wrap items-center justify-center gap-6 sm:gap-8 md:gap-12">
+                    <span class="text-xl md:text-2xl font-black italic tracking-tighter text-blue-500">BRI</span>
+                    <span class="text-xl md:text-2xl font-black italic tracking-tighter text-yellow-400">Mandiri</span>
+                    <span class="text-xl md:text-2xl font-black italic tracking-tighter text-blue-600">BCA</span>
+                    <span class="text-xl md:text-2xl font-black italic tracking-tighter text-orange-600">BNI</span>
+                    <span class="text-xl md:text-2xl font-bold tracking-tight text-blue-400">DANA</span>
+                    <span class="text-xl md:text-2xl font-bold tracking-tight text-purple-500">OVO</span>
+                    <span class="text-xl md:text-2xl font-bold tracking-tight text-green-500">GoPay</span>
+                    <span class="text-xl md:text-2xl font-bold tracking-tight text-orange-500">ShopeePay</span>
                 </div>
-                <div class="space-y-1 sm:space-y-2">
-                    <div class="text-2xl md:text-3xl font-extrabold text-blue-400">Rp 48M+</div>
-                    <div class="text-[10px] md:text-xs text-slate-400 uppercase tracking-widest mt-1.5 font-semibold">
-                        Volume Transaksi</div>
-                </div>
-                <div class="space-y-1 sm:space-y-2">
-                    <div class="text-2xl md:text-3xl font-extrabold text-blue-400">99.9%</div>
-                    <div class="text-[10px] md:text-xs text-slate-400 uppercase tracking-widest mt-1.5 font-semibold">
-                        Server Uptime</div>
-                </div>
-                <div class="space-y-1 sm:space-y-2">
-                    <div class="text-2xl md:text-3xl font-extrabold text-blue-400">4.9/5</div>
-                    <div class="text-[10px] md:text-xs text-slate-400 uppercase tracking-widest mt-1.5 font-semibold">
-                        Rating Pengguna</div>
-                </div>
+
             </div>
         </div>
     </section>
@@ -395,8 +394,9 @@
                     </div>
                     <div class="relative z-10">
                         <span
-                            class="rounded-xl border border-blue-100 bg-blue-50 px-3 py-1.5 text-[11px] font-bold text-blue-600 md:text-xs">Multi-Tenancy
-                            & Cabang</span>
+                            class="rounded-xl border border-blue-100 bg-blue-50 px-3 py-1.5 text-[11px] font-bold text-blue-600 md:text-xs">Banyak
+                            Cabang
+                            & kasir</span>
                         <h3 class="mt-5 text-2xl font-bold leading-tight text-slate-900 md:text-3xl">Kelola Banyak
                             Cabang Dalam Satu Akun Utama</h3>
                         <p class="mt-4 max-w-lg text-sm sm:text-base leading-relaxed sm:leading-8 text-slate-600">
@@ -550,8 +550,8 @@
             <div class="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
                 <div>
                     <span
-                        class="rounded-full border border-blue-200 bg-white px-4 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-blue-600 shadow-soft">Transformasi
-                        Digital</span>
+                        class="rounded-full border border-blue-200 bg-white px-4 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-blue-600 shadow-soft">Tinggalkan
+                        Cara Lama</span>
                     <h2 class="mt-6 text-3xl font-extrabold tracking-tight leading-tight text-slate-900 md:text-4xl">
                         Waktunya Beralih Dari Buku Tulis Ke Sistem Cloud.
                     </h2>

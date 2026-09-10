@@ -67,12 +67,22 @@
                     {{-- ===== MENU STOK ===== --}}
                     <x-sidebar-menu label="Barang Masuk" route="barang_masuk.index" icon="barang-masuk"
                         active="barang_masuk*" :locked="$isLocked" />
-                    <x-sidebar-menu label="Stok Opname" route="data_master.stok_opname.index" icon="stok-opname"
-                        active="data_master.stok_opname*" :locked="$isLocked" />
-                    <x-sidebar-menu label="Riwayat Stok" route="stok_history.index" icon="riwayat-stok"
-                        active="stok_history.index*" :locked="$isLocked" />
-                    <x-sidebar-menu label="Laporan Stok" route="stok_history.laporan" icon="laporan-stok"
-                        active="stok_history.laporan*" :locked="$isLocked" />
+                    @if (Auth::user()->tenant->plan && Auth::user()->tenant->plan->harga > 0)
+                        <x-sidebar-menu label="Stok Opname" route="data_master.stok_opname.index" icon="stok-opname"
+                            active="data_master.stok_opname*" :locked="$isLocked" />
+                        <x-sidebar-menu label="Riwayat Stok" route="stok_history.index" icon="riwayat-stok"
+                            active="stok_history.index*" :locked="$isLocked" />
+                        <x-sidebar-menu label="Laporan Stok" route="stok_history.laporan" icon="laporan-stok"
+                            active="stok_history.laporan*" :locked="$isLocked" />
+                    @else
+                        <x-sidebar-menu label="Stok Opname" route="data_master.stok_opname.index" icon="stok-opname"
+                            badge="PRO" active="data_master.stok_opname*" :locked="false" />
+                        <x-sidebar-menu label="Riwayat Stok" route="stok_history.index" icon="riwayat-stok" badge="PRO"
+                            active="stok_history.index*" :locked="false" />
+                        <x-sidebar-menu label="Laporan Stok" route="stok_history.laporan" icon="laporan-stok" badge="PRO"
+                            active="stok_history.laporan*" :locked="false" />
+                    @endif
+
 
                     {{-- ===== MENU PRO ===== --}}
                     @if (Auth::user()->tenant->plan && Auth::user()->tenant->plan->harga > 0)
@@ -87,7 +97,8 @@
                             :locked="false" />
                         <x-sidebar-menu label="Laba Rugi" route="upgrade" icon="laba-rugi" badge="PRO"
                             :locked="false" />
-                        <x-sidebar-menu label="Rekap" route="upgrade" icon="rekap" badge="PRO" :locked="false" />
+                        <x-sidebar-menu label="Rekap" route="upgrade" icon="rekap" badge="PRO"
+                            :locked="false" />
                     @endif
 
                     <x-sidebar-menu label="Status Langganan" route="status.langganan" icon="status-langganan"
@@ -133,13 +144,21 @@
                     {{-- ===== MENU STOK ===== --}}
                     <x-sidebar-menu label="Barang Masuk" route="barang_masuk.index" icon="barang-masuk"
                         active="barang_masuk*" :locked="$isLocked" />
-                    <x-sidebar-menu label="Stok Opname" route="data_master.stok_opname.index" icon="stok-opname"
-                        active="data_master.stok_opname*" :locked="$isLocked" />
-                    <x-sidebar-menu label="Riwayat Stok" route="stok_history.index" icon="riwayat-stok"
-                        active="stok_history.index*" :locked="$isLocked" />
-                    <x-sidebar-menu label="Laporan Stok" route="stok_history.laporan" icon="laporan-stok"
-                        active="stok_history.laporan*" :locked="$isLocked" />
-
+                    @if (Auth::user()->tenant->plan && Auth::user()->tenant->plan->harga > 0)
+                        <x-sidebar-menu label="Stok Opname" route="data_master.stok_opname.index" icon="stok-opname"
+                            active="data_master.stok_opname*" :locked="$isLocked" />
+                        <x-sidebar-menu label="Riwayat Stok" route="stok_history.index" icon="riwayat-stok"
+                            active="stok_history.index*" :locked="$isLocked" />
+                        <x-sidebar-menu label="Laporan Stok" route="stok_history.laporan" icon="laporan-stok"
+                            active="stok_history.laporan*" :locked="$isLocked" />
+                    @else
+                        <x-sidebar-menu label="Stok Opname" route="data_master.stok_opname.index" icon="stok-opname"
+                            badge="PRO" active="data_master.stok_opname*" :locked="false" />
+                        <x-sidebar-menu label="Riwayat Stok" route="stok_history.index" icon="riwayat-stok"
+                            badge="PRO" active="stok_history.index*" :locked="false" />
+                        <x-sidebar-menu label="Laporan Stok" route="stok_history.laporan" icon="laporan-stok"
+                            badge="PRO" active="stok_history.laporan*" :locked="false" />
+                    @endif
                     <x-sidebar-menu label="Manajemen Akun" route="users.index" icon="users" active="users*"
                         :locked="$isLocked" />
                     <x-sidebar-menu label="Rekap" route="rekap.index" icon="rekap" active="rekap*"
