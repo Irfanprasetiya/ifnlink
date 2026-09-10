@@ -9,6 +9,7 @@ class Tenant extends Model
 {
     use SoftDeletes;
 
+    protected $table = 'tenants';
     protected $primaryKey = 'id_tenant';
 
     protected $fillable = [
@@ -16,6 +17,8 @@ class Tenant extends Model
         'nama_pemilik',
         'email',
         'no_hp',
+        'alamat',
+        'logo',
         'domain',
         'plan_id',
         'status_langganan',

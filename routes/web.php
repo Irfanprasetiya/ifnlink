@@ -54,6 +54,7 @@ use App\Http\Controllers\ProfileController;
 // ==================== Controllers: Unused (keep for auth.php) ====================
 use App\Http\Controllers\PlanController;
 use App\Http\Controllers\PosController;
+use App\Http\Controllers\ProfileTokoController;
 use App\Http\Controllers\ReturController;
 use App\Http\Controllers\SaldoGudangController;
 use App\Http\Controllers\StokHistoryController;
@@ -156,6 +157,9 @@ Route::middleware(['auth', 'role:developer'])->prefix('developer')->name('develo
 */
 Route::middleware(['auth', 'check.pending', 'check.tenant.active', 'role:super_admin', 'prevent-back'])->group(function () {
     Route::get('/laporan-saldo', [LaporanSaldoController::class, 'index'])->name('laporan_saldo.index');
+    Route::get('/profile-toko', [ProfileTokoController::class, 'index'])->name('profile-toko.index');
+    Route::put('/profile-toko', [ProfileTokoController::class, 'update'])->name('profile-toko.update');
+    Route::post('/profile-toko/logo', [ProfileTokoController::class, 'uploadLogo'])->name('profile-toko.logo');
 });
 
 /*

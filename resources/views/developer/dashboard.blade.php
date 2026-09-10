@@ -26,8 +26,7 @@
                     </span>
                 </div>
                 <h1 class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight mt-2">
-                    Pusat Kendali <span
-                        class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-600">Omzetly.id</span>
+                    Pusat Kendali <span class="bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-600">Omzetly.id</span>
                 </h1>
                 <p class="text-slate-500 mt-1 text-sm font-medium">Pantau performa bisnis, metrik SaaS, dan status agen
                     secara real-time.</p>
