@@ -4,7 +4,8 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 pb-28 relative">
 
         {{-- ========== DAFTAR PRODUK ========== --}}
-        <div class="lg:col-span-2 bg-white rounded-2xl shadow-soft border border-slate-200/80 p-4 sm:p-6 flex flex-col h-full">
+        <div
+            class="lg:col-span-2 bg-white rounded-2xl shadow-soft border border-slate-200/80 p-4 sm:p-6 flex flex-col h-full">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <h2 class="text-xl font-extrabold text-slate-800 tracking-tight">Pilih Produk</h2>
                 <div class="relative w-full sm:w-64 shrink-0">
@@ -23,35 +24,44 @@
                     @php $isHabis = $produk->stok <= 0; @endphp
 
                     <button type="button"
-                        class="produk-item group flex flex-col justify-between border rounded-xl p-3 sm:p-4 text-left transition-all
-                            {{ $isHabis
-                                ? 'border-slate-200 bg-slate-100 opacity-60 cursor-not-allowed'
-                                : 'border-slate-200 bg-white hover:border-blue-400 hover:shadow-[0_8px_15px_-3px_rgba(37,99,235,0.12)] active:scale-95' }}"
-                        data-id="{{ $produk->voucher_id }}"
-                        data-nama="{{ $produk->voucher->nama_produk }}"
+                        class="produk-item relative group flex flex-col justify-between border rounded-xl p-3 sm:p-4 text-left transition-all
+        {{ $isHabis
+            ? 'border-slate-200 bg-slate-100 opacity-60 cursor-not-allowed'
+            : 'border-slate-200 bg-white hover:border-blue-400 hover:shadow-[0_8px_15px_-3px_rgba(37,99,235,0.12)] active:scale-95' }}"
+                        data-id="{{ $produk->voucher_id }}" data-nama="{{ $produk->voucher->nama_produk }}"
                         data-nama-lower="{{ strtolower($produk->voucher->nama_produk) }}"
-                        data-harga="{{ $produk->voucher->harga_jual }}"
-                        data-stok="{{ $produk->stok }}"
-                        data-habis="{{ $isHabis ? '1' : '0' }}"
-                        {{ $isHabis ? 'disabled' : '' }}>
+                        data-harga="{{ $produk->voucher->harga_jual }}" data-stok="{{ $produk->stok }}"
+                        data-habis="{{ $isHabis ? '1' : '0' }}" {{ $isHabis ? 'disabled' : '' }}>
+
+                        {{-- ✅ Badge Custom Harga --}}
+                        @if ($produk->voucher->is_custom_harga ?? false)
+                            <span
+                                class="absolute top-2 right-2 text-[9px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-bold border border-amber-200 z-10">
+                                CUSTOM
+                            </span>
+                        @endif
 
                         <div class="w-full">
-                            <p class="font-bold text-sm leading-snug line-clamp-2
-                                {{ $isHabis ? 'text-slate-500' : 'text-slate-800 group-hover:text-blue-700 transition-colors' }}">
+                            <p
+                                class="font-bold text-sm leading-snug line-clamp-2 pr-14
+            {{ $isHabis ? 'text-slate-500' : 'text-slate-800 group-hover:text-blue-700 transition-colors' }}">
                                 {{ $produk->voucher->nama_produk }}
                             </p>
                         </div>
 
                         <div class="mt-3 w-full">
-                            <p class="font-extrabold text-sm sm:text-base {{ $isHabis ? 'text-slate-400' : 'text-blue-600' }}">
+                            <p
+                                class="font-extrabold text-sm sm:text-base {{ $isHabis ? 'text-slate-400' : 'text-blue-600' }}">
                                 Rp {{ number_format($produk->voucher->harga_jual, 0, ',', '.') }}
                             </p>
 
                             <div class="flex items-center gap-1.5 mt-1">
-                                <span class="w-1.5 h-1.5 rounded-full
-                                    {{ $produk->stok > 5 ? 'bg-emerald-500' : ($produk->stok > 0 ? 'bg-amber-500' : 'bg-rose-500') }}">
+                                <span
+                                    class="w-1.5 h-1.5 rounded-full
+                {{ $produk->stok > 5 ? 'bg-emerald-500' : ($produk->stok > 0 ? 'bg-amber-500' : 'bg-rose-500') }}">
                                 </span>
-                                <p class="text-xs font-medium {{ $isHabis ? 'text-rose-500 font-bold' : 'text-slate-500' }}">
+                                <p
+                                    class="text-xs font-medium {{ $isHabis ? 'text-rose-500 font-bold' : 'text-slate-500' }}">
                                     {{ $isHabis ? 'Stok Habis' : 'Sisa: ' . $produk->stok }}
                                 </p>
                             </div>
@@ -69,7 +79,8 @@
                 @endforelse
 
                 {{-- ✅ Pesan jika hasil search kosong --}}
-                <div id="search-empty" class="hidden col-span-full flex flex-col items-center justify-center py-16 text-slate-400">
+                <div id="search-empty"
+                    class="hidden col-span-full flex flex-col items-center justify-center py-16 text-slate-400">
                     <svg class="w-12 h-12 mb-3 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -91,7 +102,8 @@
                         </svg>
                         Keranjang
                     </h2>
-                    <span id="badge-item-count" class="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-1 rounded-md">0 Item</span>
+                    <span id="badge-item-count" class="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-1 rounded-md">0
+                        Item</span>
                 </div>
 
                 {{-- Alert error keranjang --}}
@@ -135,7 +147,8 @@
 
                     <div>
                         <div class="flex items-center justify-between mb-1.5 px-1">
-                            <label class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Uang Pelanggan</label>
+                            <label class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Uang
+                                Pelanggan</label>
                             <button type="button" id="btn-uang-pas"
                                 class="text-xs font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-md transition-colors">
                                 Set Uang Pas
@@ -177,10 +190,12 @@
     {{-- ✅ Modal sukses --}}
     <div id="success-modal"
         class="hidden fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 opacity-0 transition-opacity duration-300">
-        <div class="bg-white rounded-3xl shadow-2xl border border-slate-100 p-8 w-full max-w-sm text-center transform scale-95 transition-transform duration-300">
+        <div
+            class="bg-white rounded-3xl shadow-2xl border border-slate-100 p-8 w-full max-w-sm text-center transform scale-95 transition-transform duration-300">
             <div class="w-20 h-20 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-5 relative">
                 <div class="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-20"></div>
-                <svg class="w-10 h-10 text-emerald-600 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-10 h-10 text-emerald-600 relative z-10" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                 </svg>
             </div>
@@ -200,14 +215,20 @@
     </div>
 
     <style>
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
     </style>
 
     <script>
         // ========== STATE ==========
         let cart = [];
-        let activeDiskonId = null; // ✅ Pakai voucher_id, bukan index
+        let activeDiskonId = null;
 
         // ========== HELPERS ==========
         const formatRupiah = (angka) => 'Rp ' + Math.round(angka).toLocaleString('id-ID');
@@ -243,7 +264,14 @@
                     }
                     existing.qty++;
                 } else {
-                    cart.push({ id, nama, harga, qty: 1, stok, diskon: 0 });
+                    cart.push({
+                        id,
+                        nama,
+                        harga,
+                        qty: 1,
+                        stok,
+                        diskon: 0
+                    });
                 }
 
                 renderCart();
@@ -258,7 +286,8 @@
             const fabCart = document.getElementById('fab-cart');
 
             if (cart.length === 0) {
-                container.innerHTML = `<div class="text-center py-8 text-slate-400 text-sm font-medium">Keranjang masih kosong.</div>`;
+                container.innerHTML =
+                    `<div class="text-center py-8 text-slate-400 text-sm font-medium">Keranjang masih kosong.</div>`;
                 document.getElementById('btn-bayar').disabled = true;
                 badgeCount.textContent = '0 Item';
                 fabBadge.classList.add('hidden');
@@ -316,7 +345,6 @@
             fabBadge.classList.remove('hidden');
             fabCart.classList.remove('translate-y-20', 'opacity-0');
 
-            // ✅ Kembalikan fokus ke input diskon yang aktif (by voucher_id)
             if (activeDiskonId !== null) {
                 const activeInput = document.getElementById(`diskon-item-${activeDiskonId}`);
                 if (activeInput) {
@@ -337,13 +365,9 @@
             const clean = value.replace(/[^\d]/g, '');
             item.diskon = clean ? parseInt(clean) : 0;
 
-            // Update nilai input langsung tanpa render ulang
             const input = document.getElementById(`diskon-item-${voucherId}`);
             if (input) {
-                const cursorPos = input.selectionStart;
                 input.value = item.diskon > 0 ? item.diskon.toLocaleString('id-ID') : '';
-
-                // Kembalikan posisi cursor
                 const newPos = input.value.length;
                 input.setSelectionRange(newPos, newPos);
             }
@@ -360,8 +384,6 @@
             }, 0);
 
             document.getElementById('total-harga').textContent = formatRupiah(total);
-
-            // Update subtotal per item di keranjang (kalau ada)
             document.getElementById('total-setelah-diskon').textContent = formatRupiah(getTotalSetelahDiskon());
 
             hitungKembalian();
@@ -430,7 +452,7 @@
 
         // ========== INPUT DISKON & BAYAR ==========
         ['bayar', 'diskon'].forEach(id => {
-            document.getElementById(id).addEventListener('input', function () {
+            document.getElementById(id).addEventListener('input', function() {
                 let value = this.value.replace(/[^\d]/g, '');
                 this.value = value ? parseInt(value).toLocaleString('id-ID') : '';
                 hitungKembalian();
@@ -444,12 +466,12 @@
             hitungKembalian();
         });
 
-        // ========== SEARCH PRODUK (optimasi) ==========
+        // ========== SEARCH PRODUK ==========
         const searchInput = document.getElementById('search-produk');
         const searchEmpty = document.getElementById('search-empty');
         let searchTimeout;
 
-        searchInput.addEventListener('input', function () {
+        searchInput.addEventListener('input', function() {
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(() => {
                 const keyword = this.value.toLowerCase().trim();
@@ -463,14 +485,15 @@
                     if (match) found++;
                 });
 
-                // ✅ Tampilkan pesan kosong kalau hasil search 0
                 searchEmpty.classList.toggle('hidden', found > 0 || !keyword);
-            }, 150); // debounce 150ms
+            }, 150);
         });
 
         // ========== FAB CART ==========
         document.getElementById('fab-cart').addEventListener('click', () => {
-            document.getElementById('keranjang-section').scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('keranjang-section').scrollIntoView({
+                behavior: 'smooth'
+            });
         });
 
         // ========== BAYAR ==========
@@ -491,44 +514,46 @@
 
             const btn = document.getElementById('btn-bayar');
             btn.disabled = true;
-            btn.innerHTML = `<svg class="animate-spin h-5 w-5 mx-auto text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
+            btn.innerHTML =
+                `<svg class="animate-spin h-5 w-5 mx-auto text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
 
             fetch('{{ route('pos.store') }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                },
-                body: JSON.stringify({
-                    items: cart.map(item => ({
-                        voucher_id: item.id,
-                        qty: item.qty,
-                        diskon: item.diskon || 0,
-                    })),
-                    bayar: bayar,
-                    diskon: diskon,
-                }),
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    const modal = document.getElementById('success-modal');
-                    document.getElementById('success-kembalian').textContent = formatRupiah(data.kembalian);
-                    document.getElementById('btn-struk').href = '{{ url('/pos/struk') }}/' + data.kode_transaksi;
-                    modal.classList.remove('hidden');
-                    setTimeout(() => {
-                        modal.classList.remove('opacity-0');
-                        modal.firstElementChild.classList.remove('scale-95');
-                    }, 10);
-                } else {
-                    showCartAlert(data.message);
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    },
+                    body: JSON.stringify({
+                        items: cart.map(item => ({
+                            voucher_id: item.id,
+                            qty: item.qty,
+                            diskon: item.diskon || 0,
+                        })),
+                        bayar: bayar,
+                        diskon: diskon,
+                    }),
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const modal = document.getElementById('success-modal');
+                        document.getElementById('success-kembalian').textContent = formatRupiah(data.kembalian);
+                        document.getElementById('btn-struk').href = '{{ url('/pos/struk') }}/' + data
+                            .kode_transaksi;
+                        modal.classList.remove('hidden');
+                        setTimeout(() => {
+                            modal.classList.remove('opacity-0');
+                            modal.firstElementChild.classList.remove('scale-95');
+                        }, 10);
+                    } else {
+                        showCartAlert(data.message);
+                        resetBayarBtn(btn);
+                    }
+                })
+                .catch(() => {
+                    showCartAlert('Terjadi kesalahan koneksi sistem.');
                     resetBayarBtn(btn);
-                }
-            })
-            .catch(() => {
-                showCartAlert('Terjadi kesalahan koneksi sistem.');
-                resetBayarBtn(btn);
-            });
+                });
         });
 
         function resetBayarBtn(btn) {

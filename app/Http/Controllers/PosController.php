@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cabang;
+use App\Models\HargaCabang;
 use App\Models\Voucher;
 use App\Models\ProdukKonter;
 use App\Models\Penjualan;
@@ -35,6 +36,22 @@ class PosController extends Controller
             ->orderBy('stok', 'desc')
             ->get();
 
+        // ✅ Ambil semua harga custom untuk cabang ini (1 query saja)
+        $hargaCustoms = HargaCabang::forCabang($user->cabang_id)
+            ->aktif()
+            ->pluck('harga_jual', 'voucher_id')
+            ->toArray();
+
+        // ✅ Override harga jual per produk kalau ada custom
+        foreach ($produks as $produk) {
+            if (isset($hargaCustoms[$produk->voucher_id])) {
+                $produk->voucher->harga_jual = $hargaCustoms[$produk->voucher_id];
+                $produk->voucher->is_custom_harga = true;
+            } else {
+                $produk->voucher->is_custom_harga = false;
+            }
+        }
+
         return view('frontend.pos.index', compact('produks'));
     }
 
@@ -47,7 +64,7 @@ class PosController extends Controller
             'items' => 'required|array|min:1',
             'items.*.voucher_id' => 'required|exists:vouchers,id',
             'items.*.qty' => 'required|integer|min:1',
-            'items.*.diskon' => 'nullable|numeric|min:0', // ✅ Tambahkan validasi diskon per item
+            'items.*.diskon' => 'nullable|numeric|min:0',
             'bayar' => 'required|numeric|min:0',
             'diskon' => 'nullable|numeric|min:0',
         ]);
@@ -58,8 +75,14 @@ class PosController extends Controller
 
         try {
             $totalHarga = 0;
-            $totalDiskonItem = 0; // ✅ Total diskon per item
+            $totalDiskonItem = 0;
             $items = [];
+
+            // ✅ Ambil semua harga custom untuk cabang ini (1 query, hemat)
+            $hargaCustoms = HargaCabang::forCabang($user->cabang_id)
+                ->aktif()
+                ->pluck('harga_jual', 'voucher_id')
+                ->toArray();
 
             // Cek stok & hitung total
             foreach ($request->items as $item) {
@@ -72,7 +95,11 @@ class PosController extends Controller
                 }
 
                 $voucher = Voucher::find($item['voucher_id']);
-                $subtotal = $voucher->harga_jual * $item['qty'];
+
+                // ✅ PAKAI HARGA CUSTOM kalau ada, kalau tidak pakai master
+                $hargaSatuan = $hargaCustoms[$voucher->id] ?? $voucher->harga_jual;
+
+                $subtotal = $hargaSatuan * $item['qty'];
 
                 // ✅ Ambil diskon per item
                 $diskonItem = $item['diskon'] ?? 0;
@@ -84,23 +111,23 @@ class PosController extends Controller
 
                 $totalSetelahDiskonItem = $subtotal - $diskonItem;
                 $totalHarga += $subtotal;
-                $totalDiskonItem += $diskonItem; // ✅ Akumulasi diskon item
+                $totalDiskonItem += $diskonItem;
 
                 $items[] = [
                     'voucher_id' => $voucher->id,
                     'qty' => $item['qty'],
-                    'harga_satuan' => $voucher->harga_jual,
+                    'harga_satuan' => $hargaSatuan,   // ✅ Simpan harga yang dipakai
                     'subtotal' => $subtotal,
-                    'diskon' => $diskonItem, // ✅ Simpan diskon item
-                    'total_setelah_diskon' => $totalSetelahDiskonItem, // ✅ Simpan total setelah diskon item
+                    'diskon' => $diskonItem,
+                    'total_setelah_diskon' => $totalSetelahDiskonItem,
                     'produk_konter' => $produk,
                 ];
             }
 
             // ✅ Hitung diskon total
-            $diskonTambahan = $request->diskon ?? 0; // Diskon tambahan (global)
-            $totalSetelahDiskonItem = $totalHarga - $totalDiskonItem; // Total setelah diskon per item
-            $totalSetelahDiskon = $totalSetelahDiskonItem - $diskonTambahan; // Total setelah semua diskon
+            $diskonTambahan = $request->diskon ?? 0;
+            $totalSetelahDiskonItem = $totalHarga - $totalDiskonItem;
+            $totalSetelahDiskon = $totalSetelahDiskonItem - $diskonTambahan;
 
             // Validasi diskon tidak melebihi total
             if ($totalDiskonItem > $totalHarga) {
@@ -127,7 +154,7 @@ class PosController extends Controller
                 'tenant_id' => $user->tenant_id,
                 'cabang_id' => $user->cabang_id,
                 'total_harga' => $totalHarga,
-                'diskon' => $totalDiskonItem + $diskonTambahan, // ✅ Total semua diskon
+                'diskon' => $totalDiskonItem + $diskonTambahan,
                 'total_setelah_diskon' => $totalSetelahDiskon,
                 'bayar' => $request->bayar,
                 'kembalian' => $request->bayar - $totalSetelahDiskon,
@@ -144,8 +171,8 @@ class PosController extends Controller
                     'qty' => $item['qty'],
                     'harga_satuan' => $item['harga_satuan'],
                     'subtotal' => $item['subtotal'],
-                    'diskon' => $item['diskon'], // ✅ Diskon per item
-                    'total_setelah_diskon' => $item['total_setelah_diskon'], // ✅ Total setelah diskon item
+                    'diskon' => $item['diskon'],
+                    'total_setelah_diskon' => $item['total_setelah_diskon'],
                 ]);
 
                 // Kurangi stok

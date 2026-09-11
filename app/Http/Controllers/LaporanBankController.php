@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use Barryvdh\DomPDF\Facade\Pdf;
-use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\LaporanSetoranExport;
 use App\Models\Bank;
 use App\Models\TransaksiBank;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Maatwebsite\Excel\Facades\Excel;
 
 class LaporanBankController extends Controller
 {
@@ -53,52 +54,96 @@ class LaporanBankController extends Controller
         $transaksis = $this->ambilTransaksiHariIni($user, $tanggal);
         $hasil = $this->hitungSaldoPerBaris($transaksis);
 
-        // ✅ Hitung metric cards dari transaksi hari ini
-        $kasId = Bank::where('nama_bank', 'Kas')->first()?->id;
-
-        $saldoAwalKas = $transaksis->where('is_saldo_awal', 1)
-            ->filter(fn($t) => $t->bank_id == $kasId)
-            ->sum('nominal');
-
-        $tambahanKas = $transaksis->where('is_saldo_awal', 0)
-            ->filter(fn($t) => $t->bank_id == $kasId && $t->jenis_transaksi->nama_transaksi === 'Penambahan Kas')
-            ->sum('nominal');
-
-        $penguranganKas = $transaksis->where('is_saldo_awal', 0)
-            ->filter(fn($t) => $t->bank_id == $kasId && $t->jenis_transaksi->nama_transaksi === 'Pengurangan Kas')
-            ->sum('nominal');
-
-        $totalTransfer = $transaksis
-            ->filter(fn($t) => $t->bank_id != $kasId && in_array(strtolower($t->jenis_transaksi->nama_transaksi ?? ''), ['transfer', 'numpang transfer']))
-            ->sum('bayar');
-
-        $totalTarikTunai = $transaksis
-            ->filter(fn($t) => $t->bank_id != $kasId && strtolower($t->jenis_transaksi->nama_transaksi ?? '') === 'tarik tunai')
-            ->sum('bayar');
+        // ✅ Hitung metric cards dalam 1 loop — bukan 5 filter terpisah
+        $metrics = $this->hitungMetricCards($transaksis);
 
         return [
             'transaksis' => $hasil['transaksis'],
             'tanggal' => $tanggal,
             'user' => $user,
             // Metric cards
-            'saldoAwalKas' => $saldoAwalKas,
-            'tambahanKas' => $tambahanKas,
-            'penguranganKas' => $penguranganKas,
-            'totalTransfer' => $totalTransfer,
-            'totalTarikTunai' => $totalTarikTunai,
+            'saldoAwalKas' => $metrics['saldoAwalKas'],
+            'tambahanKas' => $metrics['tambahanKas'],
+            'penguranganKas' => $metrics['penguranganKas'],
+            'totalTransfer' => $metrics['totalTransfer'],
+            'totalTarikTunai' => $metrics['totalTarikTunai'],
             'saldoAkhirKas' => $hasil['saldoPerBank']['kas'] ?? 0,
             'saldoBank' => $hasil['saldoPerBank'],
         ];
     }
 
+    /**
+     * ✅ Hitung semua metric cards dalam SATU loop
+     */
+    private function hitungMetricCards($transaksis): array
+    {
+        // ✅ Cache kas_id — jarang berubah
+        $kasId = Cache::remember('kas_bank_id', 3600, function () {
+            return Bank::where('nama_bank', 'Kas')->first()?->id;
+        });
+
+        $saldoAwalKas = 0;
+        $tambahanKas = 0;
+        $penguranganKas = 0;
+        $totalTransfer = 0;
+        $totalTarikTunai = 0;
+
+        foreach ($transaksis as $t) {
+            $jenis = strtolower($t->jenis_transaksi->nama_transaksi ?? '');
+            $isKas = $t->bank_id == $kasId;
+
+            // Saldo awal kas
+            if ($t->is_saldo_awal && $isKas) {
+                $saldoAwalKas += (float) $t->nominal;
+                continue;
+            }
+
+            if ($t->is_saldo_awal) {
+                continue;
+            }
+
+            // Transaksi Kas
+            if ($isKas) {
+                if ($jenis === 'penambahan kas') {
+                    $tambahanKas += (float) $t->nominal;
+                } elseif ($jenis === 'pengurangan kas') {
+                    $penguranganKas += (float) $t->nominal;
+                }
+                continue;
+            }
+
+            // Transaksi Bank (bukan Kas)
+            if (in_array($jenis, ['transfer', 'numpang transfer'])) {
+                $totalTransfer += (float) $t->bayar;
+            } elseif ($jenis === 'tarik tunai') {
+                $totalTarikTunai += (float) $t->bayar;
+            }
+        }
+
+        return [
+            'saldoAwalKas' => $saldoAwalKas,
+            'tambahanKas' => $tambahanKas,
+            'penguranganKas' => $penguranganKas,
+            'totalTransfer' => $totalTransfer,
+            'totalTarikTunai' => $totalTarikTunai,
+        ];
+    }
+
+    /**
+     * ✅ Pakai whereBetween biar index kepakai
+     */
     private function ambilTransaksiHariIni($user, $tanggal)
     {
         return TransaksiBank::with(['jenis_transaksi', 'bank'])
             ->where('tenant_id', $user->tenant_id)
             ->where('cabang_id', $user->cabang_id)
             ->where('user_id', $user->id)
-            ->whereDate('waktu_transaksi', $tanggal)
+            ->whereBetween('waktu_transaksi', [
+                $tanggal . ' 00:00:00',
+                $tanggal . ' 23:59:59',
+            ])
             ->orderBy('waktu_transaksi', 'asc')
+            ->orderBy('id', 'asc')
             ->get();
     }
 
@@ -108,6 +153,10 @@ class LaporanBankController extends Controller
      * - 'transaksis' => daftar baris yang DITAMPILKAN (baris pasangan Kas disembunyikan)
      * - 'saldoPerBank' => peta SALDO AKHIR SEBENARNYA tiap bank (termasuk Kas,
      *   dihitung dari SEMUA baris, walau baris Kas tsb disembunyikan dari tampilan)
+     *
+     * ✅ OPTIMASI: 
+     * - Query SQL sudah di-sort, tidak perlu sortBy Carbon 2x
+     * - Sort kedua (untuk urutan tampilan) tetap dipertahankan
      */
     private function hitungSaldoPerBaris($transaksis)
     {
@@ -115,10 +164,12 @@ class LaporanBankController extends Controller
         $filteredTransaksis = collect();
         $runningKas = 0;
 
+        // ✅ Sort di awal: saldo_awal dulu, lalu waktu asc, lalu id asc
         $sorted = $transaksis
             ->sortBy(function ($trx) {
                 return sprintf(
-                    '%s-%020d',
+                    '%d-%s-%020d',
+                    $trx->is_saldo_awal ? 0 : 1,           // saldo awal dulu
                     \Carbon\Carbon::parse($trx->waktu_transaksi)->format('Y-m-d H:i:s'),
                     $trx->id
                 );
@@ -151,7 +202,6 @@ class LaporanBankController extends Controller
                         $saldoPerBank[$bankName] -= $nominal;
                     }
                 } else {
-                    // Bank selain Kas
                     if ($jenis === 'tarik tunai') {
                         $saldoPerBank[$bankName] += $nominal;
                     } elseif (in_array($jenis, ['transfer', 'numpang transfer'])) {
@@ -159,15 +209,14 @@ class LaporanBankController extends Controller
                             $saldoPerBank[$bankName] -= $nominal;
                         }
                     } elseif ($jenis === 'penambahan saldo') {
-                        $saldoPerBank[$bankName] += $nominal; // hanya bank
+                        $saldoPerBank[$bankName] += $nominal;
                     } elseif ($jenis === 'pengurangan saldo') {
-                        $saldoPerBank[$bankName] -= $nominal; // hanya bank
+                        $saldoPerBank[$bankName] -= $nominal;
                     }
                 }
             }
 
             // ===== SALDO KAS =====
-            // Penambahan/Pengurangan Saldo TIDAK mempengaruhi Kas
             if ($trx->is_saldo_awal && $bankName === 'kas') {
                 $runningKas = $nominal;
             } elseif (!$trx->is_saldo_awal) {
@@ -178,13 +227,11 @@ class LaporanBankController extends Controller
                         $runningKas -= $nominal;
                     }
                 } else {
-                    // Hanya transaksi operasional yang mempengaruhi Kas
                     if ($jenis === 'tarik tunai') {
                         $runningKas -= $bayar;
                     } elseif (in_array($jenis, ['transfer', 'numpang transfer'])) {
                         $runningKas += $bayar;
                     }
-                    // penambahan saldo / pengurangan saldo → tidak ubah Kas
                 }
             }
 
@@ -194,16 +241,9 @@ class LaporanBankController extends Controller
             $filteredTransaksis->push($trx);
         }
 
-        $filteredTransaksis = $filteredTransaksis
-            ->sortBy(function ($trx) {
-                return sprintf(
-                    '%d-%s-%020d',
-                    $trx->is_saldo_awal ? 0 : 1,
-                    \Carbon\Carbon::parse($trx->waktu_transaksi)->format('Y-m-d H:i:s'),
-                    $trx->id
-                );
-            })
-            ->values();
+        // ✅ Sort kedua untuk URUTAN TAMPILAN — SAMA seperti sort pertama (ascending)
+        // Tidak perlu sort ulang karena sudah urut dari loop di atas
+        $filteredTransaksis = $filteredTransaksis->values();
 
         return [
             'transaksis' => $filteredTransaksis,

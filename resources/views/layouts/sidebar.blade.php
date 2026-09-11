@@ -52,6 +52,8 @@
                             :locked="$isLocked" />
                         <x-sidebar-menu label="Stok Produk" route="data_master.produk_konter.index"
                             active="data_master.produk_konter*" :locked="$isLocked" />
+                        <x-sidebar-menu label="Harga Cabang" route="harga-cabang.index" icon="harga"
+                            active="harga-cabang*" :locked="$isLocked" />
                     </x-sidebar-menu-dropdown>
 
                     {{-- ===== STOK ===== --}}
@@ -88,7 +90,8 @@
                             :locked="false" />
                         <x-sidebar-menu label="Laba Rugi" route="upgrade" icon="laba-rugi" badge="PRO"
                             :locked="false" />
-                        <x-sidebar-menu label="Rekap" route="upgrade" icon="rekap" badge="PRO" :locked="false" />
+                        <x-sidebar-menu label="Rekap" route="upgrade" icon="rekap" badge="PRO"
+                            :locked="false" />
                     @endif
 
                     {{-- ===== PENGATURAN ===== --}}
@@ -142,6 +145,8 @@
                             :locked="$isLocked" />
                         <x-sidebar-menu label="Stok Produk" route="data_master.produk_konter.index"
                             active="data_master.produk_konter*" :locked="$isLocked" />
+                        <x-sidebar-menu label="Harga Cabang" route="harga-cabang.index" active="harga-cabang*"
+                            :locked="$isLocked" />
                     </x-sidebar-menu-dropdown>
 
                     {{-- ===== STOK ===== --}}

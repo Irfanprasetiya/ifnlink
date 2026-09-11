@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\HargaCabang;
 
 /**
  * Voucher (PRODUK UMUM)
@@ -39,5 +40,55 @@ class Voucher extends Model
     public function produkKonters()
     {
         return $this->hasMany(ProdukKonter::class);
+    }
+
+    /**
+     * Ambil harga jual untuk cabang tertentu
+     * Kalau tidak ada custom → fallback ke harga master
+     */
+    public function hargaJualUntukCabang($cabangId)
+    {
+        $hargaCabang = HargaCabang::forCabang($cabangId)
+            ->where('voucher_id', $this->id)
+            ->aktif()
+            ->latest('tanggal_mulai')
+            ->first();
+
+        return $hargaCabang ? $hargaCabang->harga_jual : $this->harga_jual;
+    }
+
+    /**
+     * Ambil harga beli untuk cabang tertentu
+     */
+    public function hargaBeliUntukCabang($cabangId)
+    {
+        $hargaCabang = HargaCabang::forCabang($cabangId)
+            ->where('voucher_id', $this->id)
+            ->aktif()
+            ->latest('tanggal_mulai')
+            ->first();
+
+        return $hargaCabang && $hargaCabang->harga_beli
+            ? $hargaCabang->harga_beli
+            : $this->harga_beli;
+    }
+
+    /**
+     * Cek apakah produk punya harga custom di cabang ini
+     */
+    public function hasHargaCustom($cabangId)
+    {
+        return HargaCabang::forCabang($cabangId)
+            ->where('voucher_id', $this->id)
+            ->aktif()
+            ->exists();
+    }
+
+    /**
+     * Relasi ke harga cabang
+     */
+    public function hargaCabangs()
+    {
+        return $this->hasMany(HargaCabang::class, 'voucher_id');
     }
 }

@@ -3,14 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Models\ActivityLog;
-use Illuminate\Http\Request;
-use App\Models\JenisTransaksi;
-use App\Models\TransaksiBank;
 use App\Models\Bank;
-use App\Models\User;
 use App\Models\Cabang;
+use App\Models\JenisTransaksi;
 use App\Models\Tenant;
+use App\Models\TransaksiBank;
+use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class TransaksiBankController extends Controller
 {
@@ -21,22 +23,29 @@ class TransaksiBankController extends Controller
         $userId = $request->user_id ?? Auth::id();
         $tanggal = $request->tanggal ?? now()->toDateString();
 
-        $banks = Bank::where(function ($q) use ($tenantId) {
-            $q->where('tenant_id', $tenantId)->orWhereNull('tenant_id');
-        })->orderByRaw("CASE WHEN nama_bank = 'Kas' THEN 1 ELSE 0 END, nama_bank ASC")->get();
+        // ✅ Cache banks per tenant
+        $banks = Cache::remember("banks_tenant_{$tenantId}", 300, function () use ($tenantId) {
+            return Bank::where(function ($q) use ($tenantId) {
+                $q->where('tenant_id', $tenantId)->orWhereNull('tenant_id');
+            })
+                ->orderByRaw("CASE WHEN nama_bank = 'Kas' THEN 1 ELSE 0 END, nama_bank ASC")
+                ->get();
+        });
 
-        // Hanya transaksi HARI INI
+        // ✅ Transaksi HARI INI — pakai whereBetween biar index kepakai
         $transaksis = TransaksiBank::with(['jenis_transaksi', 'bank'])
             ->where('tenant_id', $tenantId)
             ->where('cabang_id', $cabangId)
             ->where('user_id', $userId)
-            ->whereDate('waktu_transaksi', $tanggal)
+            ->whereBetween('waktu_transaksi', [
+                $tanggal . ' 00:00:00',
+                $tanggal . ' 23:59:59',
+            ])
             ->orderBy('waktu_transaksi', 'asc')
             ->orderBy('id', 'asc')
             ->get();
 
-        // Mulai dari 0 — tidak bawa saldo kemarin
-        // Jam 00:00 otomatis reset karena hanya hitung transaksi tanggal hari ini
+        // ✅ Query sudah di-sort, langsung hitung saldo (tidak perlu sortBy ulang)
         $saldoPerBank = $this->hitungSaldoPerBank($transaksis);
 
         $data = $banks->map(function ($bank) use ($saldoPerBank) {
@@ -48,47 +57,61 @@ class TransaksiBankController extends Controller
             ];
         });
 
-        $cabangs = Cabang::where('tenant_id', $tenantId)->orderBy('nama_cabang')->get();
-        $users = User::where('tenant_id', $tenantId)->orderBy('name')->get();
+        // ✅ Cache cabangs & users per tenant
+        $cabangs = Cache::remember("cabangs_tenant_{$tenantId}", 300, function () use ($tenantId) {
+            return Cabang::where('tenant_id', $tenantId)->orderBy('nama_cabang')->get();
+        });
+
+        $users = Cache::remember("users_tenant_{$tenantId}", 300, function () use ($tenantId) {
+            return User::where('tenant_id', $tenantId)->orderBy('name')->get();
+        });
 
         return view('frontend.transaksi_bank.index', compact('data', 'tanggal', 'cabangs', 'users', 'userId'));
     }
 
+    /**
+     * ✅ OPTIMASI: Pakai aggregate SQL — tidak load semua transaksi lama
+     * Dari 50.000 rows → 1 aggregate query
+     */
     private function getSaldoSebelumTanggal($tenantId, $cabangId, $userId, $tanggal)
     {
-        $transaksisSebelumnya = TransaksiBank::with(['jenis_transaksi', 'bank'])
-            ->where('tenant_id', $tenantId)
+        // Ambil saldo per bank via SQL aggregate (debit - kredit)
+        $saldos = TransaksiBank::where('tenant_id', $tenantId)
             ->where('cabang_id', $cabangId)
             ->where('user_id', $userId)
-            ->whereDate('waktu_transaksi', '<', $tanggal)
-            ->orderBy('waktu_transaksi', 'asc')
-            ->orderBy('id', 'asc')
+            ->where('waktu_transaksi', '<', $tanggal . ' 00:00:00')
+            ->groupBy('bank_id')
+            ->select('bank_id', DB::raw('SUM(debit - kredit) as saldo'))
             ->get();
 
-        return $this->hitungSaldoPerBank($transaksisSebelumnya);
+        // Map bank_id → nama_bank
+        $bankIds = $saldos->pluck('bank_id')->unique()->toArray();
+        $bankNames = Bank::whereIn('id', $bankIds)->pluck('nama_bank', 'id');
+
+        $saldoPerBank = [];
+        foreach ($saldos as $s) {
+            $bankName = strtolower(trim($bankNames[$s->bank_id] ?? 'unknown'));
+            $saldoPerBank[$bankName] = (float) $s->saldo;
+        }
+
+        return $saldoPerBank;
     }
 
     /**
+     * Hitung saldo per bank dari collection transaksi.
+     *
      * Aturan:
      * - Penambahan/Pengurangan Saldo → hanya bank, Kas tidak kena
      * - Penambahan/Pengurangan Kas   → hanya Kas, bank tidak kena
      * - Tarik Tunai / Transfer / Numpang → bank + Kas
+     *
+     * ✅ Query sudah di-sort di SQL, tidak perlu sortBy ulang di PHP
      */
     private function hitungSaldoPerBank($transaksis, $saldoAwal = [])
     {
         $saldoPerBank = $saldoAwal;
 
-        $sorted = $transaksis
-            ->sortBy(function ($trx) {
-                return sprintf(
-                    '%s-%020d',
-                    \Carbon\Carbon::parse($trx->waktu_transaksi)->format('Y-m-d H:i:s'),
-                    $trx->id
-                );
-            })
-            ->values();
-
-        foreach ($sorted as $trx) {
+        foreach ($transaksis as $trx) {
             $bankName = strtolower(trim($trx->bank->nama_bank ?? 'unknown'));
             $jenis = strtolower(trim($trx->jenis_transaksi->nama_transaksi ?? ''));
             $nominal = (float) ($trx->nominal ?? 0);
@@ -159,10 +182,14 @@ class TransaksiBankController extends Controller
     {
         $tenantId = Auth::user()->tenant_id;
 
+        // ✅ Cek limit paket gratis — pakai whereBetween
         $tenant = Tenant::with('plan')->find($tenantId);
         if ($tenant && $tenant->plan && $tenant->plan->harga == 0) {
             $todayCount = TransaksiBank::where('tenant_id', $tenantId)
-                ->whereDate('waktu_transaksi', now()->toDateString())
+                ->whereBetween('waktu_transaksi', [
+                    now()->toDateString() . ' 00:00:00',
+                    now()->toDateString() . ' 23:59:59',
+                ])
                 ->count();
 
             if ($todayCount >= 20) {
@@ -210,40 +237,43 @@ class TransaksiBankController extends Controller
             $kasDebit = $bayar;
         }
 
-        TransaksiBank::create([
-            'bank_id' => $bankId,
-            'user_id' => $userId,
-            'jenis_transaksi_id' => $jenis->id,
-            'nominal' => $nominal,
-            'bayar' => $bayar,
-            'debit' => $bankDebit,
-            'kredit' => $bankKredit,
-            'saldo_awal' => 0,
-            'saldo_akhir' => 0,
-            'keterangan' => $request->keterangan,
-            'no_tujuan' => $request->no_tujuan,
-            'waktu_transaksi' => $waktu,
-            'cabang_id' => $cabangId,
-            'tenant_id' => $tenantId,
-            'is_saldo_awal' => 0,
-        ]);
+        // ✅ Pakai transaction supaya 2 insert tidak terpisah
+        DB::transaction(function () use ($bankId, $kasId, $userId, $jenis, $nominal, $bayar, $bankDebit, $bankKredit, $kasDebit, $kasKredit, $request, $waktu, $cabangId, $tenantId) {
+            TransaksiBank::create([
+                'bank_id' => $bankId,
+                'user_id' => $userId,
+                'jenis_transaksi_id' => $jenis->id,
+                'nominal' => $nominal,
+                'bayar' => $bayar,
+                'debit' => $bankDebit,
+                'kredit' => $bankKredit,
+                'saldo_awal' => 0,
+                'saldo_akhir' => 0,
+                'keterangan' => $request->keterangan,
+                'no_tujuan' => $request->no_tujuan,
+                'waktu_transaksi' => $waktu,
+                'cabang_id' => $cabangId,
+                'tenant_id' => $tenantId,
+                'is_saldo_awal' => 0,
+            ]);
 
-        TransaksiBank::create([
-            'bank_id' => $kasId,
-            'user_id' => $userId,
-            'jenis_transaksi_id' => $jenis->id,
-            'nominal' => $nominal,
-            'bayar' => $bayar,
-            'debit' => $kasDebit,
-            'kredit' => $kasKredit,
-            'saldo_awal' => 0,
-            'saldo_akhir' => 0,
-            'keterangan' => $request->keterangan,
-            'waktu_transaksi' => $waktu,
-            'cabang_id' => $cabangId,
-            'tenant_id' => $tenantId,
-            'is_saldo_awal' => 0,
-        ]);
+            TransaksiBank::create([
+                'bank_id' => $kasId,
+                'user_id' => $userId,
+                'jenis_transaksi_id' => $jenis->id,
+                'nominal' => $nominal,
+                'bayar' => $bayar,
+                'debit' => $kasDebit,
+                'kredit' => $kasKredit,
+                'saldo_awal' => 0,
+                'saldo_akhir' => 0,
+                'keterangan' => $request->keterangan,
+                'waktu_transaksi' => $waktu,
+                'cabang_id' => $cabangId,
+                'tenant_id' => $tenantId,
+                'is_saldo_awal' => 0,
+            ]);
+        });
 
         ActivityLog::log('create', 'transaksi', 'Transaksi baru - Rp ' . number_format($bayar));
 
@@ -259,12 +289,16 @@ class TransaksiBankController extends Controller
 
         $bank = Bank::findOrFail($bank_id);
 
+        // ✅ Pakai whereBetween
         $transaksis = TransaksiBank::with('jenis_transaksi')
             ->where('bank_id', $bank_id)
             ->where('tenant_id', $tenantId)
             ->where('cabang_id', $cabangId)
             ->where('user_id', $userId)
-            ->whereDate('waktu_transaksi', $tanggal)
+            ->whereBetween('waktu_transaksi', [
+                $tanggal . ' 00:00:00',
+                $tanggal . ' 23:59:59',
+            ])
             ->orderBy('waktu_transaksi', 'asc')
             ->orderBy('id', 'asc')
             ->get();
@@ -273,6 +307,7 @@ class TransaksiBankController extends Controller
         $bankName = strtolower(trim($bank->nama_bank));
         $runningSaldo = $saldoSebelumnya[$bankName] ?? 0;
 
+        // ✅ Pakai method yang sama dengan index() biar konsisten
         $transaksis->transform(function ($trx) use (&$runningSaldo, $bankName) {
             $jenis = strtolower(trim($trx->jenis_transaksi->nama_transaksi ?? ''));
             $nominal = (float) ($trx->nominal ?? 0);

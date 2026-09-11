@@ -26,7 +26,7 @@
         <div
             class="bg-white lg:bg-transparent rounded-xl sm:rounded-2xl lg:shadow-soft lg:border lg:border-slate-200/80 overflow-hidden flex flex-col">
 
-            {{-- Header Tabel (Hanya tampil di Desktop) --}}
+            {{-- Header Tabel --}}
             <div class="hidden lg:flex p-4 border-b border-slate-100 items-center gap-2 bg-slate-50/50">
                 <svg class="w-5 h-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z">
@@ -53,6 +53,7 @@
                     <tbody class="divide-y divide-slate-100 text-sm">
                         @php $noDesktop = 1; @endphp
                         @forelse($stokMenipis as $stok)
+                            @php $isHabis = $stok->stok <= 0; @endphp
                             <tr class="hover:bg-rose-50/30 transition-colors">
                                 <td class="px-5 py-3.5 text-center text-slate-500 font-medium">{{ $noDesktop++ }}</td>
                                 <td class="px-5 py-3.5 font-bold text-slate-800">{{ $stok->voucher->nama_produk ?? '-' }}
@@ -60,15 +61,25 @@
                                 <td class="px-5 py-3.5 text-slate-600 font-medium">{{ $stok->cabang->nama_cabang ?? '-' }}
                                 </td>
                                 <td class="px-5 py-3.5 text-center">
+                                    {{-- ✅ Angka stok: warna tetap rose, hanya beda intensity --}}
                                     <span
-                                        class="font-black text-rose-600 bg-rose-50 px-3 py-1.5 rounded-md border border-rose-100 shadow-sm">{{ $stok->stok }}</span>
+                                        class="font-black {{ $isHabis ? 'text-rose-700 bg-rose-100' : 'text-rose-600 bg-rose-50' }} px-3 py-1.5 rounded-md border {{ $isHabis ? 'border-rose-200' : 'border-rose-100' }}">{{ $stok->stok }}</span>
                                 </td>
                                 <td class="px-5 py-3.5 text-center">
-                                    <span
-                                        class="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200/80 uppercase">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-rose-500 mr-1.5 animate-pulse"></span>
-                                        Menipis
-                                    </span>
+                                    {{-- ✅ Badge: teks saja yang beda, warna tetap subtle --}}
+                                    @if ($isHabis)
+                                        <span
+                                            class="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-bold bg-rose-100 text-rose-700 border border-rose-200 uppercase">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-rose-600 mr-1.5 animate-pulse"></span>
+                                            Habis
+                                        </span>
+                                    @else
+                                        <span
+                                            class="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-bold bg-rose-50 text-rose-600 border border-rose-200/80 uppercase">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-rose-500 mr-1.5 animate-pulse"></span>
+                                            Menipis
+                                        </span>
+                                    @endif
                                 </td>
                             </tr>
                         @empty
@@ -99,6 +110,7 @@
             <div class="block lg:hidden bg-slate-50/50 p-3 sm:p-4 rounded-xl border border-slate-200/80 space-y-3">
                 @php $noMobile = 1; @endphp
                 @forelse($stokMenipis as $stok)
+                    @php $isHabis = $stok->stok <= 0; @endphp
                     <!-- Single Card -->
                     <div class="bg-white border border-rose-200 rounded-xl p-3.5 shadow-sm relative overflow-hidden">
 
@@ -114,11 +126,18 @@
                                     class="text-[10px] font-bold uppercase tracking-wider text-slate-500">{{ $stok->cabang->nama_cabang ?? '-' }}</span>
                             </div>
 
-                            {{-- Status Badge (Mobile) --}}
-                            <span
-                                class="px-2 py-0.5 rounded text-[9px] font-bold bg-rose-50 text-rose-700 border border-rose-200/80 uppercase tracking-wide flex items-center gap-1">
-                                <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span> Menipis
-                            </span>
+                            {{-- ✅ Badge mobile: teks saja yang beda --}}
+                            @if ($isHabis)
+                                <span
+                                    class="px-2 py-0.5 rounded text-[9px] font-bold bg-rose-100 text-rose-700 border border-rose-200 uppercase tracking-wide flex items-center gap-1">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-rose-600 animate-pulse"></span> Habis
+                                </span>
+                            @else
+                                <span
+                                    class="px-2 py-0.5 rounded text-[9px] font-bold bg-rose-50 text-rose-600 border border-rose-200/80 uppercase tracking-wide flex items-center gap-1">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span> Menipis
+                                </span>
+                            @endif
                         </div>
 
                         {{-- Body: Nama Produk --}}
@@ -130,8 +149,9 @@
                         {{-- Footer Card: Jumlah Stok --}}
                         <div class="flex items-center justify-between pt-2.5 border-t border-dashed border-slate-200 pl-2">
                             <span class="text-[9px] font-bold text-rose-400 uppercase tracking-wider">Sisa Stok</span>
+                            {{-- ✅ Angka stok: warna tetap rose, hanya beda intensity --}}
                             <span
-                                class="font-black text-rose-600 text-base bg-rose-50 px-3 py-0.5 rounded-lg border border-rose-100 shadow-sm">{{ $stok->stok }}</span>
+                                class="font-black {{ $isHabis ? 'text-rose-700 bg-rose-100 border-rose-200' : 'text-rose-600 bg-rose-50 border-rose-100' }} text-base px-3 py-0.5 rounded-lg border">{{ $stok->stok }}</span>
                         </div>
                     </div>
                 @empty

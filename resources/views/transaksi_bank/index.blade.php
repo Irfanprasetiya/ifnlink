@@ -330,10 +330,13 @@
                             @endforeach
                         </select>
                     </div>
+
+                    {{-- DI SINI PENAMBAHAN TEKSNYA --}}
                     <div id="kategoriPengeluaranBox" class="hidden">
                         <label
-                            class="block text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Kategori
-                            Pengeluaran <span class="text-rose-500">*</span></label>
+                            class="block text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">
+                            Kategori Pengeluaran <span class="text-rose-500">*</span>
+                        </label>
                         <select name="akun_pengeluaran_id" id="modal_akun_pengeluaran_id" required
                             class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-base sm:text-sm rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 px-4 py-3 sm:p-2.5 outline-none transition-all">
                             <option value="">-- Pilih Kategori --</option>
@@ -341,18 +344,23 @@
                                 <option value="{{ $akun->id }}">{{ $akun->nama_akun }}</option>
                             @endforeach
                         </select>
+                        {{-- Teks tambahan --}}
+                        <p class="text-[10px] text-slate-400 mt-1 italic font-medium">(Pilih kategori Oper Saldo jika bukan
+                            pengeluaran operasional!)</p>
+
                         <p class="text-[10px] sm:text-xs text-rose-500 mt-1.5 font-medium hidden" id="errorAkun">⚠️ Wajib
                             pilih kategori pengeluaran!</p>
                     </div>
+
                     <div>
                         <label
                             class="block text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Nominal
                             (Rp)</label>
                         <div class="relative">
                             <span
-                                class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400 font-bold">Rp</span>
+                                class="absolute left-4 top-1/2 -translate-y-1/2 flex items-center text-slate-400 font-bold text-base sm:text-sm">Rp</span>
                             <input id="nominal_input" type="text" inputmode="numeric" name="nominal" required
-                                class="currency-input w-full bg-slate-50 border border-slate-200 text-slate-900 text-base sm:text-sm rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 block pl-10 pr-4 py-3 sm:p-2.5 font-bold outline-none transition-all"
+                                class="currency-input w-full bg-slate-50 border border-slate-200 text-slate-900 text-base sm:text-sm rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 block pl-12 pr-4 py-3 sm:py-2.5 font-bold outline-none transition-all"
                                 placeholder="0">
                         </div>
                     </div>
@@ -412,7 +420,8 @@
                                 <option value="">-- Pilih User --</option>
                                 @foreach ($users as $user)
                                     <option value="{{ $user->id }}">{{ $user->name }}
-                                        ({{ $user->cabang->nama_cabang ?? '-' }})</option>
+                                        ({{ $user->cabang->nama_cabang ?? '-' }})
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
@@ -468,7 +477,8 @@
                                 <option value="">-- Pilih User --</option>
                                 @foreach ($users as $user)
                                     <option value="{{ $user->id }}">{{ $user->name }}
-                                        ({{ $user->cabang->nama_cabang ?? '-' }})</option>
+                                        ({{ $user->cabang->nama_cabang ?? '-' }})
+                                    </option>
                                 @endforeach
                             </select>
                         </div>

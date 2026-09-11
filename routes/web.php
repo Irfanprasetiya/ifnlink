@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminStokController;
 use App\Http\Controllers\Developer\PembayaranController;
+use App\Http\Controllers\HargaCabangController;
 use Illuminate\Support\Facades\Route;
 
 // ==================== Controllers: Public & Auth ====================
@@ -271,6 +272,12 @@ Route::middleware(['auth', 'check.pending', 'check.tenant.active', 'role:super_a
 
     // API JSON
     Route::get('/api/stok-menipis', [StokHistoryController::class, 'stokMenipis'])->name('stok_history.api-menipis');
+
+    // Multi-Harga per Cabang
+    Route::get('/harga-cabang', [HargaCabangController::class, 'index'])->name('harga-cabang.index');
+    Route::post('/harga-cabang', [HargaCabangController::class, 'store'])->name('harga-cabang.store');
+    Route::put('/harga-cabang/{id}', [HargaCabangController::class, 'update'])->name('harga-cabang.update');
+    Route::delete('/harga-cabang/{id}', [HargaCabangController::class, 'destroy'])->name('harga-cabang.destroy');
 
 
     // Laporan Bank Admin
