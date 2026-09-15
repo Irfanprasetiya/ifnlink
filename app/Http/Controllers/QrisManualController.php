@@ -8,6 +8,7 @@ use App\Models\Tenant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class QrisManualController extends Controller
 {
@@ -36,7 +37,7 @@ class QrisManualController extends Controller
                 ->with('error', 'Tenant tidak ditemukan.');
         }
 
-        // ✅ FIX: Batalkan Midtrans pending saat user pilih QRIS
+        // ✅ Batalkan Midtrans pending saat user pilih QRIS
         $cancelledMidtrans = Pembayaran::where('tenant_id', $tenantId)
             ->where('metode', 'midtrans')
             ->where('status', 'pending')
@@ -121,38 +122,93 @@ class QrisManualController extends Controller
         }
 
         try {
-            // Hapus bukti lama kalau ada
-            if ($pembayaran->bukti_pembayaran && file_exists(storage_path('app/public/' . $pembayaran->bukti_pembayaran))) {
-                @unlink(storage_path('app/public/' . $pembayaran->bukti_pembayaran));
+            // ============================================
+            // ✅ 1. AUTO-CREATE FOLDER
+            // ============================================
+            $folderName = 'bukti-qris';
+            $storageFolder = storage_path('app/public/' . $folderName);
+
+            if (!file_exists($storageFolder)) {
+                if (!mkdir($storageFolder, 0755, true)) {
+                    throw new \Exception('Gagal membuat folder: ' . $storageFolder);
+                }
+                Log::info('Folder created:', ['path' => $storageFolder]);
             }
 
-            // Simpan bukti baru
-            $path = $request->file('bukti')->store('bukti-qris', 'public');
+            if (!is_writable($storageFolder)) {
+                throw new \Exception('Folder tidak writable: ' . $storageFolder);
+            }
 
+            // ============================================
+            // ✅ 2. HAPUS FILE LAMA (kalau ada)
+            // ============================================
+            if ($pembayaran->bukti_pembayaran) {
+                $oldFile = storage_path('app/public/' . $pembayaran->bukti_pembayaran);
+                if (file_exists($oldFile)) {
+                    @unlink($oldFile);
+                }
+            }
+
+            // ============================================
+            // ✅ 3. SIMPAN FILE BARU
+            // ============================================
+            $file = $request->file('bukti');
+            $filename = 'bukti_' . time() . '_' . $pembayaran->id . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs($folderName, $filename, 'public');
+
+            // ============================================
+            // ✅ 4. VERIFIKASI FILE TERSIMPAN
+            // ============================================
+            $savedPath = storage_path('app/public/' . $path);
+
+            if (!file_exists($savedPath)) {
+                throw new \Exception('File gagal tersimpan: ' . $savedPath);
+            }
+
+            if (filesize($savedPath) < 100) {
+                throw new \Exception('File terlalu kecil, mungkin corrupt.');
+            }
+
+            Log::info('QRIS Bukti Uploaded:', [
+                'pembayaran_id' => $pembayaran->id,
+                'order_id' => $pembayaran->order_id,
+                'tenant_id' => $pembayaran->tenant_id,
+                'path' => $path,
+                'full_path' => $savedPath,
+                'size' => filesize($savedPath),
+                'url' => Storage::url($path),
+            ]);
+
+            // ============================================
+            // ✅ 5. UPDATE DB
+            // ============================================
             $pembayaran->update([
                 'bukti_pembayaran' => $path,
                 'status' => 'menunggu_verifikasi',
                 'keterangan' => 'Bukti transfer diupload. Menunggu verifikasi admin.',
             ]);
 
-            Log::info('QRIS Bukti Uploaded:', [
-                'pembayaran_id' => $pembayaran->id,
-                'order_id' => $pembayaran->order_id,
-                'tenant_id' => $pembayaran->tenant_id,
-            ]);
-
             return redirect()->route('qris.status', $pembayaran->order_id)
                 ->with('success', '✅ Bukti transfer berhasil diupload. Mohon tunggu verifikasi admin (maks 1x24 jam).');
 
         } catch (\Exception $e) {
-            Log::error('QRIS Upload Error: ' . $e->getMessage());
+            Log::error('QRIS Upload Error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'pembayaran_id' => $request->pembayaran_id,
+                'file_info' => $request->hasFile('bukti') ? [
+                    'name' => $request->file('bukti')->getClientOriginalName(),
+                    'size' => $request->file('bukti')->getSize(),
+                    'mime' => $request->file('bukti')->getMimeType(),
+                ] : 'no file',
+            ]);
+
             return back()->with('error', 'Gagal upload bukti: ' . $e->getMessage());
         }
     }
 
     /**
      * Halaman status pembayaran
-     * Route: GET /payment/qris/status/{id}
+     * Route: GET /payment/qris/status/{orderId}
      */
     public function status($orderId)
     {
@@ -170,7 +226,7 @@ class QrisManualController extends Controller
 
     /**
      * Cek status via AJAX (untuk polling)
-     * Route: GET /payment/qris/check/{id}
+     * Route: GET /payment/qris/check/{orderId}
      */
     public function checkStatus($orderId)
     {
