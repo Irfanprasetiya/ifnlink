@@ -120,6 +120,6 @@ class Tenant extends Model
             return true;
         }
 
-        return false;
+        return false;  // ← expired return FALSE!
     }
 }

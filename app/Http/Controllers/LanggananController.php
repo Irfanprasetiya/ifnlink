@@ -11,7 +11,14 @@ class LanggananController extends Controller
 {
     public function index()
     {
-        $tenant = Auth::user()->tenant()->with('plan')->first();
+        // ✅ Konsisten: ambil tenant langsung + eager load plan
+        $user = Auth::user();
+        $tenant = $user->tenant()->with('plan')->first();
+
+        if (!$tenant) {
+            return redirect()->route('login')
+                ->with('error', 'Data tenant tidak ditemukan.');
+        }
 
         $pembayarans = Pembayaran::where('tenant_id', $tenant->id_tenant)
             ->orderBy('created_at', 'desc')
@@ -20,7 +27,18 @@ class LanggananController extends Controller
         // ✅ Hanya dari database, bukan session
         $hasPendingPayment = $pembayarans->where('status', 'pending')->count() > 0;
 
-        return view('status_langganan.index', compact('tenant', 'pembayarans', 'hasPendingPayment'));
+        // ✅ Cek apakah tenant expired
+        $isExpired = $tenant->status_langganan === 'expired'
+            || ($tenant->status_langganan === 'active'
+                && $tenant->tanggal_berakhir
+                && now()->greaterThan($tenant->tanggal_berakhir));
+
+        return view('status_langganan.index', compact(
+            'tenant',
+            'pembayarans',
+            'hasPendingPayment',
+            'isExpired'
+        ));
     }
 
     /**
@@ -29,6 +47,10 @@ class LanggananController extends Controller
     public function cekStatus()
     {
         $tenant = Auth::user()->tenant;
+
+        if (!$tenant) {
+            return response()->json(['has_pending' => false, 'data' => []]);
+        }
 
         $pembayarans = Pembayaran::where('tenant_id', $tenant->id_tenant)
             ->orderBy('created_at', 'desc')
@@ -71,17 +93,47 @@ class LanggananController extends Controller
         return redirect()->route('checkout', $plan->id);
     }
 
+    /**
+     * Perpanjang langganan — redirect ke checkout
+     */
     public function perpanjang()
     {
         $tenant = Auth::user()->tenant;
+
+        if (!$tenant) {
+            return redirect()->route('login')
+                ->with('error', 'Data tenant tidak ditemukan.');
+        }
 
         if (!$tenant->plan || $tenant->plan->harga == 0) {
             return back()->with('error', 'Paket gratis tidak perlu diperpanjang.');
         }
 
+        if (!$tenant->plan_id) {
+            return back()->with('error', 'Paket langganan tidak ditemukan. Silakan pilih paket.');
+        }
+
+        // ✅ Cek kalau sudah ada pending payment → arahkan ke checkout existing
+        $existingPending = Pembayaran::where('tenant_id', $tenant->id_tenant)
+            ->where('status', 'pending')
+            ->latest()
+            ->first();
+
+        if ($existingPending) {
+            session([
+                'pending_tenant_id' => $tenant->id_tenant,
+                'upgrade_plan_id' => $existingPending->plan_id,
+                'pending_order_id' => $existingPending->order_id,
+            ]);
+
+            return redirect()->route('checkout', $existingPending->plan_id)
+                ->with('info', 'Anda sudah memiliki tagihan yang belum dibayar.');
+        }
+
+        // ✅ Tidak ada pending → buat session baru
         session([
             'pending_tenant_id' => $tenant->id_tenant,
-            'upgrade_plan_id' => $tenant->plan_id, // plan yang sama
+            'upgrade_plan_id' => $tenant->plan_id,
         ]);
 
         return redirect()->route('checkout', $tenant->plan_id);
@@ -120,9 +172,16 @@ class LanggananController extends Controller
         return $pdf->download('invoice-' . $pembayaran->id . '.pdf');
     }
 
+    /**
+     * Batalkan tagihan pending
+     */
     public function batalkan()
     {
         $tenant = Auth::user()->tenant;
+
+        if (!$tenant) {
+            return back()->with('error', 'Data tenant tidak ditemukan.');
+        }
 
         // Hapus record pembayaran pending
         Pembayaran::where('tenant_id', $tenant->id_tenant)
@@ -130,10 +189,16 @@ class LanggananController extends Controller
             ->delete();
 
         // Hapus session
-        session()->forget(['pending_tenant_id', 'pending_snap_token', 'pending_order_id', 'upgrade_plan_id']);
+        session()->forget([
+            'pending_tenant_id',
+            'pending_snap_token',
+            'pending_order_id',
+            'upgrade_plan_id'
+        ]);
 
-        // Ubah status tenant kembali
-        $tenant->update(['status_langganan' => 'trial']);
+        // ✅ Jangan ubah status tenant — biarkan seperti sebelumnya
+        // Status tenant tetap: active, expired, trial, dll
+        // Hanya pembayaran pending yang dihapus
 
         return redirect()->route('status.langganan')
             ->with('success', 'Tagihan berhasil dibatalkan.');

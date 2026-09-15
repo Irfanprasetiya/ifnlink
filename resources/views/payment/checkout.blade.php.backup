@@ -7,6 +7,17 @@
     <title>Checkout — Omzetly.id</title>
     <link rel="icon" href="{{ asset('assets/images/omzetly.png') }}" type="image/png">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ["Figtree", "Poppins", "ui-sans-serif", "system-ui"]
+                    }
+                }
+            }
+        }
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -23,9 +34,8 @@
     </script>
     {{-- Snap JS hanya dimuat jika ada token --}}
     @if (isset($existingToken) && $existingToken)
-        <script
-            src="{{ config('midtrans.is_production') ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js' }}"
-            data-client-key="{{ config('midtrans.client_key') }}"></script>
+        <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('midtrans.client_key') }}">
+        </script>
     @endif
 </head>
 
@@ -72,9 +82,7 @@
             <div class="flex justify-between items-center text-sm">
                 <span class="text-slate-500 font-medium">Paket Langganan</span>
                 <span
-                    class="font-bold text-slate-900 bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs border border-blue-100">
-                    {{ $plan->nama_paket }}
-                </span>
+                    class="font-bold text-slate-900 bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs border border-blue-100">{{ $plan->nama_paket }}</span>
             </div>
             <div class="flex justify-between items-center text-sm">
                 <span class="text-slate-500 font-medium">Total Harga</span>
@@ -89,11 +97,8 @@
             @endif
         </div>
 
-        {{-- ========================================== --}}
-        {{-- KONTROL AKSI PEMBAYARAN                    --}}
-        {{-- ========================================== --}}
+        {{-- Kontrol Aksi Pembayaran --}}
         @if (isset($existingToken) && $existingToken)
-            {{-- ====== ADA TOKEN MIDTRANS ====== --}}
             <div
                 class="flex items-center gap-2.5 bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-2xl text-xs font-medium mb-5">
                 <svg class="w-4 h-4 shrink-0 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -129,8 +134,7 @@
             <p class="text-[11px] text-slate-400 text-center font-medium">Memilih metode baru akan membatalkan tagihan
                 order sebelumnya.</p>
         @else
-            {{-- ====== BELUM ADA TOKEN (BAYAR BARU) ====== --}}
-            {{-- Tombol Bayar via Midtrans --}}
+            {{-- Tombol Bayar Baru --}}
             <form action="{{ route('pay') }}" method="POST">
                 @csrf
                 <input type="hidden" name="plan_id" value="{{ $plan->id }}">
@@ -140,35 +144,10 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                             d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                     </svg>
-                    Bayar via Midtrans
+                    Bayar Sekarang
                 </button>
             </form>
         @endif
-
-        {{-- ========================================== --}}
-        {{-- ✅ TOMBOL QRIS MANUAL (SELALU MUNCUL)     --}}
-        {{-- ========================================== --}}
-        <div class="relative my-4">
-            <div class="absolute inset-0 flex items-center">
-                <div class="w-full border-t border-slate-200"></div>
-            </div>
-            <div class="relative flex justify-center text-xs">
-                <span class="bg-white px-3 text-slate-400 font-medium">atau</span>
-            </div>
-        </div>
-
-        <a href="{{ route('qris.show', ['plan_id' => $plan->id]) }}"
-            class="w-full inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-50 text-slate-700 border-2 border-slate-200 font-semibold py-3.5 px-4 rounded-2xl transition-all hover:-translate-y-0.5 text-sm">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-            </svg>
-            Bayar via QRIS
-        </a>
-
-        <p class="text-[11px] text-slate-400 text-center font-medium mt-3">
-            Scan QRIS & upload bukti transfer, admin akan verifikasi.
-        </p>
 
         {{-- Kembali --}}
         <div class="text-center mt-6">
@@ -199,6 +178,7 @@
             function continuePayment() {
                 window.snap.pay('{{ $existingToken }}', {
                     onSuccess: function(result) {
+                        // ✅ Kirim data lengkap
                         let params = new URLSearchParams({
                             order_id: result.order_id || '{{ $orderId }}',
                             transaction_id: result.transaction_id || result.order_id ||
@@ -206,6 +186,7 @@
                             transaction_status: result.transaction_status || 'settlement',
                             payment_type: result.payment_type || '',
                         });
+
                         window.location.href = '{{ route('payment.finish') }}?' + params.toString();
                     },
                     onPending: function(result) {

@@ -37,16 +37,51 @@
                             @php
                                 $currentPlan = Auth::user()->tenant?->plan;
                                 $isFree = !$currentPlan || $currentPlan->harga == 0;
+
+                                // ✅ Cek apakah ada QRIS menunggu verifikasi
+                                $tenant = Auth::user()->tenant;
+                                $hasQrisVerify = false;
+
+                                if ($tenant) {
+                                    $hasQrisVerify = \App\Models\Pembayaran::where('tenant_id', $tenant->id_tenant)
+                                        ->where('metode', 'qris_manual')
+                                        ->where('status', 'menunggu_verifikasi')
+                                        ->exists();
+                                }
+
+                                // ✅ Cek status expired (active tapi tanggal_berakhir lewat)
+                                $isExpired =
+                                    $tenant &&
+                                    ($tenant->status_langganan === 'expired' ||
+                                        ($tenant->status_langganan === 'active' &&
+                                            $tenant->tanggal_berakhir &&
+                                            now()->greaterThan($tenant->tanggal_berakhir)));
                             @endphp
 
-                            {{-- Badge Status: PENDING / AKTIF --}}
-                            @if (Auth::user()->tenant && Auth::user()->tenant->isLocked())
+                            {{-- Badge Status: Diverifikasi / Pending / Expired / Aktif --}}
+                            @if ($hasQrisVerify)
+                                {{-- ✅ QRIS menunggu verifikasi --}}
+                                <span
+                                    class="text-[10px] bg-blue-400/20 text-blue-100 px-3 py-1 rounded-full font-bold flex items-center gap-1.5 border border-blue-400/30">
+                                    <span class="w-2 h-2 rounded-full bg-blue-200 animate-pulse"></span>
+                                    DIVERIFIKASI
+                                </span>
+                            @elseif ($isExpired)
+                                {{-- ✅ Expired --}}
+                                <span
+                                    class="text-[10px] bg-rose-400/20 text-rose-100 px-3 py-1 rounded-full font-bold flex items-center gap-1.5 border border-rose-400/30">
+                                    <span class="w-2 h-2 rounded-full bg-rose-300"></span>
+                                    EXPIRED
+                                </span>
+                            @elseif ($tenant && $tenant->isLocked())
+                                {{-- ✅ Pending --}}
                                 <span
                                     class="text-[10px] bg-amber-400/20 text-amber-200 px-3 py-1 rounded-full font-bold flex items-center gap-1.5 border border-amber-400/30">
                                     <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
                                     PENDING
                                 </span>
                             @else
+                                {{-- ✅ Aktif --}}
                                 <span
                                     class="text-[10px] bg-emerald-400/20 text-emerald-200 px-3 py-1 rounded-full font-bold flex items-center gap-1.5 border border-emerald-400/30">
                                     <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
@@ -182,8 +217,8 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                                     </svg>
-                                    <svg id="logoutSpinner" class="hidden w-4 h-4 animate-spin shrink-0" fill="none"
-                                        stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg id="logoutSpinner" class="hidden w-4 h-4 animate-spin shrink-0"
+                                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <circle class="opacity-25" cx="12" cy="12" r="10"
                                             stroke="currentColor" stroke-width="4"></circle>
                                         <path class="opacity-75" fill="currentColor"
@@ -193,8 +228,6 @@
                                     <span id="logoutText">Log Out</span>
                                 </button>
                             </form>
-
-
                         </ul>
                     </div>
                 </div>

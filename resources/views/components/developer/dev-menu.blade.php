@@ -5,6 +5,7 @@
 <x-sidebar-menu label="Log Aktivitas" route="developer.log.index" active="developer.log.*" icon="log" />
 <x-sidebar-menu label="Riwayat Pembayaran" route="developer.pembayaran.index" active="developer.pembayaran.*"
     icon="payment" />
+<x-sidebar-menu label="Verifikasi QRIS" route="developer.qris.index" active="developer.qris.*" icon="check-circle" />
 <x-sidebar-menu label="Backup & Restore" route="developer.backup.index" active="developer.backup.*" icon="backup" />
 <x-sidebar-menu label="Maintenance Mode" route="developer.maintenance.index" active="developer.maintenance.*"
     icon="maintenance" />

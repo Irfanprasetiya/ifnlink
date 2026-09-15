@@ -42,7 +42,6 @@ use App\Http\Controllers\VoucherController;
 // ==================== Controllers: User ====================
 use App\Http\Controllers\detailKonterController;
 use App\Http\Controllers\Developer\MaintenanceController;
-use App\Http\Controllers\Developer\QrisVerificationController;
 use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\laporanKonterController;
 use App\Http\Controllers\LaporanBankController;
@@ -57,7 +56,6 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PlanController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\ProfileTokoController;
-use App\Http\Controllers\QrisManualController;
 use App\Http\Controllers\ReturController;
 use App\Http\Controllers\SaldoGudangController;
 use App\Http\Controllers\StokHistoryController;
@@ -91,15 +89,6 @@ Route::post('/midtrans/notification', [PaymentController::class, 'notification']
     ->name('midtrans.notification')
     ->withoutMiddleware(['verify.csrf.token']);
 
-// ==========================================
-// QRIS MANUAL - PUBLIC ROUTES (sama seperti Midtrans)
-// ==========================================
-Route::get('/payment/qris', [QrisManualController::class, 'show'])->name('qris.show');
-Route::post('/payment/qris/upload', [QrisManualController::class, 'uploadBukti'])->name('qris.upload');
-Route::get('/payment/qris/status/{orderId}', [QrisManualController::class, 'status'])->name('qris.status');
-Route::get('/payment/qris/check/{orderId}', [QrisManualController::class, 'checkStatus'])->name('qris.check');
-
-
 Route::middleware(['guest.redirect', 'prevent-back'])->group(function () {
     Route::get('/login', fn() => view('auth.login'))->name('login');
 });
@@ -112,14 +101,7 @@ Route::get('/dashboard/pending', function () {
         return redirect()->route('dashboard');
     }
 
-    // ✅ Cek apakah ada pembayaran QRIS yang menunggu verifikasi
-    $pendingQris = \App\Models\Pembayaran::where('tenant_id', $tenant->id_tenant)
-        ->where('metode', 'qris_manual')
-        ->whereIn('status', ['menunggu_verifikasi', 'pending', 'rejected'])
-        ->latest()
-        ->first();
-
-    return view('dashboard.pending', compact('tenant', 'pendingQris'));
+    return view('dashboard.pending', compact('tenant'));
 })->name('dashboard.pending');
 /*
 |--------------------------------------------------------------------------
@@ -167,14 +149,6 @@ Route::middleware(['auth', 'role:developer'])->prefix('developer')->name('develo
     Route::post('/maintenance/enable', [MaintenanceController::class, 'enable'])->name('maintenance.enable');
     Route::post('/maintenance/disable', [MaintenanceController::class, 'disable'])->name('maintenance.disable');
     Route::post('/maintenance/toggle', [MaintenanceController::class, 'toggle'])->name('maintenance.toggle');
-
-    // QRIS Manual - Verifikasi
-    Route::prefix('qris-verification')->name('qris.')->group(function () {
-        Route::get('/', [QrisVerificationController::class, 'index'])->name('index');
-        Route::get('/{id}', [QrisVerificationController::class, 'show'])->name('show');
-        Route::post('/{id}/approve', [QrisVerificationController::class, 'approve'])->name('approve');
-        Route::post('/{id}/reject', [QrisVerificationController::class, 'reject'])->name('reject');
-    });
 });
 
 /*

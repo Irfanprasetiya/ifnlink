@@ -23,24 +23,12 @@ class PaymentController extends Controller
 
     /**
      * Generate Order ID dengan format OMZ
+     * Format: OMZ-{tenant_id}-{timestamp}-{random6}
+     * Contoh: OMZ-123-1692145800-AB12CD
      */
     private function generateOrderId($tenantId)
     {
         return 'OMZ-' . $tenantId . '-' . time() . '-' . strtoupper(Str::random(6));
-    }
-
-    /**
-     * ✅ FIX 1: Cek apakah tenant sudah bayar dalam 30 hari terakhir
-     * Return record pembayaran kalau sudah ada, null kalau belum
-     */
-    private function getPembayaranAktif($tenantId)
-    {
-        return Pembayaran::where('tenant_id', $tenantId)
-            ->where('status', 'confirmed')
-            ->where('metode', '!=', 'qris_manual') // exclude QRIS manual
-            ->where('tanggal_konfirmasi', '>=', now()->subDays(30))
-            ->latest('tanggal_konfirmasi')
-            ->first();
     }
 
     // Halaman Checkout (sebelum bayar)
@@ -68,54 +56,40 @@ class PaymentController extends Controller
             return redirect()->route('register')->with('error', 'Tenant tidak ditemukan.');
         }
 
-        // ✅ FIX 2: Cek apakah sudah bayar & masih aktif
-        $sudahBayar = $tenant->status_langganan === 'active';
-        $pembayaranAktif = $this->getPembayaranAktif($tenantId);
-
-        if ($pembayaranAktif && $sudahBayar && $tenant->tanggal_berakhir && $tenant->tanggal_berakhir > now()) {
-            \Log::info('Checkout blocked - Already paid', [
-                'tenant_id' => $tenantId,
-                'last_order_id' => $pembayaranAktif->order_id,
-                'paid_at' => $pembayaranAktif->tanggal_konfirmasi,
-                'status' => $tenant->status_langganan,
-            ]);
-
-            return redirect()->route('status.langganan')
-                ->with('success', 'Pembayaran Anda sudah selesai. Akun aktif sampai '
-                    . $tenant->tanggal_berakhir->format('d M Y'));
-        }
-
-        // ✅ FIX 2b: Cek apakah status butuh pembayaran
-        $statusButuhBayar = in_array($tenant->status_langganan, ['pending', 'expired', 'trial', 'suspended']);
         $isUpgrade = $tenant->plan_id != $planId;
-        $isPerpanjang = $tenant->plan_id == $planId;
+        $isPerpanjang = $tenant->plan_id == $planId && $tenant->status_langganan === 'active';
 
-        if (!$statusButuhBayar && !$isUpgrade && !$isPerpanjang) {
-            \Log::info('Checkout blocked - No payment needed', [
-                'tenant_id' => $tenantId,
-                'status' => $tenant->status_langganan,
-                'is_upgrade' => $isUpgrade,
-            ]);
-
+        if ($tenant->status_langganan !== 'pending' && !$isUpgrade && !$isPerpanjang) {
             return redirect()->route('status.langganan')
                 ->with('info', 'Pembayaran Anda sudah selesai. Tidak perlu checkout lagi.');
         }
 
-        // ✅ FIX 3: Cek existing payment — filter by metode midtrans
-        // ✅ FIX 3: Cek existing payment — filter semua metode
+        // Cek apakah sudah ada pembayaran pending untuk tenant ini
         $existingPayment = Pembayaran::where('tenant_id', $tenantId)
             ->where('status', 'pending')
-            ->whereIn('metode', ['midtrans', 'qris_manual'])
             ->latest()
             ->first();
 
         if ($existingPayment && $existingPayment->order_id) {
+            // Pakai order_id yang sudah ada
             $orderId = $existingPayment->order_id;
         } else {
-            // ✅ Jangan bikin record di sini — record dibuat saat user pilih metode
-            $orderId = null;
+            // Generate order_id baru dengan format OMZ
+            $orderId = $this->generateOrderId($tenantId);
+
+            // Simpan pembayaran baru
+            Pembayaran::create([
+                'tenant_id' => $tenantId,
+                'plan_id' => $planId,
+                'order_id' => $orderId,
+                'jumlah' => $plan->harga,
+                'status' => 'pending',
+                'metode' => 'midtrans',
+                'keterangan' => 'Menunggu pembayaran - ' . $plan->nama_paket,
+            ]);
         }
 
+        // Simpan di session
         session([
             'upgrade_plan_id' => $planId,
             'pending_order_id' => $orderId,
@@ -138,79 +112,91 @@ class PaymentController extends Controller
 
         $tenant = Tenant::findOrFail($tenantId);
 
-        // ✅ FIX 4: Cek sudah bayar dalam 30 hari terakhir
-        $pembayaranAktif = $this->getPembayaranAktif($tenantId);
-
-        if ($pembayaranAktif) {
-            \Log::info('Pay blocked - Already paid', [
-                'tenant_id' => $tenantId,
-                'last_order_id' => $pembayaranAktif->order_id,
-            ]);
-
-            return redirect()->route('status.langganan')
-                ->with('success', 'Pembayaran Anda sudah selesai.');
-        }
-
-        // ✅ FIX 5: Batalkan SEMUA pending SEBELUM bikin baru
-        $cancelledPayments = Pembayaran::where('tenant_id', $tenantId)
-            ->where('status', 'pending')
-            ->where('metode', 'midtrans')
-            ->get();
-
-        foreach ($cancelledPayments as $cancelled) {
-            $cancelled->update([
-                'status' => 'cancelled',
-                'keterangan' => 'Dibatalkan - Order baru dibuat. Order lama: ' . $cancelled->order_id,
-            ]);
-
-            \Log::info('Pending payment cancelled:', [
-                'order_id' => $cancelled->order_id,
-                'tenant_id' => $tenantId,
-            ]);
-        }
-
-        // Cek apakah ini permintaan "Ganti Metode"
+        // ✅ Cek apakah ini permintaan "Ganti Metode" atau "Bayar Baru"
         $isNewPayment = $request->input('new_payment', false) || $request->input('ganti_metode', false);
 
+        // ✅ Ambil order_id dari session atau request
         $orderId = session('pending_order_id')
             ?? $request->order_id
             ?? $request->input('order_id')
             ?? null;
 
+        // ✅ Jika ini permintaan GANTI METODE, batalkan yang lama dan buat baru
         if ($isNewPayment) {
+            // ✅ Batalkan semua pembayaran pending sebelumnya
+            $cancelledPayments = Pembayaran::where('tenant_id', $tenantId)
+                ->where('status', 'pending')
+                ->get();
+
+            foreach ($cancelledPayments as $cancelled) {
+                $cancelled->update([
+                    'status' => 'cancelled',
+                    'keterangan' => 'Dibatalkan - Ganti metode pembayaran. Order lama: ' . $cancelled->order_id,
+                ]);
+
+                \Log::info('Pembayaran dibatalkan:', [
+                    'order_id' => $cancelled->order_id,
+                    'tenant_id' => $tenantId,
+                    'reason' => 'Ganti metode pembayaran'
+                ]);
+            }
+
+            // Hapus session token lama
             session()->forget('pending_snap_token');
+
+            // Generate order_id baru
             $orderId = $this->generateOrderId($tenantId);
+
+            // Update session dengan order_id baru
             session(['pending_order_id' => $orderId]);
 
             \Log::info('Ganti Metode - Membuat order_id baru:', [
                 'new_order_id' => $orderId,
                 'tenant_id' => $tenantId,
+                'cancelled_count' => $cancelledPayments->count()
             ]);
         }
 
+        // Jika tidak ada order_id, cari dari database atau buat baru
         if (!$orderId) {
-            $orderId = $this->generateOrderId($tenantId);
+            $existingPayment = Pembayaran::where('tenant_id', $tenantId)
+                ->where('status', 'pending')
+                ->latest()
+                ->first();
+
+            if ($existingPayment && $existingPayment->order_id) {
+                $orderId = $existingPayment->order_id;
+            } else {
+                // Buat baru dengan format OMZ
+                $orderId = $this->generateOrderId($tenantId);
+            }
         }
 
+        // Log untuk debugging
         \Log::info('Pay Method - Order ID:', [
             'order_id' => $orderId,
             'is_new_payment' => $isNewPayment,
+            'session_order_id' => session('pending_order_id'),
+            'request_order_id' => $request->order_id,
             'tenant_id' => $tenantId
         ]);
 
+        // Cari atau buat record pembayaran dengan order_id ini
         $pembayaran = Pembayaran::where('order_id', $orderId)->first();
 
         if (!$pembayaran) {
+            // Buat baru jika tidak ada
             $pembayaran = Pembayaran::create([
                 'tenant_id' => $tenantId,
                 'plan_id' => $plan->id,
                 'order_id' => $orderId,
                 'jumlah' => $plan->harga,
                 'status' => 'pending',
-                'metode' => 'midtrans',
+                'metode' => '-',
                 'keterangan' => 'Menunggu pembayaran - ' . $plan->nama_paket,
             ]);
         } else {
+            // Update jika perlu
             $pembayaran->update([
                 'plan_id' => $plan->id,
                 'jumlah' => $plan->harga,
@@ -219,9 +205,10 @@ class PaymentController extends Controller
             ]);
         }
 
+        // Gunakan order_id yang SAMA untuk Midtrans
         $params = [
             'transaction_details' => [
-                'order_id' => $orderId,
+                'order_id' => $orderId, // Format OMZ
                 'gross_amount' => (int) $plan->harga,
             ],
             'item_details' => [
@@ -242,6 +229,7 @@ class PaymentController extends Controller
         try {
             $snapToken = Snap::getSnapToken($params);
 
+            // Simpan order_id yang sama di session
             session([
                 'pending_order_id' => $orderId,
                 'pending_snap_token' => $snapToken,
@@ -252,7 +240,9 @@ class PaymentController extends Controller
         } catch (\Exception $e) {
             \Log::error('Midtrans Error: ' . $e->getMessage());
 
+            // Jika error karena order_id sudah digunakan, coba buat order_id baru
             if (str_contains($e->getMessage(), 'order_id sudah digunakan')) {
+                // Batalkan pembayaran pending yang ada
                 Pembayaran::where('tenant_id', $tenantId)
                     ->where('status', 'pending')
                     ->update([
@@ -260,19 +250,24 @@ class PaymentController extends Controller
                         'keterangan' => 'Dibatalkan - Order ID sudah digunakan di Midtrans',
                     ]);
 
+                // Generate order_id baru
                 $newOrderId = $this->generateOrderId($tenantId);
+
+                // Update session
                 session(['pending_order_id' => $newOrderId]);
 
+                // Buat record baru
                 Pembayaran::create([
                     'tenant_id' => $tenantId,
                     'plan_id' => $plan->id,
                     'order_id' => $newOrderId,
                     'jumlah' => $plan->harga,
                     'status' => 'pending',
-                    'metode' => 'midtrans',
+                    'metode' => '-',
                     'keterangan' => 'Menunggu pembayaran - ' . $plan->nama_paket,
                 ]);
 
+                // Update params dengan order_id baru
                 $params['transaction_details']['order_id'] = $newOrderId;
 
                 try {
@@ -308,18 +303,9 @@ class PaymentController extends Controller
             return back()->with('error', 'Paket langganan tidak ditemukan.');
         }
 
-        // ✅ FIX 6: Cek sudah bayar dalam 30 hari terakhir
-        $pembayaranAktif = $this->getPembayaranAktif($tenant->id_tenant);
-
-        if ($pembayaranAktif) {
-            return redirect()->route('status.langganan')
-                ->with('success', 'Pembayaran Anda sudah selesai.');
-        }
-
-        // Batalkan pending
+        // ✅ Batalkan semua pembayaran pending sebelumnya
         $cancelledPayments = Pembayaran::where('tenant_id', $tenant->id_tenant)
             ->where('status', 'pending')
-            ->where('metode', 'midtrans')
             ->get();
 
         foreach ($cancelledPayments as $cancelled) {
@@ -329,21 +315,23 @@ class PaymentController extends Controller
             ]);
         }
 
+        // ✅ Buat order_id BARU
         $orderId = $this->generateOrderId($tenant->id_tenant);
 
+        // Buat record baru
         Pembayaran::create([
             'tenant_id' => $tenant->id_tenant,
             'plan_id' => $plan->id,
             'order_id' => $orderId,
             'jumlah' => $plan->harga,
             'status' => 'pending',
-            'metode' => 'midtrans',
+            'metode' => '-',
             'keterangan' => 'Pembayaran ulang - ' . $plan->nama_paket,
         ]);
 
         $params = [
             'transaction_details' => [
-                'order_id' => $orderId,
+                'order_id' => $orderId, // Format OMZ baru
                 'gross_amount' => (int) $plan->harga,
             ],
             'item_details' => [
@@ -396,7 +384,7 @@ class PaymentController extends Controller
             $vaNumber = $payload['va_numbers'][0]['va_number'] ?? null;
             $bank = $payload['va_numbers'][0]['bank'] ?? $payload['bank'] ?? null;
 
-            // Verifikasi signature
+            // Verifikasi signature jika tersedia
             if ($signatureKey && $statusCode && $grossAmount) {
                 $serverKey = config('midtrans.server_key');
                 $expectedSignature = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
@@ -407,6 +395,7 @@ class PaymentController extends Controller
                 }
             }
 
+            // Cari pembayaran
             $pembayaran = Pembayaran::where('order_id', $orderId)->first();
 
             if (!$pembayaran) {
@@ -417,37 +406,21 @@ class PaymentController extends Controller
             $tenant = Tenant::find($pembayaran->tenant_id);
 
             if (in_array($transactionStatus, ['settlement', 'capture'])) {
-                // ✅ FIX 7: Update tenant hanya kalau perlu
+                // Update tenant
                 if ($tenant) {
                     $newPlanId = $pembayaran->plan_id
                         ?? session('upgrade_plan_id')
                         ?? $this->getPlanIdFromAmount($grossAmount);
 
-                    $sudahAktif = $tenant->status_langganan === 'active'
-                        && $tenant->plan_id == $newPlanId
-                        && $tenant->tanggal_berakhir
-                        && $tenant->tanggal_berakhir > now()->addDays(25);
-
-                    if ($sudahAktif) {
-                        \Log::info('Tenant sudah aktif, skip update:', [
-                            'tenant_id' => $tenant->id_tenant,
-                            'order_id' => $orderId,
-                        ]);
-                    } else {
-                        $tenant->update([
-                            'status_langganan' => 'active',
-                            'plan_id' => $newPlanId ?? $tenant->plan_id,
-                            'tanggal_berakhir' => now()->addDays(30),
-                            'max_user' => $newPlanId ? Plan::find($newPlanId)?->max_user ?? 10 : $tenant->max_user,
-                        ]);
-
-                        \Log::info('Tenant activated via notification:', [
-                            'tenant_id' => $tenant->id_tenant,
-                            'order_id' => $orderId,
-                        ]);
-                    }
+                    $tenant->update([
+                        'status_langganan' => 'active',
+                        'plan_id' => $newPlanId ?? $tenant->plan_id,
+                        'tanggal_berakhir' => now()->addDays(30),
+                        'max_user' => $newPlanId ? Plan::find($newPlanId)?->max_user ?? 10 : $tenant->max_user,
+                    ]);
                 }
 
+                // Update pembayaran
                 $keterangan = 'Pembayaran berhasil';
                 if ($bank) {
                     $keterangan .= ' via ' . strtoupper($bank);
@@ -539,33 +512,7 @@ class PaymentController extends Controller
 
                 $pembayaran->update($updateData);
 
-                // ✅ FIX 8: Update tenant di finish juga + cek sudah aktif
                 if (in_array($transactionStatus, ['settlement', 'capture', 'success'])) {
-                    $tenant = Tenant::find($pembayaran->tenant_id);
-
-                    if ($tenant) {
-                        $newPlanId = $pembayaran->plan_id;
-
-                        $sudahAktif = $tenant->status_langganan === 'active'
-                            && $tenant->plan_id == $newPlanId
-                            && $tenant->tanggal_berakhir
-                            && $tenant->tanggal_berakhir > now()->addDays(25);
-
-                        if (!$sudahAktif) {
-                            $tenant->update([
-                                'status_langganan' => 'active',
-                                'plan_id' => $newPlanId ?? $tenant->plan_id,
-                                'tanggal_berakhir' => now()->addDays(30),
-                                'max_user' => $newPlanId ? Plan::find($newPlanId)?->max_user ?? 10 : $tenant->max_user,
-                            ]);
-
-                            \Log::info('Tenant activated via finish:', [
-                                'tenant_id' => $tenant->id_tenant,
-                                'order_id' => $orderId,
-                            ]);
-                        }
-                    }
-
                     session()->forget([
                         'pending_tenant_id',
                         'pending_order_id',
