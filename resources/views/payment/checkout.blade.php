@@ -148,24 +148,25 @@
         {{-- ========================================== --}}
         {{-- ✅ TOMBOL QRIS MANUAL (SELALU MUNCUL)     --}}
         {{-- ========================================== --}}
-        <div class="relative my-4">
-            <div class="absolute inset-0 flex items-center">
-                <div class="w-full border-t border-slate-200"></div>
+        @if (false)
+            <div class="relative my-4">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-slate-200"></div>
+                </div>
+                <div class="relative flex justify-center text-xs">
+                    <span class="bg-white px-3 text-slate-400 font-medium">atau</span>
+                </div>
             </div>
-            <div class="relative flex justify-center text-xs">
-                <span class="bg-white px-3 text-slate-400 font-medium">atau</span>
-            </div>
-        </div>
 
-        <a href="{{ route('qris.show', ['plan_id' => $plan->id]) }}"
-            class="w-full inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-50 text-slate-700 border-2 border-slate-200 font-semibold py-3.5 px-4 rounded-2xl transition-all hover:-translate-y-0.5 text-sm">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-            </svg>
-            Bayar via QRIS
-        </a>
-
+            <a href="{{ route('qris.show', ['plan_id' => $plan->id]) }}"
+                class="w-full inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-50 text-slate-700 border-2 border-slate-200 font-semibold py-3.5 px-4 rounded-2xl transition-all hover:-translate-y-0.5 text-sm">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                </svg>
+                Bayar via QRIS
+            </a>
+        @endif
         <p class="text-[11px] text-slate-400 text-center font-medium mt-3">
             Scan QRIS & upload bukti transfer, admin akan verifikasi.
         </p>

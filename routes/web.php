@@ -89,15 +89,15 @@ Route::get('/pay', fn() => redirect()->route('agen.register'));
 Route::get('/payment/finish', [PaymentController::class, 'finish'])->name('payment.finish');
 Route::post('/midtrans/notification', [PaymentController::class, 'notification'])
     ->name('midtrans.notification')
-    ->withoutMiddleware(['verify.csrf.token']);
+    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 
 // ==========================================
 // QRIS MANUAL - PUBLIC ROUTES (sama seperti Midtrans)
 // ==========================================
-Route::get('/payment/qris', [QrisManualController::class, 'show'])->name('qris.show');
-Route::post('/payment/qris/upload', [QrisManualController::class, 'uploadBukti'])->name('qris.upload');
-Route::get('/payment/qris/status/{orderId}', [QrisManualController::class, 'status'])->name('qris.status');
-Route::get('/payment/qris/check/{orderId}', [QrisManualController::class, 'checkStatus'])->name('qris.check');
+// Route::get('/payment/qris', [QrisManualController::class, 'show'])->name('qris.show');
+// Route::post('/payment/qris/upload', [QrisManualController::class, 'uploadBukti'])->name('qris.upload');
+// Route::get('/payment/qris/status/{orderId}', [QrisManualController::class, 'status'])->name('qris.status');
+// Route::get('/payment/qris/check/{orderId}', [QrisManualController::class, 'checkStatus'])->name('qris.check');
 
 
 Route::middleware(['guest.redirect', 'prevent-back'])->group(function () {
@@ -169,12 +169,12 @@ Route::middleware(['auth', 'role:developer'])->prefix('developer')->name('develo
     Route::post('/maintenance/toggle', [MaintenanceController::class, 'toggle'])->name('maintenance.toggle');
 
     // QRIS Manual - Verifikasi
-    Route::prefix('qris-verification')->name('qris.')->group(function () {
-        Route::get('/', [QrisVerificationController::class, 'index'])->name('index');
-        Route::get('/{id}', [QrisVerificationController::class, 'show'])->name('show');
-        Route::post('/{id}/approve', [QrisVerificationController::class, 'approve'])->name('approve');
-        Route::post('/{id}/reject', [QrisVerificationController::class, 'reject'])->name('reject');
-    });
+    // Route::prefix('qris-verification')->name('qris.')->group(function () {
+    //     Route::get('/', [QrisVerificationController::class, 'index'])->name('index');
+    //     Route::get('/{id}', [QrisVerificationController::class, 'show'])->name('show');
+    //     Route::post('/{id}/approve', [QrisVerificationController::class, 'approve'])->name('approve');
+    //     Route::post('/{id}/reject', [QrisVerificationController::class, 'reject'])->name('reject');
+    // });
 });
 
 /*

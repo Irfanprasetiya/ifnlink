@@ -386,6 +386,9 @@ class PaymentController extends Controller
 
             \Log::info('Midtrans Notification:', $payload);
 
+            // ============================================
+            // ✅ 1. AMBIL DATA DARI PAYLOAD
+            // ============================================
             $orderId = $payload['order_id'] ?? null;
             $transactionId = $payload['transaction_id'] ?? $orderId;
             $statusCode = $payload['status_code'] ?? null;
@@ -393,20 +396,52 @@ class PaymentController extends Controller
             $signatureKey = $payload['signature_key'] ?? null;
             $transactionStatus = $payload['transaction_status'] ?? null;
             $paymentType = $payload['payment_type'] ?? null;
+            $fraudStatus = $payload['fraud_status'] ?? null;
+            $merchantId = $payload['merchant_id'] ?? null;
             $vaNumber = $payload['va_numbers'][0]['va_number'] ?? null;
             $bank = $payload['va_numbers'][0]['bank'] ?? $payload['bank'] ?? null;
 
-            // Verifikasi signature
+            // ============================================
+            // ✅ 2. VALIDASI ORDER ID
+            // ============================================
+            if (!$orderId) {
+                \Log::warning('Notification missing order_id', $payload);
+                return response()->json(['status' => 'invalid payload'], 400);
+            }
+
+            // ============================================
+            // ✅ 3. VERIFIKASI MERCHANT ID
+            // ============================================
+            $expectedMerchantId = config('midtrans.merchant_id');
+            if ($expectedMerchantId && $merchantId && $merchantId !== $expectedMerchantId) {
+                \Log::warning('Invalid merchant_id', [
+                    'order_id' => $orderId,
+                    'received' => $merchantId,
+                    'expected' => $expectedMerchantId,
+                ]);
+                return response()->json(['status' => 'invalid merchant'], 403);
+            }
+
+            // ============================================
+            // ✅ 4. VERIFIKASI SIGNATURE
+            // ============================================
             if ($signatureKey && $statusCode && $grossAmount) {
                 $serverKey = config('midtrans.server_key');
                 $expectedSignature = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
 
                 if (!hash_equals($expectedSignature, $signatureKey)) {
-                    \Log::warning('Invalid signature', ['order_id' => $orderId]);
+                    \Log::warning('Invalid signature', [
+                        'order_id' => $orderId,
+                        'status_code' => $statusCode,
+                        'gross_amount' => $grossAmount,
+                    ]);
                     return response()->json(['status' => 'invalid signature'], 403);
                 }
             }
 
+            // ============================================
+            // ✅ 5. CARI PEMBAYARAN
+            // ============================================
             $pembayaran = Pembayaran::where('order_id', $orderId)->first();
 
             if (!$pembayaran) {
@@ -414,10 +449,49 @@ class PaymentController extends Controller
                 return response()->json(['status' => 'payment not found'], 404);
             }
 
+            // ============================================
+            // ✅ 6. IDEMPOTENT — CEK DUPLIKAT TRANSAKSI
+            // ============================================
+            // Kalau sudah confirmed & transaction_id sama → skip proses
+            if (
+                $pembayaran->status === 'confirmed'
+                && $pembayaran->transaction_id
+                && $pembayaran->transaction_id === $transactionId
+            ) {
+                \Log::info('Notification already processed, skip:', [
+                    'order_id' => $orderId,
+                    'transaction_id' => $transactionId,
+                ]);
+                return response()->json(['status' => 'already processed']);
+            }
+
             $tenant = Tenant::find($pembayaran->tenant_id);
 
+            // ============================================
+            // ✅ 7. HANDLE BERDASARKAN STATUS
+            // ============================================
             if (in_array($transactionStatus, ['settlement', 'capture'])) {
-                // ✅ FIX 7: Update tenant hanya kalau perlu
+
+                // ✅ Cek fraud_status untuk kartu kredit
+                if ($fraudStatus === 'deny') {
+                    \Log::warning('Payment denied by fraud detection', [
+                        'order_id' => $orderId,
+                        'fraud_status' => $fraudStatus,
+                    ]);
+
+                    $pembayaran->update([
+                        'transaction_id' => $transactionId,
+                        'status' => 'cancelled',
+                        'metode' => $paymentType,
+                        'keterangan' => 'Ditolak oleh fraud detection | Order: ' . $orderId,
+                    ]);
+
+                    return response()->json(['status' => 'success']);
+                }
+
+                // ============================================
+                // ✅ Update Tenant (skip kalau sudah aktif)
+                // ============================================
                 if ($tenant) {
                     $newPlanId = $pembayaran->plan_id
                         ?? session('upgrade_plan_id')
@@ -444,10 +518,15 @@ class PaymentController extends Controller
                         \Log::info('Tenant activated via notification:', [
                             'tenant_id' => $tenant->id_tenant,
                             'order_id' => $orderId,
+                            'plan_id' => $newPlanId,
+                            'expired_at' => now()->addDays(30),
                         ]);
                     }
                 }
 
+                // ============================================
+                // ✅ Update Pembayaran
+                // ============================================
                 $keterangan = 'Pembayaran berhasil';
                 if ($bank) {
                     $keterangan .= ' via ' . strtoupper($bank);
@@ -476,26 +555,51 @@ class PaymentController extends Controller
                 ]);
 
             } elseif ($transactionStatus === 'pending') {
+                // ============================================
+                // ✅ PENDING
+                // ============================================
                 $pembayaran->update([
                     'transaction_id' => $transactionId,
                     'status' => 'pending',
                     'metode' => $paymentType,
-                    'keterangan' => 'Menunggu pembayaran - ' . strtoupper($paymentType ?? 'Midtrans'),
+                    'keterangan' => 'Menunggu pembayaran - ' . strtoupper($paymentType ?? 'Midtrans') . ' | Order: ' . $orderId,
                 ]);
 
             } elseif (in_array($transactionStatus, ['expire', 'cancel', 'deny', 'failure'])) {
+                // ============================================
+                // ✅ FAILED / EXPIRED / CANCELLED
+                // ============================================
                 $pembayaran->update([
                     'transaction_id' => $transactionId,
                     'status' => $transactionStatus === 'expire' ? 'expired' : 'cancelled',
+                    'metode' => $paymentType,
                     'keterangan' => 'Pembayaran ' . $transactionStatus . ' - Order: ' . $orderId,
+                ]);
+
+                \Log::info('Payment ' . $transactionStatus . ':', [
+                    'order_id' => $orderId,
+                    'transaction_id' => $transactionId,
+                ]);
+
+            } else {
+                \Log::warning('Unknown transaction status:', [
+                    'order_id' => $orderId,
+                    'transaction_status' => $transactionStatus,
                 ]);
             }
 
             return response()->json(['status' => 'success']);
 
         } catch (\Exception $e) {
-            \Log::error('Notification error: ' . $e->getMessage());
-            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+            \Log::error('Notification error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'payload' => $request->all(),
+            ]);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], 500);
         }
     }
 

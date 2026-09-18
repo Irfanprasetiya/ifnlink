@@ -13,6 +13,7 @@ class VerifyCsrfToken extends Middleware
      */
     protected $except = [
         'deploy',
+        'midtrans/notification',  // ✅ TAMBAH
         // ✅ JANGAN tambahkan 'login' atau '*' di sini
     ];
 }
