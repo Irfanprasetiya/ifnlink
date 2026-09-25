@@ -100,9 +100,9 @@ Route::post('/midtrans/notification', [PaymentController::class, 'notification']
 // Route::get('/payment/qris/check/{orderId}', [QrisManualController::class, 'checkStatus'])->name('qris.check');
 
 
-Route::middleware(['guest.redirect', 'prevent-back'])->group(function () {
-    Route::get('/login', fn() => view('auth.login'))->name('login');
-});
+// Route::middleware(['guest.redirect', 'prevent-back'])->group(function () {
+//     Route::get('/login', fn() => view('auth.login'))->name('login');
+// });
 
 Route::get('/dashboard/pending', function () {
     $tenant = auth()->user()->tenant;
