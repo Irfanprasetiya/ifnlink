@@ -11,10 +11,30 @@
 
     @if (app()->isProduction())
         <script src="https://cdn.tailwindcss.com"></script>
-<script>tailwind.config={theme:{extend:{fontFamily:{sans:["Figtree","Poppins","ui-sans-serif","system-ui"]}}}}</script>
+        <script>
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        fontFamily: {
+                            sans: ["Figtree", "Poppins", "ui-sans-serif", "system-ui"]
+                        }
+                    }
+                }
+            }
+        </script>
     @else
         <script src="https://cdn.tailwindcss.com"></script>
-<script>tailwind.config={theme:{extend:{fontFamily:{sans:["Figtree","Poppins","ui-sans-serif","system-ui"]}}}}</script>
+        <script>
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        fontFamily: {
+                            sans: ["Figtree", "Poppins", "ui-sans-serif", "system-ui"]
+                        }
+                    }
+                }
+            }
+        </script>
     @endif
 </head>
 
@@ -59,7 +79,7 @@
                     <label for="username" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                         Username
                     </label>
-                    <input type="text" name="username_display" id="username_display" 
+                    <input type="text" name="username_display" id="username_display"
                         value="{{ $username ?? old('username') }}"
                         class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-300 outline-none transition cursor-not-allowed"
                         readonly>
@@ -70,7 +90,7 @@
                     <label for="email" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                         Email Pemilik Toko
                     </label>
-                    <input type="email" name="email_display" id="email_display" 
+                    <input type="email" name="email_display" id="email_display"
                         value="{{ $email ?? 'Email tidak tersedia' }}"
                         class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-300 outline-none transition cursor-not-allowed"
                         readonly>
@@ -90,7 +110,8 @@
                 </div>
 
                 <div>
-                    <label for="password_confirmation" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label for="password_confirmation"
+                        class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                         Konfirmasi Password
                     </label>
                     <input type="password" name="password_confirmation" id="password_confirmation"
